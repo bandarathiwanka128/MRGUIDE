@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir)",
+      "Bash(dir backend /b)",
+      "Bash(dir frontend /b)",
+      "Bash(dir \"D:\\mr-guide\\frontend\\src\")",
+      "Bash(copy /Y MapSearch.jsx MapSearch_BACKUP.jsx)",
+      "Bash(copy /Y MapSearch_NEW.jsx MapSearch.jsx)",
+      "Bash(dir /b \"D:\\mr-guide\\frontend\\src\\pages\")",
+      "Bash(dir /b \"D:\\mr-guide\\frontend\\src\")",
+      "Bash(npm start)",
+      "Bash(git init:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
