@@ -16,7 +16,7 @@
 
 .about-header h1 {
   font-size: 3.5rem;
-  color: #FFD700;
+  color: #23be47;
   margin-bottom: 1rem;
   font-weight: 800;
 }
@@ -41,7 +41,7 @@
 }
 
 .mission-section h2 {
-  color: #FFD700;
+  color: #0ac629;
   font-size: 2.5rem;
   margin-bottom: 1.5rem;
   font-weight: 700;
@@ -61,7 +61,7 @@
 }
 
 .team-section h2 {
-  color: #FFD700;
+  color: #3bb818;
   font-size: 2.5rem;
   text-align: center;
   margin-bottom: 2rem;
@@ -78,7 +78,7 @@
 }
 
 .university-info h3 {
-  color: #FFD700;
+  color: #66be79;
   font-size: 1.8rem;
   margin-bottom: 0.5rem;
   font-weight: 600;
@@ -108,7 +108,7 @@
 
 .team-member:hover {
   transform: translateY(-10px);
-  border-color: #FFD700;
+  border-color: #1ae64d;
   box-shadow: 0 15px 35px rgba(255, 215, 0, 0.3);
   background: rgba(255, 215, 0, 0.1);
 }
@@ -129,7 +129,7 @@
 }
 
 .team-member h3 {
-  color: #FFD700;
+  color: #0fc445;
   font-size: 1.3rem;
   margin-bottom: 0.5rem;
   font-weight: 600;
@@ -164,7 +164,7 @@
 }
 
 .team-overview h3 {
-  color: #FFD700;
+  color: #0dd72ba8;
   font-size: 1.5rem;
   margin-bottom: 1rem;
   font-weight: 600;
@@ -184,7 +184,7 @@
 }
 
 .features-section h2 {
-  color: #FFD700;
+  color: #2da409;
   font-size: 2.5rem;
   text-align: center;
   margin-bottom: 3rem;
@@ -208,7 +208,7 @@
 
 .feature-card:hover {
   transform: translateY(-5px);
-  border-color: #FFD700;
+  border-color: #12cd3b;
   box-shadow: 0 10px 25px rgba(255, 215, 0, 0.2);
   background: rgba(255, 215, 0, 0.05);
 }
@@ -219,7 +219,7 @@
 }
 
 .feature-card h3 {
-  color: #FFD700;
+  color: #4fbd0b;
   font-size: 1.4rem;
   margin-bottom: 0.8rem;
   font-weight: 600;
