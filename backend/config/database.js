@@ -1,13 +1,19 @@
 const { Sequelize, DataTypes } = require('sequelize');
 require('dotenv').config();
 
-const sequelize = new Sequelize({
+// Use DATABASE_URL from environment (for Neon/production) or fallback to local
+const databaseUrl = process.env.DATABASE_URL || 'postgresql://postgres:1aA#22##@localhost:5432/mrguide';
+
+const sequelize = new Sequelize(databaseUrl, {
   dialect: 'postgres',
-  host: 'localhost',
-  port: 5432,
-  database: 'mrguide',
-  username: 'postgres',
-  password: '1aA#22##',
+  dialectOptions: {
+    ssl: process.env.NODE_ENV === 'production' || databaseUrl.includes('neon.tech') || databaseUrl.includes('supabase') || databaseUrl.includes('railway')
+      ? {
+          require: true,
+          rejectUnauthorized: false
+        }
+      : false
+  },
   logging: false,
   pool: {
     max: 5,
