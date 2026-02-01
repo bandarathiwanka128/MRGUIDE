@@ -2,6 +2,15 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
+// Debug: Log environment variables (only show existence, not values)
+console.log('=== Environment Check ===');
+console.log('NODE_ENV:', process.env.NODE_ENV ? 'SET' : 'NOT SET');
+console.log('PORT:', process.env.PORT ? 'SET' : 'NOT SET');
+console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'SET' : 'NOT SET');
+console.log('JWT_SECRET:', process.env.JWT_SECRET ? 'SET' : 'NOT SET');
+console.log('CORS_ORIGIN:', process.env.CORS_ORIGIN ? 'SET' : 'NOT SET');
+console.log('========================');
+
 const { sequelize } = require('./config/database');
 const authRoutes = require('./routes/auth');
 const placesRoutes = require('./routes/places');
