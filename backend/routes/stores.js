@@ -6,8 +6,8 @@ const axios = require('axios');
 
 const router = express.Router();
 
-// Google Maps API Key (should be in environment variables)
-const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY || 'AIzaSyDKQmKH9sEMretHWkYag0FMg7VFCNRNC_8';
+// Using free alternatives: PHOTON for geocoding, OSRM for routing
+// No API keys needed!
 
 // Get all stores with filters
 router.get('/', async (req, res) => {
@@ -100,15 +100,8 @@ router.get('/:id', async (req, res) => {
       store.dataValues.weather = null;
     }
 
-    // Get timezone
-    try {
-      const timezoneResponse = await axios.get(
-        `https://maps.googleapis.com/maps/api/timezone/json?location=${store.latitude},${store.longitude}&timestamp=${Math.floor(Date.now() / 1000)}&key=${GOOGLE_MAPS_API_KEY}`
-      );
-      store.dataValues.timezone = timezoneResponse.data;
-    } catch (tzError) {
-      console.log('Timezone API error:', tzError.message);
-    }
+    // Timezone functionality removed (Google Maps API replaced)
+    // You can use a free timezone API like timeapi.io if needed
 
     res.json(store);
   } catch (error) {
@@ -135,13 +128,13 @@ router.post('/', authenticateToken, async (req, res) => {
       description
     } = req.body;
 
-    // Validate coordinates using Geocoding API
+    // Validate coordinates using PHOTON reverse geocoding (free, no API key)
     try {
       const geocodeResponse = await axios.get(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_MAPS_API_KEY}`
+        `https://photon.komoot.io/reverse?lat=${latitude}&lon=${longitude}`
       );
 
-      if (geocodeResponse.data.status !== 'OK') {
+      if (!geocodeResponse.data.features || geocodeResponse.data.features.length === 0) {
         return res.status(400).json({ error: 'Invalid coordinates' });
       }
     } catch (geocodeError) {
@@ -215,27 +208,42 @@ router.delete('/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// Get directions from location to store (with yellow route)
+// Get directions from location to store using OSRM (free, no API key)
 router.post('/:id/directions', async (req, res) => {
   try {
-    const { origin_lat, origin_lng, travel_mode = 'DRIVING' } = req.body;
+    const { origin_lat, origin_lng, travel_mode = 'car' } = req.body;
 
     const store = await Store.findByPk(req.params.id);
     if (!store) {
       return res.status(404).json({ error: 'Store not found' });
     }
 
+    // OSRM routing - free alternative to Google Directions
+    const profile = travel_mode === 'bike' ? 'bike' : travel_mode === 'foot' ? 'foot' : 'car';
     const directionsResponse = await axios.get(
-      `https://maps.googleapis.com/maps/api/directions/json?origin=${origin_lat},${origin_lng}&destination=${store.latitude},${store.longitude}&mode=${travel_mode.toLowerCase()}&key=${GOOGLE_MAPS_API_KEY}`
+      `https://router.project-osrm.org/route/v1/${profile}/${origin_lng},${origin_lat};${store.longitude},${store.latitude}`,
+      {
+        params: {
+          overview: 'full',
+          geometries: 'geojson',
+          steps: 'true'
+        }
+      }
     );
 
-    if (directionsResponse.data.status === 'OK') {
+    if (directionsResponse.data.routes && directionsResponse.data.routes.length > 0) {
       const route = directionsResponse.data.routes[0];
       res.json({
-        distance: route.legs[0].distance,
-        duration: route.legs[0].duration,
-        steps: route.legs[0].steps,
-        polyline: route.overview_polyline,
+        distance: {
+          value: route.distance,
+          text: `${(route.distance / 1000).toFixed(2)} km`
+        },
+        duration: {
+          value: route.duration,
+          text: `${Math.round(route.duration / 60)} mins`
+        },
+        steps: route.legs[0]?.steps || [],
+        geometry: route.geometry,
         route: directionsResponse.data
       });
     } else {
@@ -247,7 +255,7 @@ router.post('/:id/directions', async (req, res) => {
   }
 });
 
-// Get distance matrix for multiple stores
+// Get distance matrix for multiple stores using OSRM
 router.post('/distance-matrix', async (req, res) => {
   try {
     const { origin_lat, origin_lng, store_ids } = req.body;
@@ -258,24 +266,47 @@ router.post('/distance-matrix', async (req, res) => {
       }
     });
 
-    const destinations = stores.map(s => `${s.latitude},${s.longitude}`).join('|');
+    // Calculate distances using OSRM for each store
+    const results = await Promise.all(stores.map(async (store) => {
+      try {
+        const response = await axios.get(
+          `https://router.project-osrm.org/route/v1/car/${origin_lng},${origin_lat};${store.longitude},${store.latitude}`,
+          {
+            params: {
+              overview: 'false'
+            }
+          }
+        );
 
-    const matrixResponse = await axios.get(
-      `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${origin_lat},${origin_lng}&destinations=${destinations}&key=${GOOGLE_MAPS_API_KEY}`
-    );
+        if (response.data.routes && response.data.routes.length > 0) {
+          const route = response.data.routes[0];
+          return {
+            store: store,
+            distance: {
+              value: route.distance,
+              text: `${(route.distance / 1000).toFixed(2)} km`
+            },
+            duration: {
+              value: route.duration,
+              text: `${Math.round(route.duration / 60)} mins`
+            },
+            status: 'OK'
+          };
+        } else {
+          return {
+            store: store,
+            status: 'NOT_FOUND'
+          };
+        }
+      } catch (error) {
+        return {
+          store: store,
+          status: 'ERROR'
+        };
+      }
+    }));
 
-    if (matrixResponse.data.status === 'OK') {
-      const results = matrixResponse.data.rows[0].elements.map((element, index) => ({
-        store: stores[index],
-        distance: element.distance,
-        duration: element.duration,
-        status: element.status
-      }));
-
-      res.json(results);
-    } else {
-      res.status(400).json({ error: 'Could not calculate distance matrix' });
-    }
+    res.json(results);
   } catch (error) {
     console.error('Error calculating distance matrix:', error);
     res.status(500).json({ error: 'Server error' });
@@ -310,13 +341,18 @@ router.post('/optimize-route', async (req, res) => {
     // Simple nearest neighbor TSP algorithm
     const optimizedRoute = nearestNeighborTSP(locations, origin);
 
-    // Get directions for optimized route
-    const waypoints = optimizedRoute.slice(0, -1).map(loc => `${loc.lat},${loc.lng}`).join('|');
-    const destination = optimizedRoute[optimizedRoute.length - 1];
+    // Get directions for optimized route using OSRM
+    const coordinates = optimizedRoute.map(loc => `${loc.lng},${loc.lat}`).join(';');
 
     try {
       const directionsResponse = await axios.get(
-        `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.lat},${origin.lng}&destination=${destination.lat},${destination.lng}&waypoints=optimize:true|${waypoints}&key=${GOOGLE_MAPS_API_KEY}`
+        `https://router.project-osrm.org/route/v1/car/${coordinates}`,
+        {
+          params: {
+            overview: 'full',
+            geometries: 'geojson'
+          }
+        }
       );
 
       res.json({
@@ -333,22 +369,29 @@ router.post('/optimize-route', async (req, res) => {
   }
 });
 
-// Geocode address to coordinates
+// Geocode address to coordinates using PHOTON (free, no API key)
 router.post('/geocode', async (req, res) => {
   try {
     const { address } = req.body;
 
     const geocodeResponse = await axios.get(
-      `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${GOOGLE_MAPS_API_KEY}`
+      `https://photon.komoot.io/api/?q=${encodeURIComponent(address)}&limit=1`
     );
 
-    if (geocodeResponse.data.status === 'OK') {
-      const result = geocodeResponse.data.results[0];
+    if (geocodeResponse.data.features && geocodeResponse.data.features.length > 0) {
+      const result = geocodeResponse.data.features[0];
+      const coords = result.geometry.coordinates;
       res.json({
-        latitude: result.geometry.location.lat,
-        longitude: result.geometry.location.lng,
-        formatted_address: result.formatted_address,
-        place_id: result.place_id
+        latitude: coords[1],
+        longitude: coords[0],
+        formatted_address: [
+          result.properties.name,
+          result.properties.street,
+          result.properties.city,
+          result.properties.state,
+          result.properties.country
+        ].filter(Boolean).join(', '),
+        place_id: result.properties.osm_id
       });
     } else {
       res.status(400).json({ error: 'Address not found' });
@@ -359,19 +402,30 @@ router.post('/geocode', async (req, res) => {
   }
 });
 
-// Reverse geocode coordinates to address
+// Reverse geocode coordinates to address using PHOTON (free, no API key)
 router.post('/reverse-geocode', async (req, res) => {
   try {
     const { latitude, longitude } = req.body;
 
     const geocodeResponse = await axios.get(
-      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_MAPS_API_KEY}`
+      `https://photon.komoot.io/reverse?lat=${latitude}&lon=${longitude}`
     );
 
-    if (geocodeResponse.data.status === 'OK') {
+    if (geocodeResponse.data.features && geocodeResponse.data.features.length > 0) {
+      const results = geocodeResponse.data.features.map(feature => ({
+        formatted_address: [
+          feature.properties.name,
+          feature.properties.street,
+          feature.properties.city,
+          feature.properties.state,
+          feature.properties.country
+        ].filter(Boolean).join(', '),
+        properties: feature.properties
+      }));
+
       res.json({
-        address: geocodeResponse.data.results[0].formatted_address,
-        results: geocodeResponse.data.results
+        address: results[0].formatted_address,
+        results: results
       });
     } else {
       res.status(400).json({ error: 'Location not found' });

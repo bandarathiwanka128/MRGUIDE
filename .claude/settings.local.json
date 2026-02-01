@@ -10,7 +10,11 @@
       "Bash(dir /b \"D:\\mr-guide\\frontend\\src\\pages\")",
       "Bash(dir /b \"D:\\mr-guide\\frontend\\src\")",
       "Bash(npm start)",
-      "Bash(git init:*)"
+      "Bash(git init:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nFix: Configure CORS to use CORS_ORIGIN environment variable\n\n- Update CORS middleware to properly read CORS_ORIGIN from env\n- Add credentials, methods, and allowedHeaders for production\n- Fixes CORS blocking error preventing frontend-backend communication\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nAdd MapSearchLeaflet.jsx to repository\n\n- Renamed MapSearch_NEW.jsx to MapSearchLeaflet.jsx\n- This file was missing from git, causing frontend build failures\n- Fixes: Module not found ''./pages/MapSearchLeaflet''\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(npm install)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []
