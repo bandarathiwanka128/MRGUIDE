@@ -3,11 +3,10 @@ import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-ro
 import axios from 'axios';
 import './App.css';
 
-import Landing from './pages/Landing';
+import MapSearchLeaflet from './pages/MapSearchLeaflet';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import AboutUs from './pages/AboutUs';
-import MapSearch from './pages/MapSearch';
 
 import { API_BASE_URL } from './config';
 
@@ -75,12 +74,12 @@ const App = () => {
         </nav>
 
         <Routes>
-          <Route path="/" element={<Landing user={user} />} />
+          <Route path="/" element={<MapSearchLeaflet user={user} />} />
           <Route path="/login" element={user ? <Navigate to="/" /> : <Login setUser={setUser} />} />
           <Route path="/register" element={user ? <Navigate to="/" /> : <Register setUser={setUser} />} />
           <Route path="/about" element={<AboutUs />} />
-          <Route path="/search" element={<MapSearch />} />
-          <Route path="/map-search" element={<MapSearch />} />
+          <Route path="/search" element={<MapSearchLeaflet />} />
+          <Route path="/map-search" element={<MapSearchLeaflet />} />
           <Route path="/contact" element={<div style={{padding: '3rem', textAlign: 'center'}}><h2>Contact Us Page - Coming Soon</h2></div>} />
         </Routes>
       </div>
