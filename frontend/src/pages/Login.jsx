@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { API_BASE_URL } from '../config';
+import './Login.css';
 
 const Login = ({ setUser }) => {
   const [formData, setFormData] = useState({

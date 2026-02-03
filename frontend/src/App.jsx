@@ -3,7 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-ro
 import axios from 'axios';
 import './App.css';
 
-import MapSearchLeaflet from './pages/MapSearchLeaflet';
+import HomePage from './pages/HomePage';
+import SearchResults from './pages/SearchResults';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import AboutUs from './pages/AboutUs';
@@ -48,12 +49,10 @@ const App = () => {
       <div className="App">
         <nav className="navbar">
           <Link to="/" className="logo">Mr. Guide</Link>
-          
+
           <div className="nav-links">
             <Link to="/">Home</Link>
-            <Link to="/map-search">Map Search</Link>
             <Link to="/about">About Us</Link>
-            <Link to="/contact">Contact</Link>
           </div>
 
           <div className="auth-buttons">
@@ -74,13 +73,11 @@ const App = () => {
         </nav>
 
         <Routes>
-          <Route path="/" element={<MapSearchLeaflet user={user} />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/search" element={<SearchResults user={user} />} />
           <Route path="/login" element={user ? <Navigate to="/" /> : <Login setUser={setUser} />} />
           <Route path="/register" element={user ? <Navigate to="/" /> : <Register setUser={setUser} />} />
           <Route path="/about" element={<AboutUs />} />
-          <Route path="/search" element={<MapSearchLeaflet />} />
-          <Route path="/map-search" element={<MapSearchLeaflet />} />
-          <Route path="/contact" element={<div style={{padding: '3rem', textAlign: 'center'}}><h2>Contact Us Page - Coming Soon</h2></div>} />
         </Routes>
       </div>
     </Router>
