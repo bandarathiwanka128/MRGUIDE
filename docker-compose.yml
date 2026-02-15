@@ -33,6 +33,7 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3001
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/mrguide
       - DB_HOST=db
       - DB_PORT=5432
       - DB_NAME=mrguide
@@ -40,6 +41,7 @@ services:
       - DB_PASSWORD=postgres
       - JWT_SECRET=your_jwt_secret_change_in_production
       - CORS_ORIGIN=http://localhost:3000
+      - GEMINI_API_KEY=AIzaSyA22gU8rRIVQXbI5VYQxkikqNn029tMx5E
     volumes:
       - ./backend:/app
       - /app/node_modules
@@ -59,7 +61,7 @@ services:
       - "3000:3000"
     environment:
       - REACT_APP_API_URL=http://localhost:3001/api
-      - REACT_APP_GOOGLE_MAPS_API_KEY=${REACT_APP_GOOGLE_MAPS_API_KEY}
+      - REACT_APP_GOOGLE_MAPS_API_KEY=AIzaSyDKQmKH9sEMretHWkYag0FMg7VFCNRNC_8
     volumes:
       - ./frontend:/app
       - /app/node_modules

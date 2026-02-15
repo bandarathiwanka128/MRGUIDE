@@ -1,0 +1,740 @@
+/* =========================================
+   AuthenticSection.css - Dark Theme
+   Matches app patterns (ShortestPath, TripPlanner)
+   All class names use as- prefix
+   ========================================= */
+
+/* =========================================
+   Container - Full screen map layout
+   ========================================= */
+.as-container {
+  position: relative;
+  height: calc(100vh - 64px);
+  width: 100%;
+  background: #0a1929;
+  overflow: hidden;
+}
+
+/* =========================================
+   Map Area - Full screen behind panel
+   ========================================= */
+.as-map-area {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+}
+
+.as-map-loading {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  background: rgba(10, 25, 41, 0.9);
+  border: 1px solid rgba(156, 39, 176, 0.4);
+  border-radius: 10px;
+  color: #CE93D8;
+  font-size: 0.85rem;
+  backdrop-filter: blur(8px);
+}
+
+/* =========================================
+   Side Panel - Slides in from left
+   ========================================= */
+.as-side-panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 400px;
+  z-index: 500;
+  background: linear-gradient(180deg, #0a1929 0%, #0d2137 100%);
+  border-right: 3px solid #FFD700;
+  transform: translateX(-100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 4px 0 25px rgba(0, 0, 0, 0.5);
+}
+
+.as-side-panel.open {
+  transform: translateX(0);
+}
+
+/* =========================================
+   Panel Inner Layout
+   ========================================= */
+.as-panel-inner {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+/* Panel Header */
+.as-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  background: linear-gradient(135deg, #0d2137 0%, #1a2942 100%);
+  border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+  flex-shrink: 0;
+}
+
+.as-panel-title {
+  color: #FFD700;
+  font-size: 1.3rem;
+  margin: 0;
+  font-weight: 700;
+}
+
+.as-panel-close {
+  width: 34px;
+  height: 34px;
+  background: rgba(244, 67, 54, 0.15);
+  border: 1px solid rgba(244, 67, 54, 0.3);
+  border-radius: 50%;
+  color: #f44336;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.as-panel-close:hover {
+  background: #f44336;
+  color: white;
+}
+
+/* =========================================
+   Search Section inside panel
+   ========================================= */
+.as-panel-search {
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 215, 0, 0.15);
+  flex-shrink: 0;
+}
+
+.as-search-form {
+  display: flex;
+  gap: 10px;
+}
+
+.as-search-input {
+  flex: 1;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.as-search-input:focus {
+  outline: none;
+  border-color: #FFD700;
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+}
+
+.as-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.as-search-btn {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  border: none;
+  border-radius: 10px;
+  color: #0a1929;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.as-search-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+}
+
+.as-search-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Search Results Dropdown */
+.as-search-results {
+  margin-top: 10px;
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.as-search-result-item {
+  padding: 12px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.2s;
+}
+
+.as-search-result-item:hover {
+  background: rgba(255, 215, 0, 0.15);
+}
+
+.as-search-result-item:last-child {
+  border-bottom: none;
+}
+
+.as-search-result-item strong {
+  display: block;
+  color: #FFD700;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+
+.as-search-result-item small {
+  color: #8a929d;
+  font-size: 0.8rem;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* =========================================
+   Location Info Section (clicked point)
+   ========================================= */
+.as-location-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 20px;
+  background: rgba(255, 87, 34, 0.08);
+  border-bottom: 1px solid rgba(255, 87, 34, 0.2);
+}
+
+.as-location-icon {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 87, 34, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FF5722;
+  flex-shrink: 0;
+}
+
+.as-location-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.as-location-name {
+  color: #FFD700;
+  font-size: 1rem;
+  margin: 0 0 4px 0;
+  font-weight: 600;
+}
+
+.as-location-address {
+  color: #b0b8c4;
+  font-size: 0.85rem;
+  margin: 0 0 4px 0;
+  line-height: 1.4;
+}
+
+.as-location-coords {
+  color: #6c7a8d;
+  font-size: 0.78rem;
+  margin: 0;
+  font-family: monospace;
+}
+
+/* Geocoding status */
+.as-geocoding-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: rgba(255, 152, 0, 0.1);
+  color: #FFB74D;
+  font-size: 0.85rem;
+  border-bottom: 1px solid rgba(255, 152, 0, 0.2);
+}
+
+/* =========================================
+   Role-based Messages
+   ========================================= */
+.as-role-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 40px 30px;
+  flex: 1;
+}
+
+.as-role-icon {
+  width: 70px;
+  height: 70px;
+  background: rgba(255, 215, 0, 0.1);
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFD700;
+  margin-bottom: 20px;
+}
+
+.as-role-icon-verify {
+  background: rgba(76, 175, 80, 0.1);
+  border-color: rgba(76, 175, 80, 0.3);
+  color: #66BB6A;
+}
+
+.as-role-title {
+  color: #FFD700;
+  font-size: 1.15rem;
+  margin: 0 0 12px 0;
+  font-weight: 700;
+}
+
+.as-role-description {
+  color: #8a929d;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin: 0 0 24px 0;
+  max-width: 300px;
+}
+
+.as-role-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  border: none;
+  border-radius: 10px;
+  color: #0a1929;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.as-role-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+  color: #0a1929;
+  text-decoration: none;
+}
+
+.as-role-action-btn-register {
+  background: linear-gradient(135deg, #66BB6A 0%, #43A047 100%);
+  color: #ffffff;
+}
+
+.as-role-action-btn-register:hover {
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+  color: #ffffff;
+}
+
+/* =========================================
+   Add Authentic Data Section
+   ========================================= */
+.as-add-section {
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.as-add-title {
+  color: #FFD700;
+  font-size: 1.1rem;
+  margin: 0 0 8px 0;
+  font-weight: 700;
+}
+
+.as-add-description {
+  color: #8a929d;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 0 0 20px 0;
+}
+
+/* Type Selector (User / Business radio) */
+.as-type-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.as-type-option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 2px solid rgba(255, 215, 0, 0.15);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.as-type-option:hover {
+  border-color: rgba(255, 215, 0, 0.4);
+  background: rgba(255, 215, 0, 0.06);
+}
+
+.as-type-option.active {
+  border-color: #FFD700;
+  background: rgba(255, 215, 0, 0.12);
+}
+
+.as-type-radio {
+  display: none;
+}
+
+.as-type-icon {
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 215, 0, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFD700;
+  flex-shrink: 0;
+  transition: all 0.25s ease;
+}
+
+.as-type-option.active .as-type-icon {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  color: #0a1929;
+}
+
+.as-type-label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.as-type-name {
+  color: #e0e0e0;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.as-type-option.active .as-type-name {
+  color: #FFD700;
+}
+
+.as-type-desc {
+  color: #6c7a8d;
+  font-size: 0.78rem;
+}
+
+/* Add Location Summary */
+.as-add-location-summary {
+  padding: 14px;
+  background: rgba(255, 215, 0, 0.06);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.as-summary-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: #FFD700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.as-summary-name {
+  color: #e0e0e0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+
+.as-summary-address {
+  color: #8a929d;
+  font-size: 0.82rem;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Add Data Button */
+.as-add-data-btn {
+  width: 100%;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  border: none;
+  border-radius: 12px;
+  color: #0a1929;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.as-add-data-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+}
+
+.as-add-data-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  background: rgba(255, 215, 0, 0.3);
+  color: #8a929d;
+}
+
+.as-add-hint {
+  color: #6c7a8d;
+  font-size: 0.82rem;
+  text-align: center;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* =========================================
+   Floating Open Panel Button
+   ========================================= */
+.as-open-panel-btn {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #0d2137 0%, #1a2942 100%);
+  border: 2px solid #FFD700;
+  border-radius: 12px;
+  color: #FFD700;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+}
+
+.as-open-panel-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(255, 215, 0, 0.3);
+  background: linear-gradient(135deg, #1a2942 0%, #243b5c 100%);
+}
+
+/* =========================================
+   Map Hint Overlay
+   ========================================= */
+.as-map-hint {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 400;
+  padding: 10px 24px;
+  background: rgba(10, 25, 41, 0.9);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 10px;
+  color: #b0b8c4;
+  font-size: 0.85rem;
+  text-align: center;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+}
+
+/* =========================================
+   Map Popup Styling
+   ========================================= */
+.as-popup {
+  text-align: left;
+  min-width: 180px;
+}
+
+.as-popup strong {
+  font-size: 0.95rem;
+  color: #333;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.as-popup small {
+  color: #666;
+  display: block;
+  line-height: 1.4;
+}
+
+/* =========================================
+   Spinner Animation
+   ========================================= */
+.as-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  border-top-color: #FFD700;
+  border-radius: 50%;
+  animation: as-spin 0.7s linear infinite;
+}
+
+.as-spinner-lg {
+  width: 24px;
+  height: 24px;
+  border-width: 3px;
+}
+
+@keyframes as-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* =========================================
+   PlaceDetailsPanel override when inside panel
+   ========================================= */
+.as-side-panel .place-details-panel {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+/* =========================================
+   Custom Scrollbar - Dark Theme
+   ========================================= */
+.as-side-panel::-webkit-scrollbar,
+.as-search-results::-webkit-scrollbar {
+  width: 8px;
+}
+
+.as-side-panel::-webkit-scrollbar-track,
+.as-search-results::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.as-side-panel::-webkit-scrollbar-thumb,
+.as-search-results::-webkit-scrollbar-thumb {
+  background: rgba(255, 215, 0, 0.4);
+  border-radius: 4px;
+}
+
+.as-side-panel::-webkit-scrollbar-thumb:hover,
+.as-search-results::-webkit-scrollbar-thumb:hover {
+  background: #FFD700;
+}
+
+/* =========================================
+   Responsive Design
+   ========================================= */
+@media (max-width: 768px) {
+  .as-side-panel {
+    width: 100%;
+    bottom: 0;
+    top: auto;
+    height: 70vh;
+    transform: translateY(100%);
+    border-right: none;
+    border-top: 3px solid #FFD700;
+  }
+
+  .as-side-panel.open {
+    transform: translateY(0);
+  }
+
+  .as-open-panel-btn {
+    top: auto;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .as-open-panel-btn:hover {
+    transform: translateX(-50%) translateY(-2px);
+  }
+
+  .as-map-hint {
+    bottom: 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  .as-side-panel {
+    height: 80vh;
+  }
+
+  .as-panel-header {
+    padding: 14px 16px;
+  }
+
+  .as-panel-title {
+    font-size: 1.1rem;
+  }
+
+  .as-panel-search {
+    padding: 12px 16px;
+  }
+
+  .as-location-info {
+    padding: 12px 16px;
+  }
+
+  .as-add-section {
+    padding: 16px;
+  }
+
+  .as-type-option {
+    padding: 12px;
+  }
+
+  .as-role-message {
+    padding: 30px 20px;
+  }
+
+  .as-open-panel-btn {
+    padding: 10px 16px;
+    font-size: 0.82rem;
+  }
+}

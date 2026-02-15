@@ -5,6 +5,58 @@ const { Op } = require('sequelize');
 
 const router = express.Router();
 
+// Get nearby places with sorting
+router.get('/nearby', async (req, res) => {
+  try {
+    const { lat, lng, radius = 50, sort = 'distance', category } = req.query;
+
+    if (!lat || !lng) {
+      return res.status(400).json({ error: 'lat and lng are required' });
+    }
+
+    let where = {};
+    if (category) {
+      where.category = category;
+    }
+
+    let places = await Place.findAll({
+      where,
+      include: [{ model: Review, attributes: ['rating'] }]
+    });
+
+    // Calculate distance and filter by radius
+    places = places
+      .map(place => {
+        const dist = getDistance(
+          { lat: parseFloat(lat), lng: parseFloat(lng) },
+          { lat: parseFloat(place.latitude), lng: parseFloat(place.longitude) }
+        );
+        const ratings = place.Reviews?.map(r => r.rating) || [];
+        const avgRating = ratings.length > 0 ? ratings.reduce((a, b) => a + b, 0) / ratings.length : 0;
+        return {
+          ...place.toJSON(),
+          distance: parseFloat(dist.toFixed(2)),
+          avgRating: parseFloat(avgRating.toFixed(1))
+        };
+      })
+      .filter(p => p.distance <= parseFloat(radius));
+
+    // Sort
+    if (sort === 'rating') {
+      places.sort((a, b) => b.avgRating - a.avgRating);
+    } else if (sort === 'price') {
+      places.sort((a, b) => (a.price_level || 99) - (b.price_level || 99));
+    } else {
+      places.sort((a, b) => a.distance - b.distance);
+    }
+
+    res.json(places);
+  } catch (error) {
+    console.error('Error fetching nearby places:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // Get all places
 router.get('/', async (req, res) => {
   try {

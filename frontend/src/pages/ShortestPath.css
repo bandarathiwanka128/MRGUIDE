@@ -1,0 +1,804 @@
+/* =========================================
+   ShortestPath.css - Dark Theme
+   Matches SearchResults.css patterns
+   ========================================= */
+
+.sp-container {
+  display: flex;
+  height: calc(100vh - 64px);
+  background: #0a1929;
+}
+
+/* =========================================
+   Sidebar
+   ========================================= */
+.sp-sidebar {
+  width: 420px;
+  min-width: 400px;
+  background: linear-gradient(180deg, #0a1929 0%, #0d2137 100%);
+  display: flex;
+  flex-direction: column;
+  border-right: 3px solid #FFD700;
+  overflow: hidden;
+}
+
+/* Sidebar Header */
+.sp-sidebar-header {
+  padding: 20px;
+  background: linear-gradient(135deg, #0d2137 0%, #1a2942 100%);
+  border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.sp-title {
+  color: #FFD700;
+  font-size: 1.3rem;
+  margin: 0 0 4px 0;
+  font-weight: 700;
+}
+
+.sp-subtitle {
+  color: #8a929d;
+  font-size: 0.85rem;
+  margin: 0 0 15px 0;
+}
+
+/* Search form */
+.sp-search-form {
+  display: flex;
+  gap: 10px;
+}
+
+.sp-search-input {
+  flex: 1;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.sp-search-input:focus {
+  outline: none;
+  border-color: #FFD700;
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+}
+
+.sp-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.sp-search-btn {
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0a1929;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sp-search-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+}
+
+.sp-search-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Search results dropdown */
+.sp-search-results {
+  margin-top: 10px;
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.sp-search-result-item {
+  padding: 12px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.2s;
+}
+
+.sp-search-result-item:hover {
+  background: rgba(255, 215, 0, 0.15);
+}
+
+.sp-search-result-item:last-child {
+  border-bottom: none;
+}
+
+.sp-search-result-item strong {
+  display: block;
+  color: #FFD700;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+
+.sp-search-result-item small {
+  color: #8a929d;
+  font-size: 0.8rem;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Status bar */
+.sp-status-bar {
+  padding: 10px 20px;
+  background: rgba(255, 152, 0, 0.15);
+  color: #FFB74D;
+  font-size: 0.9rem;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 152, 0, 0.3);
+}
+
+.sp-status-bar.success {
+  background: rgba(0, 200, 83, 0.15);
+  color: #69F0AE;
+  border-color: rgba(0, 200, 83, 0.3);
+}
+
+/* Hint bar */
+.sp-hint-bar {
+  padding: 8px 20px;
+  background: rgba(41, 121, 255, 0.1);
+  color: #90CAF9;
+  font-size: 0.8rem;
+  text-align: center;
+  border-bottom: 1px solid rgba(41, 121, 255, 0.2);
+}
+
+/* =========================================
+   Sort / Filter Controls
+   ========================================= */
+.sp-controls-section {
+  padding: 12px 20px;
+  border-bottom: 1px solid rgba(255, 215, 0, 0.15);
+}
+
+.sp-control-row {
+  display: flex;
+  gap: 12px;
+}
+
+.sp-control-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sp-control-label {
+  color: #8a929d;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sp-select {
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='%23FFD700' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 18px;
+  padding-right: 30px;
+}
+
+.sp-select:focus {
+  outline: none;
+  border-color: #FFD700;
+}
+
+.sp-select option {
+  background: #0d2137;
+  color: #ffffff;
+}
+
+/* =========================================
+   Travel Mode Section
+   ========================================= */
+.sp-travel-section {
+  padding: 12px 20px;
+  border-bottom: 1px solid rgba(255, 215, 0, 0.15);
+}
+
+.sp-section-label {
+  color: #FFD700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0 0 10px 0;
+  font-weight: 600;
+}
+
+.sp-travel-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.sp-travel-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 215, 0, 0.2);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #b0b8c4;
+}
+
+.sp-travel-btn:hover {
+  border-color: #FFD700;
+  background: rgba(255, 215, 0, 0.1);
+}
+
+.sp-travel-btn.active {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  border-color: #FFD700;
+  color: #0a1929;
+}
+
+.sp-travel-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sp-travel-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.sp-travel-btn.active .sp-travel-label {
+  color: #0a1929;
+}
+
+/* =========================================
+   Locations List
+   ========================================= */
+.sp-locations-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px;
+}
+
+/* Empty state */
+.sp-empty-state {
+  padding: 40px 20px;
+  text-align: center;
+  color: #8a929d;
+}
+
+.sp-empty-title {
+  font-size: 1rem;
+  margin: 0 0 8px 0;
+  color: #b0b8c4;
+}
+
+.sp-empty-hint {
+  font-size: 0.85rem;
+  margin: 0;
+  color: #6c7a8d;
+}
+
+/* Location card */
+.sp-location-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 215, 0, 0.15);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+  transition: all 0.2s ease;
+}
+
+.sp-location-card:hover {
+  border-color: #FFD700;
+  background: rgba(255, 215, 0, 0.1);
+  transform: translateX(3px);
+}
+
+.sp-location-card.start {
+  border-color: rgba(0, 200, 83, 0.4);
+  background: rgba(0, 200, 83, 0.08);
+}
+
+.sp-location-number {
+  width: 30px;
+  height: 30px;
+  background: #E53935;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.sp-location-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.sp-location-name {
+  color: #FFD700;
+  font-size: 0.95rem;
+  margin: 0 0 4px 0;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sp-location-address {
+  color: #b0b8c4;
+  font-size: 0.8rem;
+  margin: 0 0 6px 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.sp-location-meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.sp-location-category {
+  color: #8a929d;
+  font-size: 0.75rem;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 3px 8px;
+  border-radius: 20px;
+}
+
+.sp-location-distance {
+  color: #69F0AE;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Location action buttons */
+.sp-location-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.sp-action-btn {
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: 6px;
+  color: #b0b8c4;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.sp-action-btn:hover:not(:disabled) {
+  border-color: #FFD700;
+  color: #FFD700;
+  background: rgba(255, 215, 0, 0.15);
+}
+
+.sp-action-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.sp-remove-btn {
+  width: 28px;
+  height: 28px;
+  background: rgba(244, 67, 54, 0.15);
+  border: 1px solid rgba(244, 67, 54, 0.3);
+  border-radius: 6px;
+  color: #f44336;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.sp-remove-btn:hover {
+  background: #f44336;
+  color: white;
+}
+
+/* =========================================
+   Optimize Route Section
+   ========================================= */
+.sp-optimize-section {
+  padding: 14px 20px;
+  border-top: 1px solid rgba(255, 215, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.sp-optimize-btn {
+  flex: 1;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  border: none;
+  border-radius: 10px;
+  color: #0a1929;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sp-optimize-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+}
+
+.sp-optimize-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.sp-location-count {
+  color: #8a929d;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+/* =========================================
+   Route Info Panel
+   ========================================= */
+.sp-route-panel {
+  background: linear-gradient(180deg, #0d2137 0%, #1a2942 100%);
+  padding: 16px 20px;
+  border-top: 3px solid #2979FF;
+  overflow-y: auto;
+  max-height: 380px;
+}
+
+.sp-route-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.sp-route-title {
+  color: #FFD700;
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.sp-route-close {
+  width: 30px;
+  height: 30px;
+  background: rgba(244, 67, 54, 0.2);
+  border: 1px solid #f44336;
+  border-radius: 50%;
+  color: #f44336;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.sp-route-close:hover {
+  background: #f44336;
+  color: white;
+}
+
+/* Route stats */
+.sp-route-stats {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.sp-stat-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 8px;
+  background: rgba(255, 215, 0, 0.1);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.sp-stat-value {
+  color: #FFD700;
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.sp-stat-label {
+  color: #b0b8c4;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+}
+
+/* Route stops */
+.sp-route-stops {
+  margin-bottom: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.sp-route-stop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: 0.85rem;
+  color: #e0e0e0;
+}
+
+.sp-route-stop:not(:last-child) {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 8px;
+  margin-bottom: 2px;
+}
+
+.sp-stop-marker {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.75rem;
+  color: white;
+  flex-shrink: 0;
+}
+
+.sp-stop-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Toggle directions button */
+.sp-toggle-directions-btn {
+  width: 100%;
+  padding: 10px 14px;
+  background: rgba(41, 121, 255, 0.15);
+  border: 1px solid rgba(41, 121, 255, 0.3);
+  border-radius: 8px;
+  color: #90CAF9;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  margin-bottom: 10px;
+}
+
+.sp-toggle-directions-btn:hover {
+  background: rgba(41, 121, 255, 0.25);
+  border-color: #2979FF;
+}
+
+/* Directions list */
+.sp-directions-list {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 12px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.sp-directions-title {
+  color: #FFD700;
+  font-size: 0.9rem;
+  margin: 0 0 12px 0;
+}
+
+.sp-directions-steps {
+  margin: 0;
+  padding: 0 0 0 22px;
+  list-style-type: decimal;
+}
+
+.sp-direction-step {
+  color: #e0e0e0;
+  font-size: 0.85rem;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.sp-step-instruction {
+  flex: 1;
+  line-height: 1.5;
+}
+
+.sp-step-distance {
+  color: #8a929d;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+/* =========================================
+   Map Area
+   ========================================= */
+.sp-map-area {
+  flex: 1;
+  position: relative;
+}
+
+/* =========================================
+   Marker Popup Styling (shared with SearchResults)
+   ========================================= */
+.sp-container .marker-popup {
+  text-align: left;
+  min-width: 200px;
+}
+
+.sp-container .marker-popup strong {
+  font-size: 1rem;
+  color: #333;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.sp-container .marker-popup small {
+  color: #666;
+  display: block;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+/* =========================================
+   Custom Scrollbar - Dark Theme
+   ========================================= */
+.sp-locations-list::-webkit-scrollbar,
+.sp-directions-list::-webkit-scrollbar,
+.sp-search-results::-webkit-scrollbar,
+.sp-route-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sp-locations-list::-webkit-scrollbar-track,
+.sp-directions-list::-webkit-scrollbar-track,
+.sp-search-results::-webkit-scrollbar-track,
+.sp-route-panel::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.sp-locations-list::-webkit-scrollbar-thumb,
+.sp-directions-list::-webkit-scrollbar-thumb,
+.sp-search-results::-webkit-scrollbar-thumb,
+.sp-route-panel::-webkit-scrollbar-thumb {
+  background: rgba(255, 215, 0, 0.4);
+  border-radius: 4px;
+}
+
+.sp-locations-list::-webkit-scrollbar-thumb:hover,
+.sp-directions-list::-webkit-scrollbar-thumb:hover,
+.sp-search-results::-webkit-scrollbar-thumb:hover,
+.sp-route-panel::-webkit-scrollbar-thumb:hover {
+  background: #FFD700;
+}
+
+/* =========================================
+   Responsive Design
+   ========================================= */
+@media (max-width: 1024px) {
+  .sp-sidebar {
+    width: 380px;
+    min-width: 360px;
+  }
+}
+
+@media (max-width: 768px) {
+  .sp-container {
+    flex-direction: column;
+  }
+
+  .sp-sidebar {
+    width: 100%;
+    max-width: none;
+    height: 55vh;
+    min-width: unset;
+    border-right: none;
+    border-bottom: 3px solid #FFD700;
+  }
+
+  .sp-map-area {
+    height: 45vh;
+  }
+
+  .sp-travel-buttons {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .sp-control-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sp-sidebar-header {
+    padding: 14px;
+  }
+
+  .sp-title {
+    font-size: 1.1rem;
+  }
+
+  .sp-controls-section,
+  .sp-travel-section {
+    padding: 10px 14px;
+  }
+
+  .sp-locations-list {
+    padding: 10px 12px;
+  }
+
+  .sp-location-card {
+    padding: 10px;
+  }
+
+  .sp-optimize-section {
+    padding: 10px 14px;
+  }
+}

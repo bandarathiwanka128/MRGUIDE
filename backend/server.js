@@ -15,6 +15,10 @@ const { sequelize } = require('./config/database');
 const authRoutes = require('./routes/auth');
 const placesRoutes = require('./routes/places');
 const storesRoutes = require('./routes/stores');
+const aiRoutes = require('./routes/ai');
+const tripsRoutes = require('./routes/trips');
+const weatherRoutes = require('./routes/weather');
+const seedRoutes = require('./routes/seed');
 
 const app = express();
 
@@ -32,6 +36,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/places', placesRoutes);
 app.use('/api/stores', storesRoutes);
+app.use('/api/ai', aiRoutes);
+app.use('/api/trips', tripsRoutes);
+app.use('/api/weather', weatherRoutes);
+app.use('/api/seed', seedRoutes);
 
 // Test route
 app.get('/api/test', (req, res) => {
@@ -41,7 +49,7 @@ app.get('/api/test', (req, res) => {
 // Start server
 const PORT = process.env.PORT || 3001;
 
-sequelize.sync({ alter: false }).then(() => {
+sequelize.sync({ alter: true }).then(() => {
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on http://localhost:${PORT}`);
     console.log('Database connected successfully');

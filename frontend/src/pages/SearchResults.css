@@ -638,6 +638,87 @@
   background: #1a73e8;
 }
 
+.popup-details-btn {
+  width: 100%;
+  padding: 8px 16px;
+  background: #9C27B0;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+.popup-details-btn:hover {
+  background: #7B1FA2;
+}
+
+.popup-add-data-btn {
+  width: 100%;
+  padding: 8px 16px;
+  background: #FF9800;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+.popup-add-data-btn:hover {
+  background: #F57C00;
+}
+
+/* Details Panel Overlay */
+.details-panel-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 400px;
+  z-index: 1000;
+  background: linear-gradient(180deg, #0a1929 0%, #0d2137 100%);
+  border-right: 3px solid #9C27B0;
+  overflow-y: auto;
+  box-shadow: 4px 0 25px rgba(0, 0, 0, 0.5);
+}
+
+/* Auth Snackbar */
+.auth-snackbar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2000;
+  padding: 14px 28px;
+  background: rgba(10, 25, 41, 0.95);
+  border: 1px solid #FFD700;
+  border-radius: 12px;
+  color: #FFD700;
+  font-size: 0.9rem;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: snackbarIn 0.3s ease;
+}
+
+.snackbar-link {
+  color: #4285F4;
+  text-decoration: underline;
+  font-weight: 700;
+}
+
+@keyframes snackbarIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
 /* Custom Scrollbar - Dark Theme */
 .places-list-container::-webkit-scrollbar,
 .directions-list::-webkit-scrollbar,

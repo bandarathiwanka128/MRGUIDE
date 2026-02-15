@@ -87,7 +87,12 @@ const Place = sequelize.define('Place', {
   description: DataTypes.TEXT,
   address: DataTypes.TEXT,
   google_place_id: DataTypes.STRING,
-  created_by: DataTypes.INTEGER
+  created_by: DataTypes.INTEGER,
+  price_level: {
+    type: DataTypes.INTEGER,
+    validate: { min: 1, max: 5 }
+  },
+  estimated_cost: DataTypes.DECIMAL(10, 2)
 }, {
   tableName: 'places',
   timestamps: true,
@@ -191,6 +196,45 @@ Review.belongsTo(Place, { foreignKey: 'place_id' });
 Place.hasMany(AuthenticDetail, { foreignKey: 'place_id' });
 AuthenticDetail.belongsTo(Place, { foreignKey: 'place_id' });
 
+// Trip Model
+const Trip = sequelize.define('Trip', {
+  user_id: {
+    type: DataTypes.INTEGER,
+    references: { model: User, key: 'id' }
+  },
+  title: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  description: DataTypes.TEXT,
+  destinations: {
+    type: DataTypes.JSON,
+    defaultValue: []
+  },
+  travel_mode: {
+    type: DataTypes.STRING,
+    defaultValue: 'car'
+  },
+  total_distance: DataTypes.DECIMAL(10, 2),
+  total_duration: DataTypes.DECIMAL(10, 2),
+  weather_data: DataTypes.JSON,
+  ai_suggestions: DataTypes.TEXT,
+  status: {
+    type: DataTypes.STRING,
+    defaultValue: 'draft'
+  },
+  start_date: DataTypes.DATEONLY,
+  end_date: DataTypes.DATEONLY
+}, {
+  tableName: 'trips',
+  timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: 'updated_at'
+});
+
+User.hasMany(Trip, { foreignKey: 'user_id' });
+Trip.belongsTo(User, { foreignKey: 'user_id' });
+
 // Store/Business Model for Locator
 const Store = sequelize.define('Store', {
   name: {
@@ -254,5 +298,6 @@ module.exports = {
   Place,
   AuthenticDetail,
   Review,
+  Trip,
   Store
 };

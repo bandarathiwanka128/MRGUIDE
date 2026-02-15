@@ -8,6 +8,10 @@ import SearchResults from './pages/SearchResults';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import AboutUs from './pages/AboutUs';
+import ShortestPath from './pages/ShortestPath';
+import TripPlanner from './pages/TripPlanner';
+import AuthenticSection from './pages/AuthenticSection';
+import RouteOptimize from './pages/RouteOptimize';
 
 import { API_BASE_URL } from './config';
 
@@ -75,6 +79,10 @@ const App = () => {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/search" element={<SearchResults user={user} />} />
+          <Route path="/shortest-path" element={<ShortestPath />} />
+          <Route path="/trip-planner" element={<TripPlanner user={user} />} />
+          <Route path="/authentic" element={<AuthenticSection user={user} />} />
+          <Route path="/optimize-route" element={<RouteOptimize />} />
           <Route path="/login" element={user ? <Navigate to="/" /> : <Login setUser={setUser} />} />
           <Route path="/register" element={user ? <Navigate to="/" /> : <Register setUser={setUser} />} />
           <Route path="/about" element={<AboutUs />} />
