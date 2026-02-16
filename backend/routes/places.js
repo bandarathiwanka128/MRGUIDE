@@ -86,7 +86,151 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get single place with all details
+// Get authentic details for a Google Place ID
+router.get('/google/:googlePlaceId/authentic-details', async (req, res) => {
+  try {
+    const { googlePlaceId } = req.params;
+
+    const details = await AuthenticDetail.findAll({
+      where: {
+        google_place_id: googlePlaceId,
+        is_active: true
+      },
+      include: [{
+        model: User,
+        attributes: ['id', 'username', 'email', 'mobile_number']
+      }],
+      order: [['created_at', 'DESC']]
+    });
+
+    res.json({
+      users: details.filter(d => d.detail_type === 'user'),
+      businesses: details.filter(d => d.detail_type === 'business')
+    });
+  } catch (error) {
+    console.error('Error fetching authentic details:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Search authentic details by place name or coordinates
+router.get('/search-authentic', async (req, res) => {
+  try {
+    const { name, lat, lng } = req.query;
+
+    if (!name && !lat) {
+      return res.status(400).json({ error: 'name or lat/lng is required' });
+    }
+
+    let matchingPlaces = [];
+    if (name) {
+      // Try exact match first
+      matchingPlaces = await Place.findAll({
+        where: { name: { [Op.iLike]: `%${name}%` } }
+      });
+
+      // If no exact match, try fuzzy: match significant words (>3 chars)
+      if (matchingPlaces.length === 0) {
+        const words = name.split(/\s+/).filter(w => w.length > 3);
+        if (words.length > 0) {
+          const conditions = words.map(word => ({
+            name: { [Op.iLike]: `%${word}%` }
+          }));
+          const candidates = await Place.findAll({
+            where: { [Op.or]: conditions }
+          });
+
+          // If we have coordinates, pick only the nearest candidate (within 5km)
+          if (candidates.length > 1 && lat && lng) {
+            const withDist = candidates.map(p => ({
+              place: p,
+              dist: getDistance(
+                { lat: parseFloat(lat), lng: parseFloat(lng) },
+                { lat: parseFloat(p.latitude), lng: parseFloat(p.longitude) }
+              )
+            })).sort((a, b) => a.dist - b.dist);
+
+            if (withDist[0].dist < 5) {
+              matchingPlaces = [withDist[0].place];
+            }
+          } else {
+            matchingPlaces = candidates;
+          }
+        }
+      }
+    }
+
+    // If no name match, try coordinates only - find nearest place within 2km
+    if (matchingPlaces.length === 0 && lat && lng) {
+      const allPlaces = await Place.findAll();
+      const nearest = allPlaces
+        .map(p => ({
+          place: p,
+          dist: getDistance(
+            { lat: parseFloat(lat), lng: parseFloat(lng) },
+            { lat: parseFloat(p.latitude), lng: parseFloat(p.longitude) }
+          )
+        }))
+        .filter(p => p.dist < 2)
+        .sort((a, b) => a.dist - b.dist);
+
+      if (nearest.length > 0) {
+        matchingPlaces = [nearest[0].place];
+      }
+    }
+
+    if (matchingPlaces.length === 0) {
+      return res.json({ users: [], businesses: [], place: null });
+    }
+
+    const placeIds = matchingPlaces.map(p => p.id);
+    const details = await AuthenticDetail.findAll({
+      where: { place_id: { [Op.in]: placeIds }, is_active: true },
+      include: [{ model: User, attributes: ['id', 'username', 'email', 'mobile_number'] }],
+      order: [['created_at', 'DESC']]
+    });
+
+    res.json({
+      users: details.filter(d => d.detail_type === 'user'),
+      businesses: details.filter(d => d.detail_type === 'business'),
+      place: matchingPlaces[0]
+    });
+  } catch (error) {
+    console.error('Error searching authentic details:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Get a single place with authentic details by slug/name
+router.get('/by-name/:placeName', async (req, res) => {
+  try {
+    const searchName = req.params.placeName.replace(/-/g, ' ');
+
+    const place = await Place.findOne({
+      where: { name: { [Op.iLike]: `%${searchName}%` } },
+      include: [
+        { model: Review, include: [{ model: User, attributes: ['username'] }] },
+        {
+          model: AuthenticDetail,
+          where: { is_active: true },
+          required: false,
+          include: [{ model: User, attributes: ['id', 'username', 'email', 'mobile_number'] }]
+        }
+      ]
+    });
+
+    if (!place) {
+      return res.status(404).json({ error: 'Place not found' });
+    }
+
+    res.json(place);
+  } catch (error) {
+    console.error('Error fetching place by name:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Get single place with all details (must be AFTER all named routes)
 router.get('/:id', async (req, res) => {
   try {
     const place = await Place.findByPk(req.params.id, {
@@ -165,39 +309,18 @@ router.post('/:id/reviews', authenticateToken, async (req, res) => {
   }
 });
 
-// Get authentic details for a Google Place ID
-router.get('/google/:googlePlaceId/authentic-details', async (req, res) => {
-  try {
-    const { googlePlaceId } = req.params;
-
-    const details = await AuthenticDetail.findAll({
-      where: {
-        google_place_id: googlePlaceId,
-        is_active: true
-      },
-      include: [{
-        model: User,
-        attributes: ['id', 'username', 'email', 'mobile_number']
-      }],
-      order: [['created_at', 'DESC']]
-    });
-
-    res.json({
-      users: details.filter(d => d.detail_type === 'user'),
-      businesses: details.filter(d => d.detail_type === 'business')
-    });
-  } catch (error) {
-    console.error('Error fetching authentic details:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
 // Add authentic detail to place (User or Business)
+// Also auto-creates a Place entry if one doesn't exist, so it shows on the map
 router.post('/authentic-details', authenticateToken, async (req, res) => {
   try {
     const {
       google_place_id,
       place_id,
+      place_name,
+      place_address,
+      place_lat,
+      place_lng,
+      place_category,
       detail_type,
       title,
       business_name,
@@ -216,23 +339,47 @@ router.post('/authentic-details', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Either google_place_id or place_id is required' });
     }
 
-    // Check if user has already added detail for this place
-    const existingDetail = await AuthenticDetail.findOne({
-      where: {
-        user_id: req.user.id,
-        [Op.or]: [
-          { google_place_id: google_place_id || null },
-          { place_id: place_id || null }
-        ]
+    // Auto-create a Place entry if it doesn't exist (so it shows as a purple marker on the map)
+    let resolvedPlaceId = place_id || null;
+
+    if (!resolvedPlaceId && google_place_id) {
+      // Try to find existing place by google_place_id
+      let existingPlace = await Place.findOne({ where: { google_place_id } });
+
+      if (!existingPlace && place_lat && place_lng) {
+        // Create new place entry so it appears on the Authentic Section map
+        existingPlace = await Place.create({
+          name: place_name || 'Unknown Place',
+          category: place_category || 'place',
+          latitude: place_lat,
+          longitude: place_lng,
+          address: place_address || '',
+          google_place_id,
+          created_by: req.user.id
+        });
       }
-    });
+
+      if (existingPlace) {
+        resolvedPlaceId = existingPlace.id;
+      }
+    }
+
+    // Check if user has already added detail for this place
+    const whereCondition = { user_id: req.user.id };
+    if (resolvedPlaceId) {
+      whereCondition.place_id = resolvedPlaceId;
+    } else if (google_place_id) {
+      whereCondition.google_place_id = google_place_id;
+    }
+
+    const existingDetail = await AuthenticDetail.findOne({ where: whereCondition });
 
     if (existingDetail) {
       return res.status(400).json({ error: 'You have already added details for this place' });
     }
 
     const authenticDetail = await AuthenticDetail.create({
-      place_id: place_id || null,
+      place_id: resolvedPlaceId,
       google_place_id: google_place_id || null,
       user_id: req.user.id,
       detail_type: detail_type || 'user',

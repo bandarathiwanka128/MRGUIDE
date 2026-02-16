@@ -1,26 +1,4 @@
-version: '3.8'
-
 services:
-  # PostgreSQL Database
-  db:
-    image: postgres:15-alpine
-    container_name: mrguide-db
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: mrguide
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./backend/scripts:/docker-entrypoint-initdb.d
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   # Backend API
   backend:
     build:
@@ -33,21 +11,13 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3001
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/mrguide
-      - DB_HOST=db
-      - DB_PORT=5432
-      - DB_NAME=mrguide
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
+      - DATABASE_URL=postgresql://neondb_owner:npg_gt4v8hsEdzXe@ep-billowing-leaf-a1fvwa7a-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
       - JWT_SECRET=your_jwt_secret_change_in_production
       - CORS_ORIGIN=http://localhost:3000
-      - GEMINI_API_KEY=AIzaSyA22gU8rRIVQXbI5VYQxkikqNn029tMx5E
+      - GEMINI_API_KEY=AIzaSyB3XLxAABIpBV_w5SZ65Gaf0OJ6CwaFcGQ
     volumes:
       - ./backend:/app
       - /app/node_modules
-    depends_on:
-      db:
-        condition: service_healthy
     command: npm run dev
 
   # Frontend React App
@@ -69,9 +39,6 @@ services:
       - backend
     stdin_open: true
     tty: true
-
-volumes:
-  postgres_data:
 
 networks:
   default:

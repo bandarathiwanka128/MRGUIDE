@@ -82,6 +82,7 @@ const App = () => {
           <Route path="/shortest-path" element={<ShortestPath />} />
           <Route path="/trip-planner" element={<TripPlanner user={user} />} />
           <Route path="/authentic" element={<AuthenticSection user={user} />} />
+          <Route path="/authentic/:placeName" element={<AuthenticSection user={user} />} />
           <Route path="/optimize-route" element={<RouteOptimize />} />
           <Route path="/login" element={user ? <Navigate to="/" /> : <Login setUser={setUser} />} />
           <Route path="/register" element={user ? <Navigate to="/" /> : <Register setUser={setUser} />} />

@@ -32,7 +32,22 @@
       "Bash(docker-compose stop:*)",
       "Bash(docker compose stop:*)",
       "Bash(where:*)",
-      "Bash(\"/c/Program Files/Docker/Docker/resources/bin/docker.exe\" compose stop frontend)"
+      "Bash(\"/c/Program Files/Docker/Docker/resources/bin/docker.exe\" compose stop frontend)",
+      "Bash(powershell -Command \"Get-NetTCPConnection -LocalPort 3001 | Select-Object OwningProcess,State\")",
+      "Bash(taskkill:*)",
+      "Bash(\"/c/Program Files/Docker/Docker/resources/bin/docker.exe\" compose -f d:/mr-guide/docker-compose.yml stop backend)",
+      "Bash(\"/c/Program Files/Docker/Docker/resources/bin/docker.exe\" compose -f d:/mr-guide/docker-compose.yml start backend)",
+      "Bash(\"/c/Program Files/Docker/Docker/resources/bin/docker.exe\" compose -f d:/mr-guide/docker-compose.yml up --build -d)",
+      "Bash(export PATH=\"$PATH:/c/Program Files/Docker/Docker/resources/bin\")",
+      "Bash(\"/c/Program Files/Docker/Docker/resources/bin/docker.exe\" compose -f d:/mr-guide/docker-compose.yml down -v)",
+      "Bash(\"/c/Program Files/Docker/Docker/resources/bin/docker.exe\" compose:*)",
+      "Bash(\"/c/Program Files/Docker/Docker/resources/bin/docker.exe\" compose -f d:/mr-guide/docker-compose.yml up -d)",
+      "Bash(\"/c/Program Files/Docker/Docker/resources/bin/docker.exe\" compose -f d:/mr-guide/docker-compose.yml ps)",
+      "Bash(\"/c/Program Files/Docker/Docker/resources/bin/docker.exe\" exec mrguide-db psql -U postgres -c \"\\\\l\")",
+      "Bash(\"/c/Program Files/Docker/Docker/resources/bin/docker.exe\" exec:*)",
+      "Bash(\"/c/Program Files/Docker/Docker/resources/bin/docker.exe\" exec mrguide-db psql -U postgres -d mrguide -c \"SELECT count\\(*\\) FROM places; SELECT count\\(*\\) FROM authentic_details; SELECT count\\(*\\) FROM authentic_profiles;\")",
+      "Bash(\"/c/Program Files/Docker/Docker/resources/bin/docker.exe\" compose -f d:/mr-guide/docker-compose.yml down -v --remove-orphans)",
+      "Bash(\"/c/Program Files/Docker/Docker/resources/bin/docker.exe\" logs mrguide-backend --tail 15)"
     ],
     "deny": [],
     "ask": []

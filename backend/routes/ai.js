@@ -72,4 +72,39 @@ router.post('/place-info', async (req, res) => {
   }
 });
 
+// AI travel suggestion - public endpoint for homepage
+router.post('/travel-suggest', async (req, res) => {
+  try {
+    const { question } = req.body;
+
+    if (!question || question.trim().length < 5) {
+      return res.status(400).json({ error: 'Please ask a more detailed question' });
+    }
+
+    const prompt = `You are a Sri Lanka travel expert assistant. A user asked: "${question}"
+
+Respond with ONLY a valid JSON array (no markdown, no code blocks) of 1-3 place suggestions in Sri Lanka. Each object must have:
+- "name": place name
+- "reason": 1-2 sentence explanation why this is recommended (mention weather, activities, or unique features)
+- "best_months": short text like "Dec-Mar" or "Year-round"
+- "search_query": a Google Maps search query for this place
+- "category": one of "beach", "temple", "nature", "city", "adventure", "culture", "wildlife"
+
+Example format: [{"name":"Mirissa Beach","reason":"Perfect for whale watching and surfing with calm seas.","best_months":"Nov-Apr","search_query":"Mirissa Beach Sri Lanka","category":"beach"}]
+
+Return ONLY the JSON array, nothing else.`;
+
+    const text = await callGemini(prompt);
+
+    // Parse the JSON from Gemini response (strip any markdown code blocks if present)
+    const cleaned = text.replace(/```json?\n?/g, '').replace(/```/g, '').trim();
+    const suggestions = JSON.parse(cleaned);
+
+    res.json({ suggestions: Array.isArray(suggestions) ? suggestions.slice(0, 3) : [] });
+  } catch (error) {
+    console.error('AI travel suggest error:', error.response?.data || error.message);
+    res.status(500).json({ error: 'Failed to generate suggestions. Please try again.' });
+  }
+});
+
 module.exports = router;

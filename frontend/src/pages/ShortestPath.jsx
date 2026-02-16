@@ -409,9 +409,12 @@ const ShortestPath = () => {
       locations.forEach(loc => bounds.extend({ lat: loc.lat, lng: loc.lng }));
       if (locations.length === 1) {
         mapRef.current.setCenter({ lat: locations[0].lat, lng: locations[0].lng });
-        mapRef.current.setZoom(16);
+        mapRef.current.setZoom(12);
       } else {
         mapRef.current.fitBounds(bounds, { padding: 60 });
+        window.google.maps.event.addListenerOnce(mapRef.current, 'idle', () => {
+          if (mapRef.current.getZoom() > 12) mapRef.current.setZoom(12);
+        });
       }
     }
   }, [locations, directionsResult]);

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useParams } from 'react-router-dom';
 import { GoogleMap, useLoadScript, Marker, InfoWindow } from '@react-google-maps/api';
 import axios from 'axios';
 import { API_BASE_URL, GOOGLE_MAPS_API_KEY } from '../config';
@@ -112,6 +113,8 @@ const LoginIcon = () => (
 );
 
 const AuthenticSection = ({ user }) => {
+  const { placeName: urlPlaceName } = useParams();
+
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: GOOGLE_MAPS_API_KEY,
     libraries,
@@ -119,6 +122,7 @@ const AuthenticSection = ({ user }) => {
 
   // Map ref for Google Maps instance
   const mapRef = useRef(null);
+  const urlPlaceLoaded = useRef(false);
 
   // Clicked location state
   const [clickedLocation, setClickedLocation] = useState(null);
@@ -166,13 +170,52 @@ const AuthenticSection = ({ user }) => {
           (p) => p.latitude && p.longitude
         );
         setAuthenticPlaces(placesWithCoords);
+        return placesWithCoords;
       }
     } catch (error) {
       console.error('Error fetching authentic places:', error);
     } finally {
       setLoadingPlaces(false);
     }
+    return [];
   };
+
+  // Auto-select place from URL param (e.g. /authentic/galle-fort)
+  useEffect(() => {
+    if (!urlPlaceName || urlPlaceLoaded.current || !isLoaded) return;
+
+    const loadUrlPlace = async () => {
+      try {
+        const response = await axios.get(
+          `${API_BASE_URL}/places/by-name/${encodeURIComponent(urlPlaceName)}`
+        );
+        const place = response.data;
+        if (place) {
+          urlPlaceLoaded.current = true;
+          const placeObj = {
+            id: place.google_place_id || place.id,
+            name: place.name,
+            address: place.address || '',
+            lat: parseFloat(place.latitude),
+            lng: parseFloat(place.longitude),
+          };
+          setSelectedPlace(placeObj);
+          setPanelMode('details');
+          setPanelOpen(true);
+
+          // Pan map to this place
+          if (mapRef.current) {
+            mapRef.current.panTo({ lat: placeObj.lat, lng: placeObj.lng });
+            mapRef.current.setZoom(13);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading place from URL:', error);
+      }
+    };
+
+    loadUrlPlace();
+  }, [urlPlaceName, isLoaded]);
 
   // Store the map instance when it loads
   const onMapLoad = useCallback((map) => {

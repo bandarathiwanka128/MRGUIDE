@@ -169,9 +169,12 @@ const TripPlanner = ({ user }) => {
 
     if (destinations.length === 1) {
       mapRef.current.setCenter({ lat: destinations[0].lat, lng: destinations[0].lng });
-      mapRef.current.setZoom(14);
+      mapRef.current.setZoom(12);
     } else {
       mapRef.current.fitBounds(bounds, { top: 60, bottom: 60, left: 60, right: 60 });
+      window.google.maps.event.addListenerOnce(mapRef.current, 'idle', () => {
+        if (mapRef.current.getZoom() > 12) mapRef.current.setZoom(12);
+      });
     }
   }, [destinations, directionsResponse]);
 

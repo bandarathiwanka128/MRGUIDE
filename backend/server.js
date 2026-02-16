@@ -49,7 +49,19 @@ app.get('/api/test', (req, res) => {
 // Start server
 const PORT = process.env.PORT || 3001;
 
-sequelize.sync({ alter: true }).then(() => {
+// Fix null usernames before sync (from older schema versions)
+sequelize.authenticate().then(async () => {
+  try {
+    await sequelize.query(
+      `UPDATE users SET username = CONCAT('user_', id) WHERE username IS NULL`,
+      { type: sequelize.QueryTypes.UPDATE }
+    ).catch(() => {});
+  } catch (e) {
+    // Table may not exist yet, that's fine
+  }
+
+  return sequelize.sync({ alter: true });
+}).then(() => {
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on http://localhost:${PORT}`);
     console.log('Database connected successfully');

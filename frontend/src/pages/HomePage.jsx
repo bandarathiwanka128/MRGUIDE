@@ -1,10 +1,68 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { API_BASE_URL } from '../config';
 import './HomePage.css';
+
+// Hero slider images - Sri Lanka tourism
+const heroSlides = [
+  {
+    img: 'https://media.licdn.com/dms/image/v2/D5612AQGmIELLsSrSBQ/article-cover_image-shrink_720_1280/B56ZVbc.NmGoAM-/0/1740996077593?e=2147483647&v=beta&t=T3xZ-MIsw6a2u-jNLSAii7U4GLB_czKhpngK5Bn22Ao',
+    caption: 'Discover Paradise',
+    sub: 'Sri Lanka Tourism',
+  },
+  {
+    img: 'https://media.licdn.com/dms/image/v2/D5612AQFnlw0w7ClGUg/article-cover_image-shrink_600_2000/article-cover_image-shrink_600_2000/0/1693919938172?e=2147483647&v=beta&t=_M7EdBsaazE7qM4mfQigB9spmg82meWdixclCsbDoSk',
+    caption: 'Journey Through',
+    sub: 'Ancient Heritage',
+  },
+  {
+    img: 'https://res.cloudinary.com/jerrick/image/upload/d_642250b563292b35f27461a7.png,f_jpg,q_auto,w_720/637f71bba2f78a001d04492b.jpg',
+    caption: 'Explore Nature',
+    sub: 'Pristine Landscapes',
+  },
+  {
+    img: 'https://img2.chinadaily.com.cn/images/202408/23/66c7e422a3106063b59472a8.jpeg',
+    caption: 'Experience Culture',
+    sub: 'Vibrant Traditions',
+  },
+];
+
+const examplePrompts = [
+  'Best beaches to visit in August',
+  'Cultural temples near Kandy',
+  'Adventure activities in Ella',
+  'Where to see wildlife in Sri Lanka',
+  'Best places for photography',
+];
+
+const categoryIcons = {
+  beach: '\u{1F3D6}',
+  temple: '\u{1F6D5}',
+  nature: '\u{1F33F}',
+  city: '\u{1F3D9}',
+  adventure: '\u{26F0}',
+  culture: '\u{1F3AD}',
+  wildlife: '\u{1F406}',
+};
 
 const HomePage = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [aiQuery, setAiQuery] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiResults, setAiResults] = useState([]);
+  const [aiError, setAiError] = useState('');
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const aiInputRef = useRef(null);
   const navigate = useNavigate();
+
+  // Hero slider
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -24,6 +82,33 @@ const HomePage = () => {
 
   const handleQuickSearch = (query) => {
     navigate(`/search?q=${encodeURIComponent(query)}`);
+  };
+
+  // AI suggestion handler
+  const handleAiSubmit = async (e) => {
+    e.preventDefault();
+    const q = aiQuery.trim();
+    if (!q || q.length < 5) return;
+
+    setAiLoading(true);
+    setAiResults([]);
+    setAiError('');
+
+    try {
+      const res = await axios.post(`${API_BASE_URL}/ai/travel-suggest`, { question: q });
+      setAiResults(res.data.suggestions || []);
+    } catch (err) {
+      setAiError('Could not get suggestions right now. Please try again.');
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const handleExampleClick = (prompt) => {
+    setAiQuery(prompt);
+    setAiResults([]);
+    setAiError('');
+    if (aiInputRef.current) aiInputRef.current.focus();
   };
 
   const features = [
@@ -97,13 +182,36 @@ const HomePage = () => {
 
   return (
     <div className="home-container">
+      {/* ===== HERO with Image Slider ===== */}
       <div className="hero-section">
+        {/* Image slides */}
+        <div className="hero-slider">
+          {heroSlides.map((slide, i) => (
+            <div
+              key={i}
+              className={`hero-slide ${i === currentSlide ? 'active' : ''}`}
+              style={{ backgroundImage: `url(${slide.img})` }}
+            />
+          ))}
+          <div className="hero-overlay" />
+        </div>
+
         <div className="hero-content">
+          {/* Rotating caption */}
+          <div className="hero-caption-area">
+            {heroSlides.map((slide, i) => (
+              <div key={i} className={`caption-item ${i === currentSlide ? 'active' : ''}`}>
+                <span className="caption-badge">{slide.caption}</span>
+                <span className="caption-sub">{slide.sub}</span>
+              </div>
+            ))}
+          </div>
+
           <h1 className="hero-title">
             Explore <span className="highlight">Sri Lanka</span>
           </h1>
           <p className="hero-subtitle">
-            Discover amazing places, find the best routes, and plan your perfect journey
+            Discover ancient ruins, pristine beaches, lush mountains &amp; vibrant culture
           </p>
 
           <form onSubmit={handleSearch} className="search-form">
@@ -119,7 +227,6 @@ const HomePage = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search for places, hotels, restaurants..."
                 className="home-search-input"
-                autoFocus
               />
               <button type="submit" className="home-search-btn">
                 Search
@@ -143,6 +250,136 @@ const HomePage = () => {
           </div>
         </div>
 
+        {/* Slide indicators */}
+        <div className="hero-dots">
+          {heroSlides.map((_, i) => (
+            <button
+              key={i}
+              className={`dot ${i === currentSlide ? 'active' : ''}`}
+              onClick={() => setCurrentSlide(i)}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* ===== AI Interactive Section ===== */}
+      <div className="ai-section">
+        <div className="ai-section-inner">
+          <div className="ai-header">
+            <div className="ai-icon-sparkle">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 2L9 12l-7 3 7 3 3 10 3-10 7-3-7-3z"/>
+              </svg>
+            </div>
+            <h2 className="ai-title">What are you looking for?</h2>
+            <p className="ai-subtitle">Ask anything about traveling in Sri Lanka</p>
+          </div>
+
+          <form onSubmit={handleAiSubmit} className="ai-form">
+            <div className="ai-input-wrapper">
+              <input
+                ref={aiInputRef}
+                type="text"
+                value={aiQuery}
+                onChange={(e) => setAiQuery(e.target.value)}
+                placeholder="e.g. Best places to visit in August with good weather..."
+                className="ai-input"
+                disabled={aiLoading}
+              />
+              <button
+                type="submit"
+                className="ai-submit-btn"
+                disabled={aiLoading || aiQuery.trim().length < 5}
+              >
+                {aiLoading ? (
+                  <span className="ai-spinner" />
+                ) : (
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                  </svg>
+                )}
+              </button>
+            </div>
+          </form>
+
+          {/* Example prompts */}
+          {aiResults.length === 0 && !aiLoading && !aiError && (
+            <div className="ai-examples">
+              <p className="ai-examples-label">Try asking:</p>
+              <div className="ai-example-chips">
+                {examplePrompts.map((prompt, i) => (
+                  <button
+                    key={i}
+                    className="ai-example-chip"
+                    onClick={() => handleExampleClick(prompt)}
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Loading state */}
+          {aiLoading && (
+            <div className="ai-loading">
+              <div className="ai-loading-dots">
+                <span /><span /><span />
+              </div>
+              <p>Finding the best places for you...</p>
+            </div>
+          )}
+
+          {/* Error state */}
+          {aiError && (
+            <div className="ai-error">
+              <p>{aiError}</p>
+            </div>
+          )}
+
+          {/* AI Results */}
+          {aiResults.length > 0 && (
+            <div className="ai-results">
+              <p className="ai-results-label">Recommended for you</p>
+              <div className="ai-results-grid">
+                {aiResults.map((place, i) => (
+                  <div key={i} className="ai-result-card">
+                    <div className="ai-result-category">
+                      <span className="ai-result-emoji">
+                        {categoryIcons[place.category] || '\u{1F4CD}'}
+                      </span>
+                      <span className="ai-result-cat-text">{place.category}</span>
+                    </div>
+                    <h3 className="ai-result-name">{place.name}</h3>
+                    <p className="ai-result-reason">{place.reason}</p>
+                    <div className="ai-result-meta">
+                      <span className="ai-result-months">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/>
+                          <line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                        </svg>
+                        Best: {place.best_months}
+                      </span>
+                    </div>
+                    <button
+                      className="ai-result-btn"
+                      onClick={() => navigate(`/search?q=${encodeURIComponent(place.search_query)}`)}
+                    >
+                      View on Map
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ===== Feature Cards ===== */}
+      <div className="features-wrapper">
         <div className="features-section">
           {features.map((feature, index) => (
             <div
@@ -166,6 +403,26 @@ const HomePage = () => {
           ))}
         </div>
       </div>
+
+      {/* ===== Footer ===== */}
+      <footer className="home-footer">
+        <div className="footer-inner">
+          <div className="footer-brand">
+            <h3 className="footer-logo">Mr. Guide</h3>
+            <p className="footer-tagline">Your trusted travel companion for Sri Lanka</p>
+          </div>
+          <div className="footer-links">
+            <a href="/" className="footer-link">Home</a>
+            <a href="/about" className="footer-link">About Us</a>
+            <a href="/authentic" className="footer-link">Authentic Section</a>
+            <a href="/trip-planner" className="footer-link">Trip Planner</a>
+          </div>
+          <div className="footer-bottom">
+            <p>Made with care for Sri Lanka tourism</p>
+            <p className="footer-copy">&copy; {new Date().getFullYear()} Mr. Guide. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

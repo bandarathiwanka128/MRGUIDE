@@ -6,7 +6,7 @@
 
 /* Sidebar - Dark Theme */
 .results-sidebar {
-  width: 400px;
+  width: 500px;
   min-width: 380px;
   background: linear-gradient(180deg, #0a1929 0%, #0d2137 100%);
   display: flex;

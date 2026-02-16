@@ -57,7 +57,12 @@ const AddAuthenticDataModal = ({ place, type, onClose, onSuccess }) => {
       }
 
       const payload = {
-        google_place_id: place.id,
+        google_place_id: place.id || place.placeId,
+        place_name: place.name,
+        place_address: place.address,
+        place_lat: place.lat || place.position?.lat,
+        place_lng: place.lng || place.position?.lng,
+        place_category: place.category || place.type || 'place',
         detail_type: type,
         ...formData,
         packages: formData.packages.length > 0 ? formData.packages : null

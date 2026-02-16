@@ -217,11 +217,14 @@ const SearchResults = ({ user }) => {
           setPlaces(mappedResults);
           setSearchStatus(`Found ${mappedResults.length} place${mappedResults.length !== 1 ? 's' : ''} in Sri Lanka`);
 
-          // Fit map bounds to results
+          // Fit map bounds to results (max zoom 12 = district level)
           if (mapRef.current) {
             const bounds = new window.google.maps.LatLngBounds();
             mappedResults.forEach((p) => bounds.extend(p.position));
             mapRef.current.fitBounds(bounds, { top: 60, right: 60, bottom: 60, left: 60 });
+            window.google.maps.event.addListenerOnce(mapRef.current, 'idle', () => {
+              if (mapRef.current.getZoom() > 12) mapRef.current.setZoom(12);
+            });
           }
         } else {
           setSearchStatus(`No places found for "${query}" in Sri Lanka`);
@@ -1042,11 +1045,13 @@ const SearchResults = ({ user }) => {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleAddAuthenticData(place, 'user');
+                            const slug = place.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+$/, '');
+                            navigate(`/authentic/${slug}`);
                           }}
                           className="popup-add-data-btn"
+                          style={{ background: '#9C27B0' }}
                         >
-                          Add Data
+                          Authentic Data
                         </button>
                       </div>
                     </div>

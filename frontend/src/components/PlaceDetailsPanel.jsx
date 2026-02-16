@@ -31,15 +31,39 @@ const PlaceDetailsPanel = ({ place, onClose, onAddAuthenticData }) => {
   };
 
   const fetchAuthenticDetails = async () => {
-    if (!place.id) return;
-
     setLoading(true);
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/places/google/${place.id}/authentic-details`
-      );
-      setAuthenticUsers(response.data.users || []);
-      setAuthenticBusinesses(response.data.businesses || []);
+      let users = [];
+      let businesses = [];
+
+      // Try by Google Place ID first
+      if (place.id || place.placeId) {
+        const googleId = place.placeId || place.id;
+        const response = await axios.get(
+          `${API_BASE_URL}/places/google/${googleId}/authentic-details`
+        );
+        users = response.data.users || [];
+        businesses = response.data.businesses || [];
+      }
+
+      // Always also try name/coordinate search to find matches from DB
+      if (users.length === 0 && businesses.length === 0) {
+        const params = new URLSearchParams();
+        if (place.name) params.append('name', place.name);
+        if (place.position?.lat) params.append('lat', place.position.lat);
+        else if (place.lat) params.append('lat', place.lat);
+        if (place.position?.lng) params.append('lng', place.position.lng);
+        else if (place.lng) params.append('lng', place.lng);
+
+        const fallback = await axios.get(
+          `${API_BASE_URL}/places/search-authentic?${params.toString()}`
+        );
+        users = fallback.data.users || [];
+        businesses = fallback.data.businesses || [];
+      }
+
+      setAuthenticUsers(users);
+      setAuthenticBusinesses(businesses);
     } catch (error) {
       console.error('Error fetching authentic details:', error);
     } finally {

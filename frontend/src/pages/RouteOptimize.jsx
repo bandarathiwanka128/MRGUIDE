@@ -68,11 +68,14 @@ const RouteOptimize = () => {
 
     if (displayStops.length === 1) {
       mapRef.current.setCenter({ lat: displayStops[0].lat, lng: displayStops[0].lng });
-      mapRef.current.setZoom(14);
+      mapRef.current.setZoom(12);
     } else {
       const bounds = new window.google.maps.LatLngBounds();
       displayStops.forEach(s => bounds.extend({ lat: s.lat, lng: s.lng }));
       mapRef.current.fitBounds(bounds, 60);
+      window.google.maps.event.addListenerOnce(mapRef.current, 'idle', () => {
+        if (mapRef.current.getZoom() > 12) mapRef.current.setZoom(12);
+      });
     }
   }, [stops, optimizedStops, isLoaded, directionsResult]);
 

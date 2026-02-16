@@ -36,17 +36,19 @@ body {
 
 /* Navigation Bar */
 .navbar {
-  background: rgba(26, 41, 66, 0.95);
-  backdrop-filter: blur(20px);
+  background: rgba(11, 17, 32, 0.35);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-  border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+  box-shadow: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   position: sticky;
   top: 0;
   z-index: 1000;
+  transition: background 0.3s ease;
 }
 
 .logo {
@@ -73,11 +75,12 @@ body {
 
 .nav-links a {
   text-decoration: none;
-  color: var(--text-gray);
+  color: rgba(255, 255, 255, 0.9);
   font-weight: 500;
   font-size: 1.05rem;
   transition: all 0.3s ease;
   position: relative;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 .nav-links a::after {
