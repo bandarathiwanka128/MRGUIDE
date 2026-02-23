@@ -1,20 +1,14 @@
 # Frontend Dockerfile
 FROM node:18-alpine
 
-# Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+COPY package*.json .npmrc* ./
 
-# Install dependencies
-RUN npm install
+RUN npm install --no-audit --no-fund
 
-# Copy source code
 COPY . .
 
-# Expose port
 EXPOSE 3000
 
-# Default command for development
 CMD ["npm", "start"]

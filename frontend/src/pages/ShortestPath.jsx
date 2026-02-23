@@ -349,6 +349,7 @@ const ShortestPath = () => {
   };
 
   // Recalculate when travel mode changes (if route active)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (directionsResult && getFullRoute().length >= 2) {
       fetchRouteDirections(getFullRoute());
