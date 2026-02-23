@@ -86,6 +86,97 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Get reviews for a Google Place ID
+router.get('/google/:googlePlaceId/reviews', async (req, res) => {
+  try {
+    const { googlePlaceId } = req.params;
+
+    const place = await Place.findOne({ where: { google_place_id: googlePlaceId } });
+    if (!place) {
+      return res.json({ reviews: [], avgRating: 0, totalCount: 0 });
+    }
+
+    const reviews = await Review.findAll({
+      where: { place_id: place.id },
+      include: [{ model: User, attributes: ['username'] }],
+      order: [['created_at', 'DESC']]
+    });
+
+    const avgRating = reviews.length > 0
+      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+      : 0;
+
+    res.json({
+      reviews,
+      avgRating: parseFloat(avgRating.toFixed(1)),
+      totalCount: reviews.length
+    });
+  } catch (error) {
+    console.error('Error fetching reviews:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Submit review for a Google Place ID (creates Place in DB if needed)
+router.post('/google/:googlePlaceId/reviews', authenticateToken, async (req, res) => {
+  try {
+    const { googlePlaceId } = req.params;
+    const { rating, comment, place_name, place_address, place_lat, place_lng, place_category } = req.body;
+
+    if (!rating || parseInt(rating) < 1 || parseInt(rating) > 5) {
+      return res.status(400).json({ error: 'Rating must be between 1 and 5' });
+    }
+
+    // Find or create the place record
+    let place = await Place.findOne({ where: { google_place_id: googlePlaceId } });
+
+    if (!place) {
+      if (!place_lat || !place_lng) {
+        return res.status(400).json({ error: 'Place coordinates required to create place record' });
+      }
+      place = await Place.create({
+        name: place_name || 'Unknown Place',
+        category: place_category || 'place',
+        latitude: place_lat,
+        longitude: place_lng,
+        address: place_address || '',
+        google_place_id: googlePlaceId,
+        created_by: req.user.id
+      });
+    }
+
+    // Update existing review if user already reviewed this place
+    const existing = await Review.findOne({
+      where: { place_id: place.id, user_id: req.user.id }
+    });
+
+    if (existing) {
+      await existing.update({ rating: parseInt(rating), comment: comment || '' });
+      const updated = await Review.findByPk(existing.id, {
+        include: [{ model: User, attributes: ['username'] }]
+      });
+      return res.json({ review: updated, updated: true });
+    }
+
+    const review = await Review.create({
+      place_id: place.id,
+      user_id: req.user.id,
+      rating: parseInt(rating),
+      comment: comment || '',
+      photos: []
+    });
+
+    const reviewWithUser = await Review.findByPk(review.id, {
+      include: [{ model: User, attributes: ['username'] }]
+    });
+
+    res.status(201).json({ review: reviewWithUser, updated: false });
+  } catch (error) {
+    console.error('Error creating review:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // Get authentic details for a Google Place ID
 router.get('/google/:googlePlaceId/authentic-details', async (req, res) => {
   try {
@@ -197,6 +288,50 @@ router.get('/search-authentic', async (req, res) => {
     });
   } catch (error) {
     console.error('Error searching authentic details:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Get all registered businesses with map coordinates
+router.get('/businesses', async (req, res) => {
+  try {
+    const { query, lat, lng, radius } = req.query;
+
+    const whereCondition = { detail_type: 'business', is_active: true };
+
+    if (query) {
+      whereCondition[Op.or] = [
+        { business_name: { [Op.iLike]: `%${query}%` } },
+        { title: { [Op.iLike]: `%${query}%` } },
+        { description: { [Op.iLike]: `%${query}%` } }
+      ];
+    }
+
+    const businesses = await AuthenticDetail.findAll({
+      where: whereCondition,
+      include: [
+        { model: User, attributes: ['id', 'username', 'email'] },
+        { model: Place, attributes: ['id', 'name', 'latitude', 'longitude', 'address', 'category'] }
+      ],
+      order: [['created_at', 'DESC']]
+    });
+
+    let result = businesses.filter(b => b.Place && b.Place.latitude && b.Place.longitude);
+
+    if (lat && lng && radius) {
+      const r = parseFloat(radius);
+      result = result.filter(b => {
+        const dist = getDistance(
+          { lat: parseFloat(lat), lng: parseFloat(lng) },
+          { lat: parseFloat(b.Place.latitude), lng: parseFloat(b.Place.longitude) }
+        );
+        return dist <= r;
+      });
+    }
+
+    res.json(result);
+  } catch (error) {
+    console.error('Error fetching businesses:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -331,6 +466,7 @@ router.post('/authentic-details', authenticateToken, async (req, res) => {
       phone,
       email,
       website,
+      maps_link,
       packages,
       photos
     } = req.body;
@@ -392,6 +528,7 @@ router.post('/authentic-details', authenticateToken, async (req, res) => {
       phone,
       email,
       website,
+      maps_link: maps_link || null,
       packages: packages || null,
       photos: photos || []
     });

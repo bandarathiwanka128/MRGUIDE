@@ -12,13 +12,10 @@ const SRI_LANKA_CENTER = { lat: 7.8731, lng: 80.7718 };
 const SRI_LANKA_BOUNDS = { south: 5.916, north: 9.835, west: 79.652, east: 81.879 };
 const mapContainerStyle = { width: '100%', height: '100%' };
 
-// Purple marker icon URL for authentic places
-const PURPLE_MARKER_URL =
-  'https://maps.google.com/mapfiles/ms/icons/purple-dot.png';
-
-// Orange marker icon URL for clicked location
-const ORANGE_MARKER_URL =
-  'https://maps.google.com/mapfiles/ms/icons/orange-dot.png';
+// Marker icon URLs
+const PURPLE_MARKER_URL = 'https://maps.google.com/mapfiles/ms/icons/purple-dot.png';
+const ORANGE_MARKER_URL = 'https://maps.google.com/mapfiles/ms/icons/orange-dot.png';
+const BLUE_MARKER_URL   = 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png';
 
 const mapOptions = {
   restriction: {
@@ -137,6 +134,10 @@ const AuthenticSection = ({ user }) => {
   const [authenticPlaces, setAuthenticPlaces] = useState([]);
   const [loadingPlaces, setLoadingPlaces] = useState(false);
 
+  // Registered business markers
+  const [businesses, setBusinesses] = useState([]);
+  const [nearbyBusinesses, setNearbyBusinesses] = useState([]);
+
   // Selected place for details panel
   const [selectedPlace, setSelectedPlace] = useState(null);
 
@@ -154,11 +155,35 @@ const AuthenticSection = ({ user }) => {
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
 
-  // Load existing authentic places on mount
+  // Load existing authentic places and businesses on mount
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchAuthenticPlaces();
+    fetchBusinesses();
   }, []);
+
+  const fetchBusinesses = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/places/businesses`);
+      if (response.data && Array.isArray(response.data)) {
+        setBusinesses(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching businesses:', error);
+    }
+  };
+
+  const fetchNearbyBusinesses = async (lat, lng) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/places/businesses`, {
+        params: { lat, lng, radius: 5 }
+      });
+      setNearbyBusinesses(response.data || []);
+    } catch (error) {
+      console.error('Error fetching nearby businesses:', error);
+      setNearbyBusinesses([]);
+    }
+  };
 
   const fetchAuthenticPlaces = async () => {
     setLoadingPlaces(true);
@@ -294,6 +319,7 @@ const AuthenticSection = ({ user }) => {
         setSelectedPlace(null);
         setPanelMode('add');
         setPanelOpen(true);
+        fetchNearbyBusinesses(lat, lng);
       }
     },
     [reverseGeocode, showModal]
@@ -385,6 +411,7 @@ const AuthenticSection = ({ user }) => {
     setPanelOpen(false);
     // Refresh markers
     fetchAuthenticPlaces();
+    fetchBusinesses();
   };
 
   // Handle closing the side panel
@@ -395,6 +422,7 @@ const AuthenticSection = ({ user }) => {
     setActiveInfoWindow(null);
     setSearchResults([]);
     setSearchQuery('');
+    setNearbyBusinesses([]);
   };
 
   // Search places using Google Places API (textSearch)
@@ -464,6 +492,9 @@ const AuthenticSection = ({ user }) => {
     setSearchResults([]);
     setSearchQuery('');
 
+    // Fetch registered businesses near this location
+    fetchNearbyBusinesses(result.lat, result.lng);
+
     // Pan the map to the selected result
     if (mapRef.current) {
       mapRef.current.panTo({ lat: result.lat, lng: result.lng });
@@ -472,18 +503,9 @@ const AuthenticSection = ({ user }) => {
   };
 
   // Render the side panel content based on state
+  // Note: PlaceDetailsPanel is rendered separately in the root JSX (outside the
+  // transformed .as-side-panel) so that position:fixed works correctly.
   const renderPanelContent = () => {
-    // Details mode: show PlaceDetailsPanel
-    if (panelMode === 'details' && selectedPlace) {
-      return (
-        <PlaceDetailsPanel
-          place={selectedPlace}
-          onClose={handleClosePanel}
-          onAddAuthenticData={handleAddAuthenticData}
-        />
-      );
-    }
-
     // Add mode: different content based on user role
     return (
       <div className="as-panel-inner">
@@ -551,6 +573,55 @@ const AuthenticSection = ({ user }) => {
           <div className="as-geocoding-status">
             <span className="as-spinner" />
             <span>Getting location details...</span>
+          </div>
+        )}
+
+        {/* Nearby registered businesses */}
+        {nearbyBusinesses.length > 0 && (
+          <div className="as-nearby-businesses">
+            <h3 className="as-nearby-biz-title">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="#34699A" style={{ flexShrink: 0 }}>
+                <path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z" />
+              </svg>
+              Registered Businesses Nearby
+            </h3>
+            {nearbyBusinesses.map(biz => (
+              <div
+                key={biz.id}
+                className="as-nearby-biz-card"
+                onClick={() => {
+                  if (!biz.Place) return;
+                  const lat = parseFloat(biz.Place.latitude);
+                  const lng = parseFloat(biz.Place.longitude);
+                  const placeObj = {
+                    id: biz.Place.google_place_id || String(biz.Place.id),
+                    name: biz.business_name || biz.Place.name,
+                    address: biz.Place.address || '',
+                    lat,
+                    lng,
+                  };
+                  setSelectedPlace(placeObj);
+                  setClickedLocation(null);
+                  setPanelMode('details');
+                  if (mapRef.current) {
+                    mapRef.current.panTo({ lat, lng });
+                    mapRef.current.setZoom(16);
+                  }
+                }}
+              >
+                <div className="as-nearby-biz-header">
+                  <span className="as-nearby-biz-name">{biz.business_name || biz.Place?.name}</span>
+                  <span className="as-nearby-biz-badge">Registered</span>
+                </div>
+                {biz.title && <div className="as-nearby-biz-type">{biz.title}</div>}
+                {biz.description && (
+                  <div className="as-nearby-biz-desc">
+                    {biz.description.length > 80 ? biz.description.substring(0, 80) + '...' : biz.description}
+                  </div>
+                )}
+                {biz.phone && <div className="as-nearby-biz-phone">📞 {biz.phone}</div>}
+              </div>
+            ))}
           </div>
         )}
 
@@ -712,7 +783,7 @@ const AuthenticSection = ({ user }) => {
   }
 
   return (
-    <div className="as-container">
+    <div className={`as-container${panelOpen && panelMode === 'details' ? ' detail-panel-open' : ''}`}>
       {/* Map - full screen behind everything */}
       <div className="as-map-area">
         <GoogleMap
@@ -733,6 +804,71 @@ const AuthenticSection = ({ user }) => {
               }}
             />
           )}
+
+          {/* Registered business markers (blue) */}
+          {businesses.map((biz) => {
+            if (!biz.Place) return null;
+            const lat = parseFloat(biz.Place.latitude);
+            const lng = parseFloat(biz.Place.longitude);
+            if (isNaN(lat) || isNaN(lng)) return null;
+            const bizKey = 'biz-' + biz.id;
+            return (
+              <Marker
+                key={bizKey}
+                position={{ lat, lng }}
+                icon={{
+                  url: BLUE_MARKER_URL,
+                  scaledSize: new window.google.maps.Size(38, 38),
+                }}
+                onClick={() => {
+                  const placeObj = {
+                    id: biz.Place.google_place_id || String(biz.Place.id),
+                    name: biz.business_name || biz.Place.name,
+                    address: biz.Place.address || '',
+                    lat,
+                    lng,
+                  };
+                  setSelectedPlace(placeObj);
+                  setClickedLocation(null);
+                  setPanelMode('details');
+                  setPanelOpen(true);
+                  setActiveInfoWindow(bizKey);
+                  if (mapRef.current) {
+                    mapRef.current.panTo({ lat, lng });
+                  }
+                }}
+              >
+                {activeInfoWindow === bizKey && (
+                  <InfoWindow
+                    position={{ lat, lng }}
+                    onCloseClick={() => setActiveInfoWindow(null)}
+                  >
+                    <div style={{ minWidth: '200px' }}>
+                      <strong style={{ fontSize: '1rem', color: '#1565C0' }}>
+                        🏢 {biz.business_name || biz.Place.name}
+                      </strong>
+                      <br />
+                      {biz.title && (
+                        <em style={{ color: '#555', fontSize: '0.85rem' }}>{biz.title}</em>
+                      )}
+                      <br />
+                      <small style={{ color: '#666' }}>{biz.Place.address || ''}</small>
+                      {biz.phone && (
+                        <div style={{ marginTop: '4px', fontSize: '0.85rem' }}>
+                          📞 {biz.phone}
+                        </div>
+                      )}
+                      <div style={{ marginTop: '6px' }}>
+                        <span style={{ background: '#1565C0', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>
+                          Registered Business
+                        </span>
+                      </div>
+                    </div>
+                  </InfoWindow>
+                )}
+              </Marker>
+            );
+          })}
 
           {/* Existing authentic places markers (purple) */}
           {authenticPlaces.map((place) => {
@@ -861,10 +997,21 @@ const AuthenticSection = ({ user }) => {
         )}
       </div>
 
-      {/* Side panel - slides in from left */}
-      <div className={`as-side-panel ${panelOpen ? 'open' : ''}`}>
-        {panelOpen && renderPanelContent()}
+      {/* Side panel - slides in from left (only for add/search mode) */}
+      <div className={`as-side-panel ${panelOpen && panelMode !== 'details' ? 'open' : ''}`}>
+        {panelOpen && panelMode !== 'details' && renderPanelContent()}
       </div>
+
+      {/* Detail panel — rendered outside as-side-panel so position:fixed works
+          correctly (CSS transforms on parent break fixed positioning) */}
+      {panelOpen && panelMode === 'details' && selectedPlace && (
+        <PlaceDetailsPanel
+          place={selectedPlace}
+          user={user}
+          onClose={handleClosePanel}
+          onAddAuthenticData={handleAddAuthenticData}
+        />
+      )}
 
       {/* Floating button to open panel when closed */}
       {!panelOpen && (

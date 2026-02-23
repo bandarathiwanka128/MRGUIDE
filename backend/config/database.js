@@ -131,6 +131,7 @@ const AuthenticDetail = sequelize.define('AuthenticDetail', {
   phone: DataTypes.STRING,
   email: DataTypes.STRING,
   website: DataTypes.STRING,
+  maps_link: DataTypes.STRING,
   packages: DataTypes.JSON,
   photos: DataTypes.ARRAY(DataTypes.STRING),
   verified: {

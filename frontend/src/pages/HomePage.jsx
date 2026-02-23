@@ -28,6 +28,13 @@ const heroSlides = [
   },
 ];
 
+const statsItems = [
+  { icon: '🌴', number: '200+', label: 'Destinations' },
+  { icon: '🗺️', number: 'Smart', label: 'Route Planning' },
+  { icon: '🤖', number: 'AI', label: 'Travel Guide' },
+  { icon: '🏆', number: '100%', label: 'Free Access' },
+];
+
 const examplePrompts = [
   'Best beaches to visit in August',
   'Cultural temples near Kandy',
@@ -123,8 +130,8 @@ const HomePage = () => {
         </svg>
       ),
       path: '/shortest-path',
-      gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      accentColor: '#667eea'
+      gradient: 'linear-gradient(135deg, #34699A 0%, #1e4a75 100%)',
+      accentColor: '#34699A'
     },
     {
       title: 'Trip Planner',
@@ -137,8 +144,8 @@ const HomePage = () => {
         </svg>
       ),
       path: '/trip-planner',
-      gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-      accentColor: '#f5576c'
+      gradient: 'linear-gradient(135deg, #FFCC00 0%, #e6a800 100%)',
+      accentColor: '#FFCC00'
     },
     {
       title: 'Authentic Section',
@@ -150,8 +157,8 @@ const HomePage = () => {
         </svg>
       ),
       path: '/authentic',
-      gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-      accentColor: '#4facfe'
+      gradient: 'linear-gradient(135deg, #4a89c0 0%, #34699A 100%)',
+      accentColor: '#4a89c0'
     },
     {
       title: 'Map Search',
@@ -163,8 +170,8 @@ const HomePage = () => {
         </svg>
       ),
       path: '/search',
-      gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-      accentColor: '#43e97b'
+      gradient: 'linear-gradient(135deg, #34699A 0%, #0D1B2A 100%)',
+      accentColor: '#34699A'
     },
     {
       title: 'Route Optimization',
@@ -175,8 +182,22 @@ const HomePage = () => {
         </svg>
       ),
       path: '/optimize-route',
-      gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-      accentColor: '#fa709a'
+      gradient: 'linear-gradient(135deg, #FFCC00 0%, #34699A 100%)',
+      accentColor: '#FFCC00'
+    },
+    {
+      title: 'Download App',
+      description: 'Take Mr. Guide wherever you go. Available soon on Android and iOS devices.',
+      icon: (
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+          <line x1="12" y1="18" x2="12.01" y2="18"/>
+        </svg>
+      ),
+      path: null,
+      gradient: 'linear-gradient(135deg, #1a2d42 0%, #34699A 100%)',
+      accentColor: '#FFCC00',
+      isDownload: true
     }
   ];
 
@@ -195,6 +216,9 @@ const HomePage = () => {
           ))}
           <div className="hero-overlay" />
         </div>
+
+        {/* Seamless bottom blend into page content */}
+        <div className="hero-bottom-fade" />
 
         <div className="hero-content">
           {/* Rotating caption */}
@@ -262,15 +286,47 @@ const HomePage = () => {
         </div>
       </div>
 
+      {/* ===== Stats Bar ===== */}
+      <div className="stats-bar">
+        {statsItems.map((s, i) => (
+          <div className="stat-pill" key={i}>
+            <span className="stat-pill-icon">{s.icon}</span>
+            <div className="stat-pill-text">
+              <span className="stat-pill-num">{s.number}</span>
+              <span className="stat-pill-label">{s.label}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
       {/* ===== AI Interactive Section ===== */}
       <div className="ai-section">
         <div className="ai-section-inner">
-          <div className="ai-header">
-            <div className="ai-icon-sparkle">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 2L9 12l-7 3 7 3 3 10 3-10 7-3-7-3z"/>
-              </svg>
+
+          {/* Bot Avatar + Greeting */}
+          <div className="bot-wrapper">
+            <div className="bot-top-row">
+              <div className="bot-avatar-container">
+                <span className="bot-ring"></span>
+                <span className="bot-ring ring-2"></span>
+                <div className="bot-avatar-inner">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+                  </svg>
+                </div>
+              </div>
+              <div className="bot-meta">
+                <span className="bot-name">Lanka Guide <span className="bot-ai-badge">AI</span></span>
+                <span className="bot-online"><span className="online-dot"></span>Online · Ready to help</span>
+              </div>
             </div>
+            <div className="bot-bubble">
+              <p>Hello traveller! 🌴 I'm your personal Sri Lanka travel guide. Ask me about must-see temples, pristine beaches, wildlife safaris, best seasons to visit, hidden gems, or local cuisine. I'm here to make your journey unforgettable!</p>
+            </div>
+          </div>
+
+          <div className="ai-header">
             <h2 className="ai-title">What are you looking for?</h2>
             <p className="ai-subtitle">Ask anything about traveling in Sri Lanka</p>
           </div>
@@ -378,31 +434,77 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* ===== Feature Cards ===== */}
-      <div className="features-wrapper">
-        <div className="features-section">
+      {/* ===== Features Section ===== */}
+      <section className="features-section-outer">
+        <div className="features-section-header">
+          <span className="features-eyebrow">WHAT WE OFFER</span>
+          <h2 className="features-title">Key Features</h2>
+          <p className="features-subtitle">
+            Smart tools for every step of your journey — from first search to final destination
+          </p>
+        </div>
+
+        <div className="features-grid">
           {features.map((feature, index) => (
             <div
               key={index}
-              className="feature-card"
-              onClick={() => navigate(feature.path)}
-              style={{ '--card-gradient': feature.gradient, '--card-accent': feature.accentColor }}
+              className={`feature-card${feature.isDownload ? ' download-card' : ''}`}
+              onClick={feature.isDownload ? undefined : () => navigate(feature.path)}
+              style={{
+                '--card-gradient': feature.gradient,
+                '--card-accent': feature.accentColor,
+                '--delay': `${index * 0.1}s`
+              }}
             >
-              <div className="feature-card-glow"></div>
               <div className="feature-icon-wrapper">
                 {feature.icon}
               </div>
               <h3>{feature.title}</h3>
               <p>{feature.description}</p>
-              <div className="feature-arrow">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-                </svg>
-              </div>
+
+              {feature.isDownload ? (
+                <div className="store-buttons">
+                  <a
+                    className="store-btn"
+                    href="#"
+                    onClick={e => { e.stopPropagation(); e.preventDefault(); }}
+                    title="Coming Soon on Google Play"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M3.18 23.76c.37.2.8.22 1.2.05l11.84-6.6-2.9-2.9-10.14 9.45zM20.44 9.23L5.08.87C4.68.63 4.23.6 3.82.79L13.87 11.5 20.44 9.23zM.44 1.85C.16 2.17 0 2.61 0 3.13v17.74c0 .52.16.96.44 1.28l.07.07 9.94-9.94v-.23L.44 1.85zM22.56 11.05l-2.9-1.66-3.02 3.02 3.02 3.02 2.91-1.66c.83-.48.83-1.24-.01-1.72z"/>
+                    </svg>
+                    <span className="store-label">
+                      <small>GET IT ON</small>
+                      <strong>Google Play</strong>
+                    </span>
+                  </a>
+                  <a
+                    className="store-btn"
+                    href="#"
+                    onClick={e => { e.stopPropagation(); e.preventDefault(); }}
+                    title="Coming Soon on App Store"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                    </svg>
+                    <span className="store-label">
+                      <small>DOWNLOAD ON THE</small>
+                      <strong>App Store</strong>
+                    </span>
+                  </a>
+                  <span className="coming-soon-badge">Coming Soon</span>
+                </div>
+              ) : (
+                <div className="feature-arrow">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                  </svg>
+                </div>
+              )}
             </div>
           ))}
         </div>
-      </div>
+      </section>
 
       {/* ===== Footer ===== */}
       <footer className="home-footer">

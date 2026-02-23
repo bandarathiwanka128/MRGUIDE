@@ -371,6 +371,237 @@
   background: #ffc107;
 }
 
+/* ── Map Picker ─────────────────────────────────────────── */
+.map-picker-search-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.map-picker-search-input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: #e0e0e0;
+  font-size: 0.95rem;
+  transition: border-color 0.2s;
+}
+
+.map-picker-search-input:focus {
+  outline: none;
+  border-color: #FFD700;
+}
+
+.map-picker-search-input::placeholder {
+  color: #6a7280;
+}
+
+.map-picker-search-btn {
+  background: linear-gradient(135deg, #FFCC00 0%, #e6a800 100%);
+  border: none;
+  border-radius: 8px;
+  width: 44px;
+  height: 44px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+  flex-shrink: 0;
+}
+
+.map-picker-search-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 204, 0, 0.3);
+}
+
+.map-picker-search-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.map-picker-container {
+  width: 100%;
+  height: 280px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid rgba(255, 215, 0, 0.25);
+  margin-bottom: 12px;
+}
+
+.map-picker-selected {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: rgba(255, 204, 0, 0.08);
+  border: 1px solid rgba(255, 204, 0, 0.3);
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.map-picker-pin-icon {
+  font-size: 1.2rem;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.map-picker-address {
+  color: #e0e0e0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.map-picker-coords {
+  color: #FFCC00;
+  font-size: 0.8rem;
+  font-family: monospace;
+  margin-top: 4px;
+}
+
+.map-picker-hint {
+  color: #6a7280;
+  font-size: 0.85rem;
+  text-align: center;
+  font-style: italic;
+  margin: 8px 0 0;
+}
+
+/* Spinner inside map picker search button */
+.mp-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(10, 25, 41, 0.3);
+  border-top-color: #0a1929;
+  border-radius: 50%;
+  animation: mp-spin 0.7s linear infinite;
+}
+
+@keyframes mp-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Image Link Inputs ──────────────────────────────────── */
+.image-links-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.image-link-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.image-link-input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 215, 0, 0.25);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #e0e0e0;
+  font-size: 0.9rem;
+  transition: border-color 0.2s;
+}
+
+.image-link-input:focus {
+  outline: none;
+  border-color: #FFD700;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.image-link-input::placeholder {
+  color: #6a7280;
+}
+
+.image-link-preview-btn {
+  font-size: 1rem;
+  text-decoration: none;
+  background: rgba(52, 105, 154, 0.3);
+  border: 1px solid rgba(52, 105, 154, 0.5);
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.image-link-preview-btn:hover {
+  background: rgba(52, 105, 154, 0.6);
+}
+
+.image-link-remove-btn {
+  background: rgba(244, 67, 54, 0.2);
+  border: 1px solid rgba(244, 67, 54, 0.5);
+  color: #f44336;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.image-link-remove-btn:hover {
+  background: #f44336;
+  color: white;
+}
+
+.add-image-link-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px dashed rgba(255, 215, 0, 0.3);
+  color: #FFCC00;
+  border-radius: 8px;
+  padding: 9px 16px;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  width: 100%;
+  text-align: center;
+}
+
+.add-image-link-btn:hover {
+  background: rgba(255, 204, 0, 0.08);
+  border-color: #FFCC00;
+}
+
+/* ── Google Maps Link Field ─────────────────────────────── */
+.maps-link-label-icon {
+  margin-right: 4px;
+}
+
+.label-optional {
+  color: #6a7280;
+  font-size: 0.82rem;
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+.input-hint {
+  color: #6a7280;
+  font-size: 0.8rem;
+  margin: 4px 0 0;
+  font-style: italic;
+}
+
+/* Widen modal for business map picker */
+.modal-container {
+  max-width: 680px;
+}
+
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
   .modal-container {

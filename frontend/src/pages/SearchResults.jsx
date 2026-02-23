@@ -562,7 +562,7 @@ const SearchResults = ({ user }) => {
   }
 
   return (
-    <div className="search-results-container">
+    <div className={`search-results-container${showDetailsPanel ? ' detail-panel-open' : ''}`}>
       {/* Sidebar - Dark Theme */}
       <div className="results-sidebar">
         {/* Search Header */}
@@ -772,46 +772,105 @@ const SearchResults = ({ user }) => {
                 )
               : null;
 
+            let photoUrl = null;
+            try {
+              if (place.photos && place.photos.length > 0 && place.photos[0].getUrl) {
+                photoUrl = place.photos[0].getUrl({ maxWidth: 400, maxHeight: 180 });
+              }
+            } catch (e) { /* no photo */ }
+
+            const isSelected = selectedPlace?.id === place.id;
+
             return (
               <div
                 key={place.id}
-                className={`place-result-card ${selectedPlace?.id === place.id ? 'selected' : ''}`}
-                onClick={() => getDirections(place)}
+                className={`place-photo-card ${isSelected ? 'selected' : ''}`}
               >
-                <div className="place-number">{index + 1}</div>
-                <div className="place-details">
-                  <h4 className="place-name">{place.name}</h4>
-                  <p className="place-address">{place.address}</p>
-                  <div className="place-meta">
-                    {place.rating && renderStars(place.rating)}
-                    {place.priceLevel !== null && renderPriceLevel(place.priceLevel)}
-                    {place.type && (
-                      <span className="place-type">
-                        {place.type.replace(/_/g, ' ')}
-                      </span>
+                {/* Photo section */}
+                <div className="place-photo-wrap" onClick={() => handleMarkerDetails(place)}>
+                  {photoUrl ? (
+                    <img src={photoUrl} alt={place.name} className="place-photo-img" />
+                  ) : (
+                    <div className="place-photo-fallback">
+                      <svg viewBox="0 0 24 24" width="36" height="36" fill="currentColor">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                      </svg>
+                    </div>
+                  )}
+                  <div className="place-photo-number">{index + 1}</div>
+                  {place.openNow !== null && (
+                    <div className={`place-photo-status ${place.openNow ? 'open' : 'closed'}`}>
+                      {place.openNow ? 'Open' : 'Closed'}
+                    </div>
+                  )}
+                </div>
+
+                {/* Card body */}
+                <div className="place-card-body">
+                  <h4 className="place-card-name" onClick={() => handleMarkerDetails(place)}>
+                    {place.name}
+                  </h4>
+                  <p className="place-card-address">{place.address}</p>
+
+                  {/* Star rating */}
+                  {place.rating ? (
+                    <div className="place-card-stars">
+                      <div className="star-row">
+                        {[1,2,3,4,5].map(i => (
+                          <span key={i} className={`pcard-star ${i <= Math.floor(place.rating) ? 'full' : place.rating - Math.floor(place.rating) >= 0.5 && i === Math.ceil(place.rating) ? 'half' : 'empty'}`}>★</span>
+                        ))}
+                      </div>
+                      <span className="star-value">{place.rating.toFixed(1)}</span>
+                      {place.userRatingsTotal > 0 && (
+                        <span className="star-count">· {place.userRatingsTotal.toLocaleString()}</span>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="place-card-no-rating">No rating yet</div>
+                  )}
+
+                  {/* Meta badges */}
+                  <div className="place-card-badges">
+                    {place.type && place.type !== 'point_of_interest' && (
+                      <span className="place-badge type-badge">{place.type.replace(/_/g, ' ')}</span>
                     )}
                     {distance && (
-                      <span className="place-distance">{'\uD83D\uDCCD'} {distance} km</span>
+                      <span className="place-badge dist-badge">{distance} km</span>
                     )}
-                    {place.openNow !== null && (
-                      <span
-                        style={{
-                          color: place.openNow ? '#69F0AE' : '#f44336',
-                          fontSize: '0.8rem',
-                          fontWeight: 600,
-                        }}
-                      >
-                        {place.openNow ? 'Open Now' : 'Closed'}
-                      </span>
+                    {place.priceLevel !== null && place.priceLevel !== undefined && (
+                      <span className="place-badge price-badge">{'$'.repeat(place.priceLevel + 1)}</span>
                     )}
                   </div>
+
+                  {/* Action buttons */}
+                  <div className="place-card-actions">
+                    <button
+                      className="pcard-dir-btn"
+                      onClick={() => getDirections(place)}
+                      disabled={loading && isSelected}
+                    >
+                      {loading && isSelected ? (
+                        <span className="btn-spin">...</span>
+                      ) : (
+                        <>
+                          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                            <path d="M21.71 11.29l-9-9a1 1 0 00-1.42 0l-9 9a1 1 0 000 1.42l9 9a1 1 0 001.42 0l9-9a1 1 0 000-1.42zM14 14.5V12h-4v3H8v-4a1 1 0 011-1h5V7.5l3.5 3.5-3.5 3.5z"/>
+                          </svg>
+                          Directions
+                        </>
+                      )}
+                    </button>
+                    <button
+                      className="pcard-det-btn"
+                      onClick={() => handleMarkerDetails(place)}
+                    >
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                      </svg>
+                      Reviews &amp; Info
+                    </button>
+                  </div>
                 </div>
-                <button
-                  className="get-directions-btn"
-                  disabled={loading && selectedPlace?.id === place.id}
-                >
-                  {loading && selectedPlace?.id === place.id ? '...' : '\u2192'}
-                </button>
               </div>
             );
           })}
@@ -1080,18 +1139,17 @@ const SearchResults = ({ user }) => {
         </GoogleMap>
       </div>
 
-      {/* Place Details Panel */}
+      {/* Place Details Panel — fixed right sidebar */}
       {showDetailsPanel && detailsPanelPlace && (
-        <div className="details-panel-overlay">
-          <PlaceDetailsPanel
-            place={detailsPanelPlace}
-            onClose={() => {
-              setShowDetailsPanel(false);
-              setDetailsPanelPlace(null);
-            }}
-            onAddAuthenticData={handleAddAuthenticData}
-          />
-        </div>
+        <PlaceDetailsPanel
+          place={detailsPanelPlace}
+          user={user}
+          onClose={() => {
+            setShowDetailsPanel(false);
+            setDetailsPanelPlace(null);
+          }}
+          onAddAuthenticData={handleAddAuthenticData}
+        />
       )}
 
       {/* Add Authentic Data Modal */}

@@ -57,9 +57,8 @@ const TripPlanner = ({ user }) => {
   const [directionsResponse, setDirectionsResponse] = useState(null);
   const [routeInfo, setRouteInfo] = useState(null);
 
-  // Weather
+  // Weather (auto-fetched inside AI suggestions)
   const [weatherData, setWeatherData] = useState({});
-  const [weatherLoading, setWeatherLoading] = useState(false);
 
   // AI Suggestions
   const [aiSuggestions, setAiSuggestions] = useState('');
@@ -84,6 +83,7 @@ const TripPlanner = ({ user }) => {
   const nextIdRef = useRef(1);
   const sidebarRef = useRef(null);
   const containerRef = useRef(null);
+  const scrollAreaRef = useRef(null);
 
   // Generate a unique ID for each destination
   const generateId = () => {
@@ -145,6 +145,36 @@ const TripPlanner = ({ user }) => {
       fetchSavedTrips();
     }
   }, [user]);
+
+  // renderAiContent: parse markdown-ish AI text into styled JSX
+  const renderAiContent = (text) => {
+    return text.split('\n').map((line, i) => {
+      if (!line.trim()) return null;
+      if (line.startsWith('## ') || line.startsWith('# ')) {
+        return (
+          <div key={i} className="tp-ai-section-header">
+            {line.replace(/^#+\s/, '')}
+          </div>
+        );
+      }
+      if (line.match(/^\*\*(.+)\*\*$/) || (line.startsWith('**') && line.endsWith('**'))) {
+        return <p key={i} className="tp-ai-bold">{line.replace(/\*\*/g, '')}</p>;
+      }
+      if (line.startsWith('- ') || line.startsWith('* ')) {
+        const content = line.replace(/^[-*]\s/, '').replace(/\*\*(.+?)\*\*/g, '$1');
+        return (
+          <div key={i} className="tp-ai-bullet-item">
+            <span className="tp-ai-bullet-dot">▸</span>
+            <span>{content}</span>
+          </div>
+        );
+      }
+      if (/^\d+\.\s/.test(line)) {
+        return <p key={i} className="tp-ai-numbered">{line.replace(/\*\*(.+?)\*\*/g, '$1')}</p>;
+      }
+      return <p key={i} className="tp-ai-line">{line.replace(/\*\*(.+?)\*\*/g, '$1')}</p>;
+    });
+  };
 
   // Auto-calculate route when destinations or travel mode change
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -442,61 +472,29 @@ const TripPlanner = ({ user }) => {
     return mins > 0 ? `${hours} hr ${mins} min` : `${hours} hr`;
   };
 
-  // Fetch weather for all destinations
-  const fetchWeather = async () => {
-    if (destinations.length === 0) {
-      showStatus('Add destinations first to get weather.', 'error');
-      return;
-    }
-
-    setWeatherLoading(true);
-    showStatus('Fetching weather data...', 'info');
-
+  // Internal: fetch weather silently and return map
+  const fetchWeatherSilent = async (dests) => {
     try {
-      const locationsPayload = destinations.map((d) => ({
-        lat: d.lat,
-        lng: d.lng,
-        name: d.name
-      }));
-
       const response = await axios.post(`${API_BASE_URL}/weather/multi`, {
-        locations: locationsPayload
+        locations: dests.map((d) => ({ lat: d.lat, lng: d.lng, name: d.name }))
       });
-
-      if (response.data && response.data.weather) {
-        const weatherMap = {};
-        response.data.weather.forEach((w) => {
-          weatherMap[w.name] = {
-            temp: w.temp,
-            description: w.description,
-            icon: w.icon
-          };
-        });
-        setWeatherData(weatherMap);
-        showStatus('Weather data loaded.', 'success');
-      } else if (response.data && Array.isArray(response.data)) {
-        const weatherMap = {};
-        response.data.forEach((w) => {
-          weatherMap[w.name] = {
-            temp: w.temp,
-            description: w.description,
-            icon: w.icon
-          };
-        });
-        setWeatherData(weatherMap);
-        showStatus('Weather data loaded.', 'success');
-      } else {
-        showStatus('Weather data format unexpected.', 'error');
-      }
-    } catch (error) {
-      console.error('Weather fetch error:', error);
-      showStatus('Failed to fetch weather data.', 'error');
-    } finally {
-      setWeatherLoading(false);
+      const list = Array.isArray(response.data)
+        ? response.data
+        : response.data?.weather || [];
+      const map = {};
+      list.forEach((w) => {
+        if (w.status !== 'error') {
+          map[w.name] = { temp: w.temp, description: w.description, icon: w.icon, humidity: w.humidity };
+        }
+      });
+      setWeatherData(map);
+      return map;
+    } catch {
+      return {};
     }
   };
 
-  // Fetch AI suggestions
+  // Fetch AI suggestions (auto-fetches weather + hotel context)
   const fetchAiSuggestions = async () => {
     if (!user) {
       showStatus('Please log in to get AI suggestions.', 'error');
@@ -509,7 +507,10 @@ const TripPlanner = ({ user }) => {
 
     setAiLoading(true);
     setAiSuggestions('');
-    showStatus('Getting AI suggestions...', 'info');
+    showStatus('Fetching weather & generating AI plan...', 'info');
+
+    // Step 1: silently get weather
+    const weather = await fetchWeatherSilent(destinations);
 
     try {
       const token = localStorage.getItem('token');
@@ -519,22 +520,20 @@ const TripPlanner = ({ user }) => {
           destinations: destinations.map((d) => ({ lat: d.lat, lng: d.lng, name: d.name })),
           travel_mode: travelMode,
           start_date: startDate,
-          end_date: endDate
+          end_date: endDate,
+          weather_data: weather
         },
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      if (response.data && response.data.suggestions) {
-        setAiSuggestions(response.data.suggestions);
-        showStatus('AI suggestions loaded.', 'success');
-      } else if (response.data && typeof response.data === 'string') {
-        setAiSuggestions(response.data);
-        showStatus('AI suggestions loaded.', 'success');
-      } else if (response.data && response.data.message) {
-        setAiSuggestions(response.data.message);
-        showStatus('AI suggestions loaded.', 'success');
+      const text =
+        response.data?.suggestions ||
+        (typeof response.data === 'string' ? response.data : null) ||
+        response.data?.message;
+
+      if (text) {
+        setAiSuggestions(text);
+        showStatus('AI plan ready!', 'success');
       } else {
         showStatus('No suggestions received.', 'error');
       }
@@ -824,7 +823,7 @@ const TripPlanner = ({ user }) => {
         </div>
 
         {/* Scrollable content area */}
-        <div className="tp-scroll-area">
+        <div className="tp-scroll-area" ref={scrollAreaRef}>
           {/* Destinations list */}
           <div className="tp-destinations-list">
             {destinations.length === 0 && (
@@ -926,66 +925,6 @@ const TripPlanner = ({ user }) => {
             </div>
           )}
 
-          {/* Action buttons */}
-          <div className="tp-actions-section">
-            <button
-              className="tp-weather-btn"
-              onClick={fetchWeather}
-              disabled={weatherLoading || destinations.length === 0}
-            >
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 18H6c-2.21 0-4-1.79-4-4s1.79-4 4-4h.71C7.37 7.69 9.48 6 12 6c3.04 0 5.5 2.46 5.5 5.5v.5H19c1.66 0 3 1.34 3 3s-1.34 3-3 3z" />
-              </svg>
-              {weatherLoading ? 'Loading...' : 'Get Weather'}
-            </button>
-
-            <button
-              className="tp-ai-btn"
-              onClick={fetchAiSuggestions}
-              disabled={aiLoading || destinations.length === 0}
-            >
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" />
-              </svg>
-              {aiLoading ? 'Thinking...' : 'Get AI Suggestions'}
-            </button>
-
-            <button
-              className="tp-save-btn"
-              onClick={saveTrip}
-              disabled={saving || destinations.length === 0}
-            >
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                <path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z" />
-              </svg>
-              {saving ? 'Saving...' : 'Save Trip'}
-            </button>
-          </div>
-
-          {/* AI Suggestions card */}
-          {aiSuggestions && (
-            <div className="tp-ai-card">
-              <div className="tp-ai-card-header">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                  <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z" />
-                </svg>
-                <h4 className="tp-ai-card-title">AI Suggestions</h4>
-                <button className="tp-ai-close" onClick={() => setAiSuggestions('')}>
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-                  </svg>
-                </button>
-              </div>
-              <div className="tp-ai-card-body">
-                {aiSuggestions.split('\n').map((line, i) => (
-                  <p key={i} className="tp-ai-line">
-                    {line}
-                  </p>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* My Trips section */}
           <div className="tp-trips-section">
             <h3 className="tp-trips-title">
@@ -1054,6 +993,42 @@ const TripPlanner = ({ user }) => {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Action buttons - always visible at bottom of sidebar */}
+        <div className="tp-actions-section">
+          <button
+            className="tp-ai-btn"
+            onClick={fetchAiSuggestions}
+            disabled={aiLoading || destinations.length === 0}
+          >
+            {aiLoading ? (
+              <>
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" className="tp-spin">
+                  <path d="M12 4V2A10 10 0 0 0 2 12h2a8 8 0 0 1 8-8z" />
+                </svg>
+                Analysing weather &amp; planning...
+              </>
+            ) : (
+              <>
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                  <path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/>
+                </svg>
+                Get AI Suggestions
+              </>
+            )}
+          </button>
+
+          <button
+            className="tp-save-btn"
+            onClick={saveTrip}
+            disabled={saving || destinations.length === 0}
+          >
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+              <path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z" />
+            </svg>
+            {saving ? 'Saving...' : 'Save Trip'}
+          </button>
         </div>
       </div>
 
@@ -1232,6 +1207,90 @@ const TripPlanner = ({ user }) => {
           })()}
         </GoogleMap>
       </div>
+
+      {/* ── AI Suggestions Full Overlay ── */}
+      {(aiLoading || aiSuggestions) && (
+        <div
+          className="tp-ai-overlay"
+          onClick={(e) => { if (e.target === e.currentTarget && !aiLoading) setAiSuggestions(''); }}
+        >
+          <div className="tp-ai-panel">
+            {/* Header */}
+            <div className="tp-ai-panel-header">
+              <div className="tp-ai-panel-title-row">
+                <div className="tp-ai-panel-icon">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="#0a1929">
+                    <path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="tp-ai-panel-heading">AI Travel Plan</h2>
+                  <p className="tp-ai-panel-route">
+                    {destinations.map(d => d.name).join(' → ')}
+                    {routeInfo ? ` • ${routeInfo.distance} km • ${formatDuration(routeInfo.duration)}` : ''}
+                  </p>
+                </div>
+              </div>
+              {!aiLoading && (
+                <button className="tp-ai-panel-close" onClick={() => setAiSuggestions('')} title="Close">
+                  ×
+                </button>
+              )}
+            </div>
+
+            {aiLoading ? (
+              /* Loading state */
+              <div className="tp-ai-loading-state">
+                <div className="tp-ai-spinner" />
+                <p className="tp-ai-loading-text">Analysing weather &amp; generating your travel plan...</p>
+                <p className="tp-ai-loading-sub">Checking hotels, routes, and local conditions</p>
+              </div>
+            ) : (
+              <>
+                {/* Weather strip */}
+                {Object.keys(weatherData).length > 0 && (
+                  <div className="tp-ai-weather-strip">
+                    {Object.entries(weatherData).map(([name, w]) => (
+                      <div key={name} className="tp-ai-weather-item">
+                        {w.icon && (
+                          <img
+                            src={`https://openweathermap.org/img/wn/${w.icon}@2x.png`}
+                            alt={w.description}
+                            className="tp-ai-weather-icon"
+                          />
+                        )}
+                        <div className="tp-ai-weather-details">
+                          <span className="tp-ai-weather-name">{name}</span>
+                          <span className="tp-ai-weather-temp">{Math.round(w.temp)}°C</span>
+                          <span className="tp-ai-weather-desc">{w.description}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* AI Content Body */}
+                <div className="tp-ai-panel-body">
+                  {renderAiContent(aiSuggestions)}
+                </div>
+
+                {/* Footer */}
+                <div className="tp-ai-panel-footer">
+                  <button className="tp-ai-panel-close-btn" onClick={() => setAiSuggestions('')}>
+                    Close
+                  </button>
+                  <button className="tp-ai-panel-save-btn" onClick={saveTrip} disabled={saving}>
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style={{ marginRight: 6 }}>
+                      <path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z" />
+                    </svg>
+                    {saving ? 'Saving...' : 'Save This Trip'}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
