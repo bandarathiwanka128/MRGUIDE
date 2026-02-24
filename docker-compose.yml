@@ -14,7 +14,7 @@ services:
       - DATABASE_URL=postgresql://neondb_owner:npg_gt4v8hsEdzXe@ep-billowing-leaf-a1fvwa7a-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
       - JWT_SECRET=your_jwt_secret_change_in_production
       - CORS_ORIGIN=http://localhost:3000
-      - GEMINI_API_KEY=AIzaSyBpJirs99Mu1h67g700aLfLeSpony1vPCg
+      - GEMINI_API_KEY=AIzaSyCDZZ5H4xfiNcdVYFwxOTMvi0O4P2axjuk
     volumes:
       - ./backend:/app
       - /app/node_modules

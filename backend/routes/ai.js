@@ -14,9 +14,9 @@ if (!GEMINI_API_KEY) {
 
 // Models to try in order (fallback chain)
 const GEMINI_MODELS = [
-  'gemini-2.5-flash',
   'gemini-1.5-flash',
-  'gemini-2.0-flash',
+  'gemini-1.5-pro',
+  'gemini-1.0-pro',
 ];
 const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 
@@ -267,20 +267,12 @@ Be specific with real hotel names, real attractions, and realistic Sri Lanka pri
     const suggestions = await callGemini(prompt);
     res.json({ suggestions });
   } catch (error) {
-    const status = error.response?.status;
     console.error('AI trip suggestions error:', error.response?.data || error.message);
-    
-    // Return fallback data when API is down
-    if (status === 429 || status >= 500) {
-      console.warn('⚠️ Gemini quota exhausted - returning fallback suggestions');
-      return res.json({ 
-        suggestions: FALLBACK_TRIP_SUGGESTIONS,
-        fallback: true,
-        note: 'Using demo data - Gemini API currently unavailable'
-      });
-    }
-    
-    res.status(500).json({ error: 'Failed to generate AI suggestions. Using demo mode.' });
+    return res.json({
+      suggestions: FALLBACK_TRIP_SUGGESTIONS,
+      fallback: true,
+      note: 'Using demo data - Gemini API currently unavailable'
+    });
   }
 });
 
@@ -298,23 +290,10 @@ router.post('/place-info', async (req, res) => {
     const info = await callGemini(prompt);
     res.json({ info });
   } catch (error) {
-    const status = error.response?.status;
     console.error('AI place info error:', error.response?.data || error.message);
-    
-    // Return fallback data when API is down
     const placeName = req.body.name || 'Unknown';
     const fallbackInfo = FALLBACK_PLACE_INFO[placeName] || FALLBACK_PLACE_INFO['Sigiriya'];
-    
-    if (status === 429 || status >= 500) {
-      console.warn('⚠️ Gemini quota exhausted - returning fallback place info');
-      return res.json({ 
-        info: fallbackInfo,
-        fallback: true,
-        note: 'Using demo data - Gemini API currently unavailable'
-      });
-    }
-    
-    res.status(500).json({ error: 'Failed to generate place info. Using demo mode.' });
+    return res.json({ info: fallbackInfo, fallback: true });
   }
 });
 
@@ -350,20 +329,8 @@ Keep it practical and specific to Sri Lanka. Format with markdown headers.`;
     const tips = await callGemini(prompt);
     res.json({ tips });
   } catch (error) {
-    const status = error.response?.status;
     console.error('AI route tips error:', error.response?.data || error.message);
-    
-    // Return fallback data when API is down
-    if (status === 429 || status >= 500) {
-      console.warn('⚠️ Gemini quota exhausted - returning fallback route tips');
-      return res.json({ 
-        tips: FALLBACK_ROUTE_TIPS,
-        fallback: true,
-        note: 'Using demo data - Gemini API currently unavailable'
-      });
-    }
-    
-    res.status(500).json({ error: 'Failed to generate route tips. Using demo mode.' });
+    return res.json({ tips: FALLBACK_ROUTE_TIPS, fallback: true });
   }
 });
 
