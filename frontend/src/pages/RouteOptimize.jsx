@@ -45,6 +45,8 @@ const RouteOptimize = () => {
   const [showComparison, setShowComparison] = useState(false);
   const [selectedMarker, setSelectedMarker] = useState(null);
   const [placeDetails, setPlaceDetails] = useState({});
+  const [aiTips, setAiTips] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
 
   const mapRef = useRef(null);
   const placesServiceRef = useRef(null);
@@ -437,6 +439,26 @@ const RouteOptimize = () => {
     }
   };
 
+  const fetchAiTips = async () => {
+    const activeStops = optimizedStops || stops;
+    if (activeStops.length === 0) return;
+    setAiLoading(true);
+    setAiTips('');
+    try {
+      const res = await axios.post(`${API_BASE_URL}/ai/route-tips`, {
+        stops: activeStops.map(s => ({ name: s.name })),
+        travelMode,
+        totalDistance: routeInfo?.distance,
+        totalDuration: routeInfo?.duration
+      });
+      setAiTips(res.data.tips || '');
+    } catch (err) {
+      setAiTips('Failed to get AI tips. Please try again.');
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   if (!isLoaded) {
     return (
       <div className="ro-container">
@@ -625,6 +647,46 @@ const RouteOptimize = () => {
                 <span className="ro-stat-label">stops</span>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* AI Tips button — show when route is calculated */}
+        {routeInfo && (displayStops.length > 1) && (
+          <div className="ro-ai-section">
+            <button
+              className="ro-ai-btn"
+              onClick={fetchAiTips}
+              disabled={aiLoading}
+            >
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"/>
+              </svg>
+              {aiLoading ? 'Getting AI Tips...' : 'Get AI Travel Tips'}
+            </button>
+
+            {aiTips && (
+              <div className="ro-ai-card">
+                <div className="ro-ai-card-header">
+                  <span>AI Travel Tips</span>
+                  <button className="ro-ai-close" onClick={() => setAiTips('')}>×</button>
+                </div>
+                <div className="ro-ai-body">
+                  {aiTips.split('\n').map((line, i) => {
+                    if (!line.trim()) return null;
+                    if (line.startsWith('## ') || line.startsWith('# ')) {
+                      return <h4 key={i} className="ro-ai-heading">{line.replace(/^#+\s/, '')}</h4>;
+                    }
+                    if (line.startsWith('**') && line.endsWith('**')) {
+                      return <p key={i} className="ro-ai-bold">{line.replace(/\*\*/g, '')}</p>;
+                    }
+                    if (line.startsWith('- ') || line.startsWith('* ')) {
+                      return <p key={i} className="ro-ai-bullet">• {line.replace(/^[-*]\s/, '')}</p>;
+                    }
+                    return <p key={i} className="ro-ai-line">{line.replace(/\*\*/g, '')}</p>;
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

@@ -47,7 +47,13 @@
       "Bash(\"/c/Program Files/Docker/Docker/resources/bin/docker.exe\" exec:*)",
       "Bash(\"/c/Program Files/Docker/Docker/resources/bin/docker.exe\" exec mrguide-db psql -U postgres -d mrguide -c \"SELECT count\\(*\\) FROM places; SELECT count\\(*\\) FROM authentic_details; SELECT count\\(*\\) FROM authentic_profiles;\")",
       "Bash(\"/c/Program Files/Docker/Docker/resources/bin/docker.exe\" compose -f d:/mr-guide/docker-compose.yml down -v --remove-orphans)",
-      "Bash(\"/c/Program Files/Docker/Docker/resources/bin/docker.exe\" logs mrguide-backend --tail 15)"
+      "Bash(\"/c/Program Files/Docker/Docker/resources/bin/docker.exe\" logs mrguide-backend --tail 15)",
+      "Bash(\"C:/Program Files/Docker/Docker/resources/bin/docker.exe\" restart:*)",
+      "Bash(sleep 5 && \"C:/Program Files/Docker/Docker/resources/bin/docker.exe\" logs mrguide-backend --tail 20 2>&1)",
+      "Bash(sleep 8 && \"C:/Program Files/Docker/Docker/resources/bin/docker.exe\" logs mrguide-backend --tail 10 2>&1)",
+      "Bash(docker ps:*)",
+      "Bash(tasklist:*)",
+      "Bash(GEMINI_API_KEY=AIzaSyClCmwyTbqp4DadfzQxw_Hf0qGW97rRoEk node -e \":*)"
     ],
     "deny": [],
     "ask": []

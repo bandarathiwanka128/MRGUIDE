@@ -13,7 +13,11 @@
     "migrate": "sequelize db:migrate",
     "seed": "sequelize db:seed:all"
   },
-  "keywords": ["api", "express", "postgresql"],
+  "keywords": [
+    "api",
+    "express",
+    "postgresql"
+  ],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
@@ -27,6 +31,8 @@
     "express": "^5.1.0",
     "express-validator": "^7.2.1",
     "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.2",
+    "node-cache": "^5.1.2",
     "pg": "^8.16.3",
     "sequelize": "^6.37.7"
   },

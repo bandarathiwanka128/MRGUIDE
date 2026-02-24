@@ -25,6 +25,21 @@
   right: 0;
   bottom: 0;
   z-index: 1;
+  transition: right 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+              bottom 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* When detail panel is open: shrink map so it isn't covered */
+.as-container.detail-panel-open .as-map-area {
+  right: 360px;
+}
+
+/* Mobile: detail panel is a bottom sheet — map shrinks upward */
+@media (max-width: 768px) {
+  .as-container.detail-panel-open .as-map-area {
+    right: 0;
+    bottom: 70vh;
+  }
 }
 
 .as-map-loading {
@@ -737,4 +752,97 @@
     padding: 10px 16px;
     font-size: 0.82rem;
   }
+}
+
+/* =========================================
+   Nearby Businesses Section
+   ========================================= */
+.as-nearby-businesses {
+  padding: 16px 20px;
+  border-top: 1px solid rgba(52, 105, 154, 0.3);
+  border-bottom: 1px solid rgba(52, 105, 154, 0.2);
+  background: rgba(52, 105, 154, 0.05);
+}
+
+.as-nearby-biz-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #34699A;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.as-nearby-biz-card {
+  background: rgba(52, 105, 154, 0.12);
+  border: 1px solid rgba(52, 105, 154, 0.3);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s, border-color 0.2s;
+}
+
+.as-nearby-biz-card:last-child {
+  margin-bottom: 0;
+}
+
+.as-nearby-biz-card:hover {
+  background: rgba(52, 105, 154, 0.22);
+  border-color: #34699A;
+  transform: translateY(-1px);
+}
+
+.as-nearby-biz-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.as-nearby-biz-name {
+  color: #e0e8f4;
+  font-weight: 600;
+  font-size: 0.95rem;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.as-nearby-biz-badge {
+  background: #34699A;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.as-nearby-biz-type {
+  color: #FFCC00;
+  font-size: 0.8rem;
+  font-style: italic;
+  margin-bottom: 4px;
+}
+
+.as-nearby-biz-desc {
+  color: #94a3b8;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  margin-bottom: 4px;
+}
+
+.as-nearby-biz-phone {
+  color: #7ab3d8;
+  font-size: 0.82rem;
+  margin-top: 4px;
 }
