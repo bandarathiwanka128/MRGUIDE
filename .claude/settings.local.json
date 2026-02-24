@@ -52,7 +52,8 @@
       "Bash(sleep 5 && \"C:/Program Files/Docker/Docker/resources/bin/docker.exe\" logs mrguide-backend --tail 20 2>&1)",
       "Bash(sleep 8 && \"C:/Program Files/Docker/Docker/resources/bin/docker.exe\" logs mrguide-backend --tail 10 2>&1)",
       "Bash(docker ps:*)",
-      "Bash(tasklist:*)"
+      "Bash(tasklist:*)",
+      "Bash(GEMINI_API_KEY=AIzaSyClCmwyTbqp4DadfzQxw_Hf0qGW97rRoEk node -e \":*)"
     ],
     "deny": [],
     "ask": []

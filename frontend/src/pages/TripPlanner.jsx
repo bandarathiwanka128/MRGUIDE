@@ -209,7 +209,7 @@ const TripPlanner = ({ user }) => {
   }, [destinations, directionsResponse]);
 
   // Fetch saved trips
-  const fetchSavedTrips = async () => {
+  const fetchSavedTrips = useCallback(async () => {
     if (!user) return;
     setTripsLoading(true);
     try {
@@ -223,7 +223,7 @@ const TripPlanner = ({ user }) => {
     } finally {
       setTripsLoading(false);
     }
-  };
+  }, [user]);
 
   // Search places using Google Places textSearch
   const searchPlaces = useCallback(async (query) => {
@@ -523,7 +523,7 @@ const TripPlanner = ({ user }) => {
           end_date: endDate,
           weather_data: weather
         },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` }, timeout: 120000 }
       );
 
       const text =
@@ -537,12 +537,31 @@ const TripPlanner = ({ user }) => {
       } else {
         showStatus('No suggestions received.', 'error');
       }
+      setAiLoading(false);
     } catch (error) {
       console.error('AI suggestions error:', error);
+      const status = error.response?.status;
+      if (status === 429) {
+        // Keep button disabled during entire countdown — do NOT call setAiLoading(false) here
+        let secs = 60;
+        showStatus(`AI rate limited. Auto-retrying in ${secs}s...`, 'error');
+        const interval = setInterval(() => {
+          secs--;
+          if (secs > 0) {
+            showStatus(`AI rate limited. Auto-retrying in ${secs}s...`, 'error');
+          } else {
+            clearInterval(interval);
+          }
+        }, 1000);
+        setTimeout(() => {
+          clearInterval(interval);
+          fetchAiSuggestions(); // retry — aiLoading is still true so button stays disabled
+        }, 60000);
+        return; // skip setAiLoading(false) — finally removed below
+      }
       const msg =
         error.response?.data?.error || error.response?.data?.message || 'Failed to get AI suggestions.';
       showStatus(msg, 'error');
-    } finally {
       setAiLoading(false);
     }
   };
