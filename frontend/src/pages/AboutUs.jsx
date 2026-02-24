@@ -9,10 +9,12 @@ const AboutUs = () => {
         <p>Your trusted companion in discovering amazing places</p>
       </div>
 
+
       <div className="about-content">
         <section className="mission-section">
           <h2>Our Mission</h2>
           <p>
+
             At Mr. Guide, we revolutionize travel planning by combining intelligent route
             optimization with authentic local knowledge. Our platform helps travelers discover
             hidden gems, plan efficient routes, and make informed decisions based on verified
