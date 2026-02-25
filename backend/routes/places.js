@@ -1,5 +1,5 @@
 const express = require('express');
-const { Place, Review, AuthenticDetail, User } = require('../config/database');
+const { Place, Review, AuthenticDetail, User, AuthenticProfile } = require('../config/database');
 const authenticateToken = require('../middleware/auth');
 const { Op } = require('sequelize');
 
@@ -189,7 +189,8 @@ router.get('/google/:googlePlaceId/authentic-details', async (req, res) => {
       },
       include: [{
         model: User,
-        attributes: ['id', 'username', 'email', 'mobile_number']
+        attributes: ['id', 'username', 'email', 'mobile_number'],
+        include: [{ model: AuthenticProfile, required: false }]
       }],
       order: [['created_at', 'DESC']]
     });
@@ -277,7 +278,11 @@ router.get('/search-authentic', async (req, res) => {
     const placeIds = matchingPlaces.map(p => p.id);
     const details = await AuthenticDetail.findAll({
       where: { place_id: { [Op.in]: placeIds }, is_active: true },
-      include: [{ model: User, attributes: ['id', 'username', 'email', 'mobile_number'] }],
+      include: [{
+        model: User,
+        attributes: ['id', 'username', 'email', 'mobile_number'],
+        include: [{ model: AuthenticProfile, required: false }]
+      }],
       order: [['created_at', 'DESC']]
     });
 
@@ -349,7 +354,11 @@ router.get('/by-name/:placeName', async (req, res) => {
           model: AuthenticDetail,
           where: { is_active: true },
           required: false,
-          include: [{ model: User, attributes: ['id', 'username', 'email', 'mobile_number'] }]
+          include: [{
+            model: User,
+            attributes: ['id', 'username', 'email', 'mobile_number'],
+            include: [{ model: AuthenticProfile, required: false }]
+          }]
         }
       ]
     });

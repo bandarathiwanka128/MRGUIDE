@@ -1,6 +1,8 @@
 const express = require('express');
 const axios = require('axios');
 const authenticateToken = require('../middleware/auth');
+const { Place, AuthenticDetail, User, AuthenticProfile } = require('../config/database');
+const { Op } = require('sequelize');
 
 const router = express.Router();
 
@@ -334,6 +336,145 @@ Keep it practical and specific to Sri Lanka. Format with markdown headers.`;
   }
 });
 
+// Helper: search DB for places/businesses matching query words
+async function searchDatabase(question) {
+  const results = [];
+  try {
+    // Extract meaningful words (>3 chars) from the question
+    const words = question.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+    if (words.length === 0) return results;
+
+    const wordConditions = words.map(w => ({ [Op.iLike]: `%${w}%` }));
+
+    // 1. Search businesses in AuthenticDetail
+    const businesses = await AuthenticDetail.findAll({
+      where: {
+        is_active: true,
+        detail_type: 'business',
+        [Op.or]: [
+          { business_name: { [Op.or]: wordConditions } },
+          { title: { [Op.or]: wordConditions } },
+          { description: { [Op.or]: wordConditions } },
+          { organization: { [Op.or]: wordConditions } }
+        ]
+      },
+      include: [
+        { model: User, attributes: ['username', 'mobile_number', 'email'],
+          include: [{ model: AuthenticProfile, required: false }] },
+        { model: Place, required: false, attributes: ['name', 'address', 'latitude', 'longitude', 'google_place_id'] }
+      ],
+      limit: 3
+    });
+
+    for (const b of businesses) {
+      const placeName = b.Place?.name || b.business_name;
+      results.push({
+        name: b.business_name || placeName,
+        reason: b.description
+          ? b.description.slice(0, 120) + (b.description.length > 120 ? '...' : '')
+          : `${b.title || 'Business'} located in Sri Lanka.`,
+        best_months: 'Year-round',
+        search_query: `${b.business_name || placeName} Sri Lanka`,
+        category: mapBusinessCategory(b.title),
+        source: 'database',
+        db_type: 'business',
+        contact: b.phone || b.User?.mobile_number || null,
+        added_by: b.User?.username || null,
+        place_name: placeName
+      });
+    }
+
+    // 2. Search authentic users in AuthenticDetail
+    const users = await AuthenticDetail.findAll({
+      where: {
+        is_active: true,
+        detail_type: 'user',
+        [Op.or]: [
+          { description: { [Op.or]: wordConditions } },
+          { expertise: { [Op.or]: wordConditions } },
+          { title: { [Op.or]: wordConditions } }
+        ]
+      },
+      include: [
+        { model: User, attributes: ['username', 'mobile_number', 'email'],
+          include: [{ model: AuthenticProfile, required: false }] },
+        { model: Place, required: false, attributes: ['name', 'address', 'latitude', 'longitude', 'google_place_id'] }
+      ],
+      limit: 3
+    });
+
+    for (const u of users) {
+      const placeName = u.Place?.name || 'Sri Lanka';
+      const profile = u.User?.AuthenticProfile;
+      results.push({
+        name: placeName,
+        reason: u.description
+          ? u.description.slice(0, 120) + (u.description.length > 120 ? '...' : '')
+          : `Recommended by local expert ${u.User?.username || 'local guide'}.`,
+        best_months: 'Year-round',
+        search_query: `${placeName} Sri Lanka`,
+        category: 'culture',
+        source: 'database',
+        db_type: 'user',
+        expert_name: u.User?.username || null,
+        expert_title: u.title || profile?.title || null,
+        contact: u.phone || u.User?.mobile_number || null
+      });
+    }
+
+    // 3. Search Place table by name
+    const places = await Place.findAll({
+      where: {
+        [Op.or]: words.map(w => ({ name: { [Op.iLike]: `%${w}%` } }))
+      },
+      limit: 3
+    });
+
+    for (const p of places) {
+      // Don't duplicate if already added from AuthenticDetail
+      if (!results.find(r => r.place_name === p.name || r.name === p.name)) {
+        results.push({
+          name: p.name,
+          reason: p.description
+            ? p.description.slice(0, 120)
+            : `Place in Sri Lanka with authentic local data.`,
+          best_months: 'Year-round',
+          search_query: `${p.name} Sri Lanka`,
+          category: mapPlaceCategory(p.category),
+          source: 'database',
+          db_type: 'place'
+        });
+      }
+    }
+  } catch (err) {
+    console.error('[DB search] error:', err.message);
+  }
+  return results;
+}
+
+function mapBusinessCategory(title) {
+  if (!title) return 'city';
+  const t = title.toLowerCase();
+  if (t.includes('hotel') || t.includes('resort') || t.includes('guesthouse')) return 'city';
+  if (t.includes('restaurant') || t.includes('cafe') || t.includes('food')) return 'culture';
+  if (t.includes('tour') || t.includes('safari') || t.includes('adventure')) return 'adventure';
+  if (t.includes('beach') || t.includes('dive') || t.includes('surf')) return 'beach';
+  if (t.includes('temple') || t.includes('heritage')) return 'temple';
+  if (t.includes('wildlife') || t.includes('park') || t.includes('nature')) return 'wildlife';
+  return 'city';
+}
+
+function mapPlaceCategory(category) {
+  if (!category) return 'culture';
+  const c = category.toLowerCase();
+  if (c.includes('beach')) return 'beach';
+  if (c.includes('temple') || c.includes('religious')) return 'temple';
+  if (c.includes('nature') || c.includes('park')) return 'nature';
+  if (c.includes('adventure')) return 'adventure';
+  if (c.includes('wildlife')) return 'wildlife';
+  return 'culture';
+}
+
 // AI travel suggestion - public endpoint for homepage
 router.post('/travel-suggest', async (req, res) => {
   try {
@@ -343,61 +484,64 @@ router.post('/travel-suggest', async (req, res) => {
       return res.status(400).json({ error: 'Please ask a more detailed question' });
     }
 
+    // Step 1: Search our own database first
+    const dbResults = await searchDatabase(question);
+
+    // Step 2: Ask Gemini to fill remaining slots (max 6 total, DB results have priority)
+    const remaining = Math.max(1, 3 - dbResults.length);
+    const dbNames = dbResults.map(r => r.name).join(', ');
+    const avoidClause = dbNames
+      ? ` Do NOT suggest these places (already listed): ${dbNames}.`
+      : '';
+
     const prompt = `You are a Sri Lanka travel expert assistant. A user asked: "${question}"
+${avoidClause}
 
-Respond with ONLY a valid JSON array (no markdown, no code blocks) of 1-3 place suggestions in Sri Lanka. Each object must have:
+Respond with ONLY a valid JSON array (no markdown, no code blocks) of exactly ${remaining} place suggestion(s) in Sri Lanka. Each object must have:
 - "name": place name
-- "reason": 1-2 sentence explanation why this is recommended (mention weather, activities, or unique features)
+- "reason": 1-2 sentence explanation relevant to the user's question
 - "best_months": short text like "Dec-Mar" or "Year-round"
-- "search_query": a Google Maps search query for this place
+- "search_query": a Google Maps search query for this place in Sri Lanka
 - "category": one of "beach", "temple", "nature", "city", "adventure", "culture", "wildlife"
-
-Example format: [{"name":"Mirissa Beach","reason":"Perfect for whale watching and surfing with calm seas.","best_months":"Nov-Apr","search_query":"Mirissa Beach Sri Lanka","category":"beach"}]
 
 Return ONLY the JSON array, nothing else.`;
 
-    const text = await callGemini(prompt);
-
+    let geminiResults = [];
     try {
-      // Parse the JSON from Gemini response (strip any markdown code blocks if present)
+      const text = await callGemini(prompt);
       const cleaned = text.replace(/```json?\n?/g, '').replace(/```/g, '').trim();
-      const suggestions = JSON.parse(cleaned);
-
-      res.json({ suggestions: Array.isArray(suggestions) ? suggestions.slice(0, 3) : [] });
-    } catch (parseError) {
-      console.error('JSON parse error in travel-suggest:', parseError.message);
-      console.error('Raw Gemini response:', text);
-      
-      // Fallback: Return hardcoded suggestions if parsing fails
-      const fallbackSuggestions = [
-        { name: "Sigiriya", reason: "UNESCO World Heritage site with stunning views of an ancient fortress.", best_months: "Nov-Mar", search_query: "Sigiriya Sri Lanka", category: "culture" },
-        { name: "Mirissa Beach", reason: "Perfect for whale watching and relaxing by the ocean.", best_months: "Nov-Apr", search_query: "Mirissa Beach Sri Lanka", category: "beach" },
-        { name: "Kandy Temple of the Tooth", reason: "Sacred Buddhist temple in the heart of Sri Lanka's cultural triangle.", best_months: "Year-round", search_query: "Temple of the Tooth Kandy", category: "temple" }
-      ];
-      
-      res.status(200).json({ suggestions: fallbackSuggestions, note: 'Using default suggestions due to service interruption' });
+      const parsed = JSON.parse(cleaned);
+      geminiResults = (Array.isArray(parsed) ? parsed : []).map(r => ({ ...r, source: 'ai' }));
+    } catch (err) {
+      console.warn('[travel-suggest] Gemini parse failed:', err.message);
     }
-  } catch (error) {
-    const status = error.response?.status;
-    console.error('AI travel suggest error:', error.response?.data || error.message);
-    
-    // Return fallback suggestions when API is down
-    const fallbackSuggestions = [
-      { name: "Sigiriya", reason: "UNESCO World Heritage site with stunning views of an ancient fortress.", best_months: "Nov-Mar", search_query: "Sigiriya Sri Lanka", category: "culture" },
-      { name: "Mirissa Beach", reason: "Perfect for whale watching and relaxing by the ocean.", best_months: "Nov-Apr", search_query: "Mirissa Beach Sri Lanka", category: "beach" },
-      { name: "Kandy Temple of the Tooth", reason: "Sacred Buddhist temple in the heart of Sri Lanka's cultural triangle.", best_months: "Year-round", search_query: "Temple of the Tooth Kandy", category: "temple" }
-    ];
-    
-    if (status === 429 || status >= 500) {
-      console.warn('⚠️ Gemini quota exhausted - returning fallback suggestions');
-      return res.json({ 
-        suggestions: fallbackSuggestions,
-        fallback: true,
-        note: 'Using demo data - Gemini API currently unavailable'
+
+    // Step 3: Combine — DB results first, then Gemini
+    const combined = [...dbResults, ...geminiResults].slice(0, 6);
+
+    // If nothing at all, use hardcoded fallback
+    if (combined.length === 0) {
+      return res.json({
+        suggestions: [
+          { name: 'Sigiriya', reason: 'UNESCO World Heritage site with stunning views of an ancient fortress.', best_months: 'Nov-Mar', search_query: 'Sigiriya Sri Lanka', category: 'culture', source: 'ai' },
+          { name: 'Mirissa Beach', reason: 'Perfect for whale watching and relaxing by the ocean.', best_months: 'Nov-Apr', search_query: 'Mirissa Beach Sri Lanka', category: 'beach', source: 'ai' },
+          { name: 'Kandy Temple of the Tooth', reason: 'Sacred Buddhist temple in the heart of Sri Lanka\'s cultural triangle.', best_months: 'Year-round', search_query: 'Temple of the Tooth Kandy', category: 'temple', source: 'ai' }
+        ],
+        fallback: true
       });
     }
-    
-    res.json({ suggestions: fallbackSuggestions, note: 'Demo suggestions' });
+
+    res.json({ suggestions: combined });
+  } catch (error) {
+    console.error('AI travel suggest error:', error.response?.data || error.message);
+    res.json({
+      suggestions: [
+        { name: 'Sigiriya', reason: 'UNESCO World Heritage site with stunning views of an ancient fortress.', best_months: 'Nov-Mar', search_query: 'Sigiriya Sri Lanka', category: 'culture', source: 'ai' },
+        { name: 'Mirissa Beach', reason: 'Perfect for whale watching and relaxing by the ocean.', best_months: 'Nov-Apr', search_query: 'Mirissa Beach Sri Lanka', category: 'beach', source: 'ai' },
+        { name: 'Kandy Temple of the Tooth', reason: 'Sacred Buddhist temple in the heart of Sri Lanka\'s cultural triangle.', best_months: 'Year-round', search_query: 'Temple of the Tooth Kandy', category: 'temple', source: 'ai' }
+      ],
+      fallback: true
+    });
   }
 });
 

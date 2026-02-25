@@ -336,42 +336,49 @@ const PlaceDetailsPanel = ({ place, onClose, onAddAuthenticData, user }) => {
               </div>
             ) : (
               <div className="authentic-list">
-                {authenticUsers.map((user, index) => (
+                {authenticUsers.map((au, index) => {
+                  const profile = au.User?.AuthenticProfile;
+                  const displayTitle = au.title || profile?.title;
+                  const displayJobTitle = au.job_title || profile?.job_title;
+                  const displayPhone = au.phone || au.User?.mobile_number;
+                  const displayEmail = au.email || au.User?.email;
+                  return (
                   <div key={index} className="authentic-card">
                     <div className="authentic-header">
                       <div className="user-info">
-                        <h4>{user.User?.username || 'Anonymous'}</h4>
-                        {user.title && <p className="user-title">{user.title}</p>}
-                        {user.organization && <p className="user-org">{user.organization}</p>}
-                        {user.job_title && <p className="user-job">{user.job_title}</p>}
+                        <h4>{au.User?.username || 'Anonymous'}</h4>
+                        {displayTitle && <p className="user-title">{displayTitle}</p>}
+                        {au.organization && <p className="user-org">{au.organization}</p>}
+                        {displayJobTitle && <p className="user-job">{displayJobTitle}</p>}
                       </div>
-                      {user.verified && <span className="verified-badge">✓ Verified</span>}
+                      {au.verified && <span className="verified-badge">✓ Verified</span>}
                     </div>
-                    {user.expertise && (
+                    {au.expertise && (
                       <div className="expertise-section">
                         <strong>Expertise:</strong>
-                        <p>{user.expertise}</p>
+                        <p>{au.expertise}</p>
                       </div>
                     )}
-                    {user.description && (
+                    {au.description && (
                       <div className="description-section">
                         <strong>About This Place:</strong>
-                        <p>{user.description}</p>
+                        <p>{au.description}</p>
                       </div>
                     )}
                     <div className="contact-actions">
-                      {user.phone && (
-                        <button className="contact-btn call" onClick={() => handleCall(user.phone)}>📞 Call</button>
+                      {displayPhone && (
+                        <button className="contact-btn call" onClick={() => handleCall(displayPhone)}>📞 Call</button>
                       )}
-                      {user.email && (
-                        <button className="contact-btn email" onClick={() => handleEmail(user.email)}>✉️ Email</button>
+                      {displayEmail && (
+                        <button className="contact-btn email" onClick={() => handleEmail(displayEmail)}>✉️ Email</button>
                       )}
-                      {user.website && (
-                        <button className="contact-btn website" onClick={() => handleWebsite(user.website)}>🌐 Website</button>
+                      {au.website && (
+                        <button className="contact-btn website" onClick={() => handleWebsite(au.website)}>🌐 Website</button>
                       )}
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

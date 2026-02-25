@@ -399,14 +399,29 @@ const HomePage = () => {
               <p className="ai-results-label">Recommended for you</p>
               <div className="ai-results-grid">
                 {aiResults.map((place, i) => (
-                  <div key={i} className="ai-result-card">
-                    <div className="ai-result-category">
-                      <span className="ai-result-emoji">
-                        {categoryIcons[place.category] || '\u{1F4CD}'}
-                      </span>
-                      <span className="ai-result-cat-text">{place.category}</span>
+                  <div key={i} className={`ai-result-card${place.source === 'database' ? ' ai-result-card--local' : ''}`}>
+                    <div className="ai-result-card-top">
+                      <div className="ai-result-category">
+                        <span className="ai-result-emoji">
+                          {categoryIcons[place.category] || '\u{1F4CD}'}
+                        </span>
+                        <span className="ai-result-cat-text">{place.category}</span>
+                      </div>
+                      {place.source === 'database' && (
+                        <span className="ai-local-badge">
+                          {place.db_type === 'business' ? '🏢 Local Business' : '👤 Local Expert'}
+                        </span>
+                      )}
                     </div>
                     <h3 className="ai-result-name">{place.name}</h3>
+                    {place.db_type === 'business' && place.added_by && (
+                      <p className="ai-result-owner">by {place.added_by}</p>
+                    )}
+                    {place.db_type === 'user' && place.expert_name && (
+                      <p className="ai-result-owner">
+                        {place.expert_title ? `${place.expert_title} · ` : ''}{place.expert_name}
+                      </p>
+                    )}
                     <p className="ai-result-reason">{place.reason}</p>
                     <div className="ai-result-meta">
                       <span className="ai-result-months">
@@ -416,6 +431,11 @@ const HomePage = () => {
                         </svg>
                         Best: {place.best_months}
                       </span>
+                      {place.contact && (
+                        <span className="ai-result-contact">
+                          📞 {place.contact}
+                        </span>
+                      )}
                     </div>
                     <button
                       className="ai-result-btn"

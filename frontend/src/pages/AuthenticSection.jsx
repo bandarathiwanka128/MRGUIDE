@@ -1041,6 +1041,7 @@ const AuthenticSection = ({ user }) => {
         <AddAuthenticDataModal
           place={modalPlace}
           type={modalType}
+          user={user}
           onClose={() => {
             setShowModal(false);
             setModalPlace(null);

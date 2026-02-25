@@ -1157,6 +1157,7 @@ const SearchResults = ({ user }) => {
         <AddAuthenticDataModal
           place={authModalPlace}
           type={authModalType}
+          user={user}
           onClose={() => {
             setShowAuthModal(false);
             setAuthModalPlace(null);

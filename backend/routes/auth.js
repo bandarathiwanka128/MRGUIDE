@@ -151,7 +151,7 @@ router.post('/login', async (req, res) => {
 router.get('/me', authenticateToken, async (req, res) => {
   try {
     const user = await User.findByPk(req.user.id, {
-      attributes: ['id', 'username', 'email', 'role', 'country'],
+      attributes: ['id', 'username', 'email', 'role', 'country', 'mobile_number'],
       include: [{
         model: AuthenticProfile,
         required: false
