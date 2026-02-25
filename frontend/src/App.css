@@ -11,7 +11,7 @@
   --blue-dark: #2a5580;
   --blue-light: #4a89c0;
   --cream: #F6F1E9;
-  --error: #e05252;
+  --error: #e33a3a;
   --success: #4caf50;
 }
 
@@ -19,8 +19,8 @@
 [data-theme="dark"] {
   --bg: #0D1B2A;
   --bg-surface: #132238;
-  --bg-card: #1a2d42;
-  --bg-card-hover: #1e3550;
+  --bg-card: #203d5e;
+  --bg-card-hover: #2b4767;
   --text: #F6F1E9;
   --text-muted: #8da4be;
   --text-dim: #5a7a9a;
