@@ -32,7 +32,7 @@
   background-size: cover;
   background-position: center;
   opacity: 0;
-  transform: scale(1.06);
+  transform: scale(1.07);
   transition: opacity 1.8s ease, transform 7s ease-out;
   will-change: opacity, transform;
 }
