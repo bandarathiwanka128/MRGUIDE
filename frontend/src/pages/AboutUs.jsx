@@ -69,32 +69,6 @@ const AboutUs = () => {
         </div>
       </div>
 
-<<<<<<< HEAD
-
-      <div className="about-content">
-        <section className="mission-section">
-          <h2>Our Mission</h2>
-          <p>
-
-            At Mr. Guide, we revolutionize travel planning by combining intelligent route
-            optimization with authentic local knowledge. Our platform helps travelers discover
-            hidden gems, plan efficient routes, and make informed decisions based on verified
-            information from local experts and fellow travelers.
-          </p>
-        </section>
-
-        <section className="team-section">
-          <h2>Development Team</h2>
-          <div className="university-info">
-            <h3>Faculty of Engineering, University of Ruhuna</h3>
-            <p className="department">Department of Computer Engineering</p>
-          </div>
-
-          <div className="team-grid">
-            <div className="team-member">
-              <div className="member-avatar">
-                <span>HT</span>
-=======
       <div className="about-body">
 
         {/* ── MISSION ── */}
@@ -116,7 +90,6 @@ const AboutUs = () => {
                   <span className="stat-number">4</span>
                   <span className="stat-label">Engineers</span>
                 </div>
->>>>>>> 6fa3a94881285078e45f51b226bbddcb0a58ee7d
               </div>
             </div>
 
