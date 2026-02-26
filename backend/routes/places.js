@@ -185,7 +185,8 @@ router.get('/google/:googlePlaceId/authentic-details', async (req, res) => {
     const details = await AuthenticDetail.findAll({
       where: {
         google_place_id: googlePlaceId,
-        is_active: true
+        is_active: true,
+        verified: true
       },
       include: [{
         model: User,
@@ -277,7 +278,7 @@ router.get('/search-authentic', async (req, res) => {
 
     const placeIds = matchingPlaces.map(p => p.id);
     const details = await AuthenticDetail.findAll({
-      where: { place_id: { [Op.in]: placeIds }, is_active: true },
+      where: { place_id: { [Op.in]: placeIds }, is_active: true, verified: true },
       include: [{
         model: User,
         attributes: ['id', 'username', 'email', 'mobile_number'],
@@ -302,7 +303,7 @@ router.get('/businesses', async (req, res) => {
   try {
     const { query, lat, lng, radius } = req.query;
 
-    const whereCondition = { detail_type: 'business', is_active: true };
+    const whereCondition = { detail_type: 'business', is_active: true, verified: true };
 
     if (query) {
       whereCondition[Op.or] = [
@@ -352,7 +353,7 @@ router.get('/by-name/:placeName', async (req, res) => {
         { model: Review, include: [{ model: User, attributes: ['username'] }] },
         {
           model: AuthenticDetail,
-          where: { is_active: true },
+          where: { is_active: true, verified: true },
           required: false,
           include: [{
             model: User,
