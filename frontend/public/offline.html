@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Offline — Mr. Guide</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0D1B2A;
+      color: #e0eaf5;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .card {
+      background: #1a2d42;
+      border: 1px solid rgba(52, 105, 154, 0.3);
+      border-radius: 16px;
+      padding: 3rem 2.5rem;
+      max-width: 420px;
+      width: 100%;
+    }
+
+    .icon { font-size: 4rem; margin-bottom: 1rem; }
+
+    .logo {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 1.5rem;
+    }
+    .logo-mr    { color: #FFCC00; }
+    .logo-guide { color: #34699A; }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: #fff;
+    }
+
+    p {
+      color: #8ca8c5;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+    }
+
+    .btn {
+      display: inline-block;
+      background: #34699A;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 2rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: #2a5580; }
+
+    .tips {
+      margin-top: 2rem;
+      text-align: left;
+      background: rgba(52, 105, 154, 0.1);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+    }
+    .tips h3 { font-size: 0.85rem; color: #FFCC00; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px; }
+    .tips ul  { list-style: none; }
+    .tips li  { color: #8ca8c5; font-size: 0.85rem; padding: 0.25rem 0; }
+    .tips li::before { content: '→ '; color: #34699A; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo"><span class="logo-mr">Mr.</span><span class="logo-guide">Guide</span></div>
+    <div class="icon">📡</div>
+    <h1>You're Offline</h1>
+    <p>
+      It looks like you've lost your internet connection.
+      Some features may not be available, but your saved trips
+      and recently viewed guides are still accessible.
+    </p>
+    <button class="btn" onclick="location.reload()">Try Again</button>
+
+    <div class="tips">
+      <h3>Available Offline</h3>
+      <ul>
+        <li>Recently viewed guide profiles</li>
+        <li>Saved trip itineraries</li>
+        <li>Cached map tiles</li>
+        <li>App settings</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    // Auto-retry when connection is restored
+    window.addEventListener('online', () => location.reload());
+  </script>
+</body>
+</html>

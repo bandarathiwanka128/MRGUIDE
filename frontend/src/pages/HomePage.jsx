@@ -175,14 +175,16 @@ const HomePage = () => {
       accentColor: '#34699A'
     },
     {
-      title: 'Route Optimization',
-      description: 'Optimize multi-stop routes using smart algorithms. Compare before and after with detailed segment analysis.',
+      title: 'Find a Guide',
+      description: 'Book a verified local travel guide with transparent distance-based pricing. Live tracking, QR payment, real reviews.',
       icon: (
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          <circle cx="12" cy="8" r="4"/>
+          <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+          <path d="M18 14l2 2 4-4" strokeWidth="2"/>
         </svg>
       ),
-      path: '/optimize-route',
+      path: '/guides',
       gradient: 'linear-gradient(135deg, #FFCC00 0%, #34699A 100%)',
       accentColor: '#FFCC00'
     },

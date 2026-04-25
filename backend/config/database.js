@@ -292,6 +292,198 @@ const Store = sequelize.define('Store', {
 User.hasMany(Store, { foreignKey: 'owner_id' });
 Store.belongsTo(User, { foreignKey: 'owner_id' });
 
+// ─── Guide Models ──────────────────────────────────────────────────────────
+
+const Guide = sequelize.define('Guide', {
+  user_id: {
+    type: DataTypes.INTEGER,
+    references: { model: User, key: 'id' },
+    unique: true
+  },
+  display_name: { type: DataTypes.STRING(100), allowNull: false },
+  photo_url: DataTypes.TEXT,
+  bio: DataTypes.STRING(500),
+  about_tours: DataTypes.TEXT,
+  languages: { type: DataTypes.ARRAY(DataTypes.STRING), defaultValue: [] },
+  speciality_regions: { type: DataTypes.ARRAY(DataTypes.STRING), defaultValue: [] },
+  tier_1km: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0 },
+  tier_5km: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0 },
+  tier_10km: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0 },
+  tier_20km: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0 },
+  tier_per_km_over20: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0 },
+  currency: { type: DataTypes.STRING(10), defaultValue: 'LKR' },
+  phone: DataTypes.STRING(20),
+  whatsapp: DataTypes.STRING(20),
+  payment_ref: DataTypes.TEXT,
+  bank_name: DataTypes.STRING(100),
+  bank_account_number: DataTypes.STRING(50),
+  bank_branch: DataTypes.STRING(100),
+  nic_number: DataTypes.STRING(20),
+  card_last4: DataTypes.STRING(4),
+  card_expiry: DataTypes.STRING(7),
+  stripe_customer_id: DataTypes.STRING(100),
+  is_available: { type: DataTypes.BOOLEAN, defaultValue: false },
+  is_verified: { type: DataTypes.BOOLEAN, defaultValue: false },
+  avg_rating: { type: DataTypes.DECIMAL(3, 2), defaultValue: 0 },
+  total_reviews: { type: DataTypes.INTEGER, defaultValue: 0 },
+  total_earnings_base: { type: DataTypes.DECIMAL(12, 2), defaultValue: 0 },
+  total_tips_received: { type: DataTypes.DECIMAL(12, 2), defaultValue: 0 },
+  total_commission_paid: { type: DataTypes.DECIMAL(12, 2), defaultValue: 0 },
+  pending_cash_commission: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0 }
+}, {
+  tableName: 'guides',
+  timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: 'updated_at'
+});
+
+const GuidePhoto = sequelize.define('GuidePhoto', {
+  guide_id: { type: DataTypes.INTEGER, references: { model: Guide, key: 'id' } },
+  url: { type: DataTypes.TEXT, allowNull: false },
+  caption: DataTypes.STRING(255),
+  sort_order: { type: DataTypes.INTEGER, defaultValue: 0 }
+}, {
+  tableName: 'guide_photos',
+  timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: false
+});
+
+const GuideLocation = sequelize.define('GuideLocation', {
+  guide_id: {
+    type: DataTypes.INTEGER,
+    references: { model: Guide, key: 'id' },
+    unique: true,
+    primaryKey: true
+  },
+  lat: { type: DataTypes.DECIMAL(10, 7), allowNull: false },
+  lng: { type: DataTypes.DECIMAL(10, 7), allowNull: false },
+  accuracy: DataTypes.DECIMAL(8, 2)
+}, {
+  tableName: 'guide_locations',
+  timestamps: true,
+  createdAt: false,
+  updatedAt: 'updated_at'
+});
+
+const GuidePayout = sequelize.define('GuidePayout', {
+  guide_id: { type: DataTypes.INTEGER, references: { model: Guide, key: 'id' } },
+  period_start: DataTypes.DATEONLY,
+  period_end: DataTypes.DATEONLY,
+  qr_base_total: { type: DataTypes.DECIMAL(12, 2), defaultValue: 0 },
+  tips_total: { type: DataTypes.DECIMAL(12, 2), defaultValue: 0 },
+  qr_commission: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0 },
+  cash_commission_recovered: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0 },
+  cash_commission_rolled_over: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0 },
+  net_payout: { type: DataTypes.DECIMAL(12, 2), defaultValue: 0 },
+  bank_transfer_ref: DataTypes.STRING(100),
+  status: {
+    type: DataTypes.ENUM('pending', 'processing', 'paid', 'failed'),
+    defaultValue: 'pending'
+  },
+  paid_at: DataTypes.DATE
+}, {
+  tableName: 'guide_payouts',
+  timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: 'updated_at'
+});
+
+const GuideTrip = sequelize.define('GuideTrip', {
+  guide_id: { type: DataTypes.INTEGER, references: { model: Guide, key: 'id' } },
+  tourist_id: { type: DataTypes.INTEGER, references: { model: User, key: 'id' } },
+  payout_id: { type: DataTypes.INTEGER, references: { model: GuidePayout, key: 'id' }, allowNull: true },
+  origin_lat: DataTypes.DECIMAL(10, 7),
+  origin_lng: DataTypes.DECIMAL(10, 7),
+  dest_lat: DataTypes.DECIMAL(10, 7),
+  dest_lng: DataTypes.DECIMAL(10, 7),
+  origin_address: DataTypes.TEXT,
+  dest_address: DataTypes.TEXT,
+  distance_km: { type: DataTypes.DECIMAL(8, 3), defaultValue: 0 },
+  base_fare: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0 },
+  tip_amount: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0 },
+  total_paid: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0 },
+  platform_commission: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0 },
+  guide_earnings: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0 },
+  payment_method: {
+    type: DataTypes.ENUM('qr', 'cash'),
+    allowNull: true
+  },
+  paid: { type: DataTypes.BOOLEAN, defaultValue: false },
+  status: {
+    type: DataTypes.ENUM('pending', 'confirmed', 'active', 'completed', 'cancelled'),
+    defaultValue: 'pending'
+  },
+  stripe_payment_intent_id: DataTypes.STRING(200),
+  started_at: DataTypes.DATE,
+  ended_at: DataTypes.DATE,
+  route_polyline: DataTypes.TEXT
+}, {
+  tableName: 'guide_trips',
+  timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: 'updated_at'
+});
+
+const GuideReview = sequelize.define('GuideReview', {
+  guide_id: { type: DataTypes.INTEGER, references: { model: Guide, key: 'id' } },
+  tourist_id: { type: DataTypes.INTEGER, references: { model: User, key: 'id' } },
+  trip_id: { type: DataTypes.INTEGER, references: { model: GuideTrip, key: 'id' }, allowNull: true },
+  rating: { type: DataTypes.INTEGER, validate: { min: 1, max: 5 } },
+  comment: DataTypes.TEXT
+}, {
+  tableName: 'guide_reviews',
+  timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: false
+});
+
+const Conversation = sequelize.define('Conversation', {
+  guide_id: { type: DataTypes.INTEGER, references: { model: Guide, key: 'id' } },
+  tourist_id: { type: DataTypes.INTEGER, references: { model: User, key: 'id' } },
+  trip_id: { type: DataTypes.INTEGER, references: { model: GuideTrip, key: 'id' }, allowNull: true }
+}, {
+  tableName: 'conversations',
+  timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: false
+});
+
+const Message = sequelize.define('Message', {
+  conversation_id: { type: DataTypes.INTEGER, references: { model: Conversation, key: 'id' } },
+  sender_id: { type: DataTypes.INTEGER, references: { model: User, key: 'id' } },
+  content: { type: DataTypes.TEXT, allowNull: false },
+  read: { type: DataTypes.BOOLEAN, defaultValue: false }
+}, {
+  tableName: 'messages',
+  timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: false
+});
+
+// Guide Associations
+User.hasOne(Guide, { foreignKey: 'user_id' });
+Guide.belongsTo(User, { foreignKey: 'user_id' });
+Guide.hasMany(GuidePhoto, { foreignKey: 'guide_id', as: 'photos' });
+GuidePhoto.belongsTo(Guide, { foreignKey: 'guide_id' });
+Guide.hasOne(GuideLocation, { foreignKey: 'guide_id', as: 'location' });
+GuideLocation.belongsTo(Guide, { foreignKey: 'guide_id' });
+Guide.hasMany(GuidePayout, { foreignKey: 'guide_id', as: 'payouts' });
+GuidePayout.belongsTo(Guide, { foreignKey: 'guide_id' });
+Guide.hasMany(GuideTrip, { foreignKey: 'guide_id', as: 'guide_trips' });
+GuideTrip.belongsTo(Guide, { foreignKey: 'guide_id' });
+User.hasMany(GuideTrip, { foreignKey: 'tourist_id', as: 'tourist_trips' });
+GuideTrip.belongsTo(User, { foreignKey: 'tourist_id', as: 'tourist' });
+GuidePayout.hasMany(GuideTrip, { foreignKey: 'payout_id' });
+GuideTrip.belongsTo(GuidePayout, { foreignKey: 'payout_id', as: 'payout' });
+Guide.hasMany(GuideReview, { foreignKey: 'guide_id', as: 'guide_reviews' });
+GuideReview.belongsTo(Guide, { foreignKey: 'guide_id' });
+GuideReview.belongsTo(User, { foreignKey: 'tourist_id', as: 'reviewer' });
+Guide.hasMany(Conversation, { foreignKey: 'guide_id' });
+Conversation.belongsTo(Guide, { foreignKey: 'guide_id' });
+Conversation.hasMany(Message, { foreignKey: 'conversation_id', as: 'messages' });
+Message.belongsTo(Conversation, { foreignKey: 'conversation_id' });
+
 module.exports = {
   sequelize,
   User,
@@ -300,5 +492,13 @@ module.exports = {
   AuthenticDetail,
   Review,
   Trip,
-  Store
+  Store,
+  Guide,
+  GuidePhoto,
+  GuideLocation,
+  GuidePayout,
+  GuideTrip,
+  GuideReview,
+  Conversation,
+  Message
 };

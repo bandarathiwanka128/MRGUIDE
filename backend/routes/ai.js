@@ -3,6 +3,7 @@ const axios = require('axios');
 const authenticateToken = require('../middleware/auth');
 const { Place, AuthenticDetail, User, AuthenticProfile } = require('../config/database');
 const { Op } = require('sequelize');
+const { createGeminiBreaker } = require('../utils/circuitBreaker');
 
 const router = express.Router();
 
@@ -16,9 +17,9 @@ if (!GEMINI_API_KEY) {
 
 // Models to try in order (fallback chain)
 const GEMINI_MODELS = [
+  'gemini-2.5-flash',
+  'gemini-2.0-flash',
   'gemini-1.5-flash',
-  'gemini-1.5-pro',
-  'gemini-1.0-pro',
 ];
 const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 
@@ -93,6 +94,9 @@ async function callGemini(prompt, retries = 3) {
 
   throw lastError;
 }
+
+// Circuit breaker wraps callGemini — opens after 50% failure rate in 10s window
+const geminiBreaker = createGeminiBreaker(callGemini);
 
 // Mock fallback data when API fails
 const FALLBACK_TRIP_SUGGESTIONS = `## 🗺️ Best Route & Itinerary
@@ -266,7 +270,7 @@ For EACH destination, list 2-3 specific hotels:
 
 Be specific with real hotel names, real attractions, and realistic Sri Lanka prices. Use markdown formatting.`;
 
-    const suggestions = await callGemini(prompt);
+    const suggestions = await geminiBreaker.fire(prompt);
     res.json({ suggestions });
   } catch (error) {
     console.error('AI trip suggestions error:', error.response?.data || error.message);
@@ -289,7 +293,7 @@ router.post('/place-info', async (req, res) => {
 
     const prompt = `Tell me about "${name}" in Sri Lanka${lat && lng ? ` (located at ${lat}, ${lng})` : ''}. Include: brief description, history, best time to visit, entry fees if any, nearby attractions, and travel tips. Keep it under 300 words.`;
 
-    const info = await callGemini(prompt);
+    const info = await geminiBreaker.fire(prompt);
     res.json({ info });
   } catch (error) {
     console.error('AI place info error:', error.response?.data || error.message);
@@ -328,7 +332,7 @@ Please provide smart travel tips for this route:
 
 Keep it practical and specific to Sri Lanka. Format with markdown headers.`;
 
-    const tips = await callGemini(prompt);
+    const tips = await geminiBreaker.fire(prompt);
     res.json({ tips });
   } catch (error) {
     console.error('AI route tips error:', error.response?.data || error.message);
@@ -508,7 +512,7 @@ Return ONLY the JSON array, nothing else.`;
 
     let geminiResults = [];
     try {
-      const text = await callGemini(prompt);
+      const text = await geminiBreaker.fire(prompt);
       const cleaned = text.replace(/```json?\n?/g, '').replace(/```/g, '').trim();
       const parsed = JSON.parse(cleaned);
       geminiResults = (Array.isArray(parsed) ? parsed : []).map(r => ({ ...r, source: 'ai' }));
@@ -545,14 +549,30 @@ Return ONLY the JSON array, nothing else.`;
   }
 });
 
+// Circuit-breaker stats — useful for dashboards / Prometheus scrape
+router.get('/breaker-stats', (_req, res) => {
+  res.json({
+    state:    geminiBreaker.opened ? 'OPEN' : geminiBreaker.halfOpen ? 'HALF_OPEN' : 'CLOSED',
+    enabled:  Boolean(GEMINI_API_KEY),
+    stats:    {
+      fires:    geminiBreaker.stats.fires,
+      failures: geminiBreaker.stats.failures,
+      successes:geminiBreaker.stats.successes,
+      timeouts: geminiBreaker.stats.timeouts,
+      rejects:  geminiBreaker.stats.rejects,
+      fallbacks:geminiBreaker.stats.fallbacks
+    }
+  });
+});
+
 // Health check — confirms key is loaded and Gemini is reachable
 router.get('/health', async (_req, res) => {
   if (!GEMINI_API_KEY) {
     return res.status(500).json({ ok: false, error: 'GEMINI_API_KEY not set' });
   }
   try {
-    await callGemini('Reply with the single word: OK');
-    res.json({ ok: true, key: GEMINI_API_KEY.slice(0, 8) + '...' });
+    await geminiBreaker.fire('Reply with the single word: OK');
+    res.json({ ok: true, key: GEMINI_API_KEY.slice(0, 8) + '...', breaker: 'CLOSED' });
   } catch (e) {
     res.status(500).json({ ok: false, error: e.response?.data?.error?.message || e.message });
   }

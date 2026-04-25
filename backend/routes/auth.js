@@ -170,4 +170,10 @@ router.post('/logout', authenticateToken, (req, res) => {
   res.json({ message: 'Logout successful' });
 });
 
+// OAuth callback landing — frontend reads token from query string
+// GET /api/auth/auth-status  (ping to verify JWT is still valid)
+router.get('/auth-status', authenticateToken, (req, res) => {
+  res.json({ authenticated: true, user: req.user });
+});
+
 module.exports = router;

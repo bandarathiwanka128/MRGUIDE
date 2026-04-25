@@ -4,11 +4,15 @@
       "Bash(timeout 30 node:*)",
       "Bash(powershell -Command:*)",
       "Bash(docker compose:*)",
-      "Read(//d/Mr-guide admin/**)"
+      "Read(//d/Mr-guide admin/**)",
+      "Read(//d/mrguide_Travelguiders/**)",
+      "Bash(flutter --version)",
+      "Bash(echo \"EXIT:$?\")"
     ],
     "additionalDirectories": [
       "D:\\Mr-guide admin\\backend",
-      "D:\\Mr-guide admin\\frontend\\src"
+      "D:\\Mr-guide admin\\frontend\\src",
+      "D:\\mrguide_Travelguiders"
     ]
   }
 }

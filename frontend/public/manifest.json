@@ -1,6 +1,14 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Mr. Guide",
+  "name": "Mr. Guide — Sri Lanka Travel Guide",
+  "description": "Find local guides, plan trips and explore Sri Lanka",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#34699A",
+  "background_color": "#0D1B2A",
+  "scope": "/",
+  "lang": "en-LK",
   "icons": [
     {
       "src": "favicon.ico",
@@ -10,16 +18,31 @@
     {
       "src": "logo192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
       "src": "logo512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "shortcuts": [
+    {
+      "name": "Find a Guide",
+      "short_name": "Guides",
+      "description": "Browse live local guides near you",
+      "url": "/guides",
+      "icons": [{ "src": "logo192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Trip Planner",
+      "short_name": "Planner",
+      "description": "Plan your Sri Lanka itinerary",
+      "url": "/trip-planner",
+      "icons": [{ "src": "logo192.png", "sizes": "192x192" }]
+    }
+  ],
+  "categories": ["travel", "maps", "lifestyle"]
 }

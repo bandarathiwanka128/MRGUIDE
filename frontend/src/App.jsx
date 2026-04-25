@@ -11,7 +11,12 @@ import AboutUs from './pages/AboutUs';
 import ShortestPath from './pages/ShortestPath';
 import TripPlanner from './pages/TripPlanner';
 import AuthenticSection from './pages/AuthenticSection';
-import RouteOptimize from './pages/RouteOptimize';
+import GuideBooking from './pages/GuideBooking';
+import GuideProfile from './pages/GuideProfile';
+import GuideRegister from './pages/GuideRegister';
+import GuideDashboard from './pages/GuideDashboard';
+import TripPayment from './pages/TripPayment';
+import LiveTripView from './pages/LiveTripView';
 
 import { API_BASE_URL } from './config';
 
@@ -88,7 +93,9 @@ const App = () => {
 
           <div className="nav-links">
             <Link to="/">Home</Link>
+            <Link to="/guides">Find a Guide</Link>
             <Link to="/about">About Us</Link>
+            {user && <Link to="/guide/dashboard">My Guide</Link>}
           </div>
 
           <div className="nav-right">
@@ -124,7 +131,12 @@ const App = () => {
           <Route path="/trip-planner" element={<TripPlanner user={user} />} />
           <Route path="/authentic" element={<AuthenticSection user={user} />} />
           <Route path="/authentic/:placeName" element={<AuthenticSection user={user} />} />
-          <Route path="/optimize-route" element={<RouteOptimize />} />
+          <Route path="/guides" element={<GuideBooking user={user} />} />
+          <Route path="/guides/register" element={user ? <GuideRegister user={user} /> : <Navigate to="/login" />} />
+          <Route path="/guides/:id" element={<GuideProfile user={user} />} />
+          <Route path="/guide/dashboard" element={user ? <GuideDashboard user={user} /> : <Navigate to="/login" />} />
+          <Route path="/pay/:tripId" element={<TripPayment user={user} />} />
+          <Route path="/trip/live/:tripId" element={user ? <LiveTripView user={user} /> : <Navigate to="/login" />} />
           <Route path="/login" element={user ? <Navigate to="/" /> : <Login setUser={setUser} />} />
           <Route path="/register" element={user ? <Navigate to="/" /> : <Register setUser={setUser} />} />
           <Route path="/about" element={<AboutUs />} />
