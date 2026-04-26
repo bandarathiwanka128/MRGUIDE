@@ -24,24 +24,35 @@ console.log('RABBITMQ_URL:      ', process.env.RABBITMQ_URL     ? 'SET' : 'NOT S
 console.log('GOOGLE_CLIENT_ID:  ', process.env.GOOGLE_CLIENT_ID ? 'SET' : 'NOT SET (OAuth disabled)');
 console.log('========================');
 
-const { sequelize }       = require('./config/database');
-const authRoutes           = require('./routes/auth');
-const placesRoutes         = require('./routes/places');
-const storesRoutes         = require('./routes/stores');
-const aiRoutes             = require('./routes/ai');
-const tripsRoutes          = require('./routes/trips');
-const weatherRoutes        = require('./routes/weather');
-const seedRoutes           = require('./routes/seed');
-const guidesRoutes         = require('./routes/guides');
-const guideTripsRoutes     = require('./routes/guide-trips');
-const payoutsRoutes        = require('./routes/payouts');
-const adminGuidesRoutes    = require('./routes/admin-guides');
+let sequelize, authRoutes, placesRoutes, storesRoutes, aiRoutes, tripsRoutes,
+    weatherRoutes, seedRoutes, guidesRoutes, guideTripsRoutes, payoutsRoutes,
+    adminGuidesRoutes, defaultLimiter, aiLimiter, authLimiter, paymentLimiter,
+    oauthRouter, passport, eventBus, createGraphQLMiddleware, generateAPIKey;
 
-const { defaultLimiter, aiLimiter, authLimiter, paymentLimiter } = require('./gateway/rateLimiter');
-const { router: oauthRouter, passport }                           = require('./auth/oauth');
-const eventBus                                                    = require('./events/eventBus');
-const { createGraphQLMiddleware }                                 = require('./graphql/schema');
-const { generateAPIKey }                                          = require('./gateway/apiKey');
+try {
+  ({ sequelize }         = require('./config/database'));
+  authRoutes              = require('./routes/auth');
+  placesRoutes            = require('./routes/places');
+  storesRoutes            = require('./routes/stores');
+  aiRoutes                = require('./routes/ai');
+  tripsRoutes             = require('./routes/trips');
+  weatherRoutes           = require('./routes/weather');
+  seedRoutes              = require('./routes/seed');
+  guidesRoutes            = require('./routes/guides');
+  guideTripsRoutes        = require('./routes/guide-trips');
+  payoutsRoutes           = require('./routes/payouts');
+  adminGuidesRoutes       = require('./routes/admin-guides');
+  ({ defaultLimiter, aiLimiter, authLimiter, paymentLimiter } = require('./gateway/rateLimiter'));
+  ({ router: oauthRouter, passport }   = require('./auth/oauth'));
+  eventBus                = require('./events/eventBus');
+  ({ createGraphQLMiddleware }         = require('./graphql/schema'));
+  ({ generateAPIKey }                  = require('./gateway/apiKey'));
+} catch (bootErr) {
+  console.error('\n❌ STARTUP FAILED — module load error:');
+  console.error('   ', bootErr.message);
+  console.error('   Stack:', bootErr.stack);
+  process.exit(1);
+}
 
 const app        = express();
 const httpServer = http.createServer(app);
