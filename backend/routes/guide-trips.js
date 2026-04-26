@@ -1,6 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+let _stripe = null;
+const getStripe = () => {
+  if (!_stripe) {
+    if (!process.env.STRIPE_SECRET_KEY) throw new Error('STRIPE_SECRET_KEY not configured');
+    _stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+  }
+  return _stripe;
+};
 const { GuideTrip, Guide, GuidePayout, GuideReview, User } = require('../config/database');
 const { authenticateToken } = require('../middleware/auth');
 const { calculateFare, fareBreakdown } = require('../utils/fareCalculator');
@@ -171,7 +178,7 @@ router.put('/:id/end', authenticateToken, async (req, res) => {
     let paymentIntentId = null;
     let clientSecret = null;
     try {
-      const pi = await stripe.paymentIntents.create({
+      const pi = await getStripe().paymentIntents.create({
         amount: Math.round(fare.base_fare * 100),
         currency: 'lkr',
         metadata: { trip_id: String(trip.id), guide_id: String(trip.guide_id) }
