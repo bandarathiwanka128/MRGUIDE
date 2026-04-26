@@ -19,19 +19,22 @@
 
 'use strict';
 
-// Guard: skip entirely unless explicitly enabled (prevents Node.js v22 compat issues)
-if (process.env.OTEL_ENABLED !== 'true') {
-  console.log('[Tracing] Disabled — set OTEL_ENABLED=true to enable');
+// Guard: only activate when BOTH enabled AND an OTLP endpoint is configured.
+// require-in-the-middle (OTel's module hook) breaks subpath package exports
+// (e.g. @apollo/server/express4) on Node.js v22 — so never patch unless
+// traces actually have somewhere to go.
+const otelReady =
+  process.env.OTEL_ENABLED === 'true' &&
+  Boolean(process.env.OTEL_EXPORTER_OTLP_ENDPOINT);
+
+if (!otelReady) {
+  console.log('[Tracing] Disabled — set OTEL_ENABLED=true + OTEL_EXPORTER_OTLP_ENDPOINT to enable');
   module.exports = null;
   return;
 }
 
 const { NodeTracerProvider } = require('@opentelemetry/sdk-trace-node');
-const {
-  SimpleSpanProcessor,
-  ConsoleSpanExporter,
-  BatchSpanProcessor
-} = require('@opentelemetry/sdk-trace-base');
+const { BatchSpanProcessor } = require('@opentelemetry/sdk-trace-base');
 const { registerInstrumentations } = require('@opentelemetry/instrumentation');
 const { HttpInstrumentation }     = require('@opentelemetry/instrumentation-http');
 const { ExpressInstrumentation }  = require('@opentelemetry/instrumentation-express');
@@ -46,35 +49,16 @@ const provider = new NodeTracerProvider({
   })
 });
 
-// Use OTLP exporter when endpoint is configured (Jaeger, Tempo, etc.)
-// otherwise fall back to console so dev mode works with zero infra
-if (process.env.OTEL_EXPORTER_OTLP_ENDPOINT) {
-  try {
-    const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
-    const exporter = new OTLPTraceExporter({
-      url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT
-    });
-    provider.addSpanProcessor(new BatchSpanProcessor(exporter));
-    console.log(`[Tracing] OTLP exporter → ${process.env.OTEL_EXPORTER_OTLP_ENDPOINT}`);
-  } catch {
-    console.warn('[Tracing] OTLP exporter package missing — falling back to console');
-    provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
-  }
-} else {
-  // Dev: only log spans for non-health-check routes to reduce noise
-  const filtered = {
-    export(spans, cb) {
-      const interesting = spans.filter(s => {
-        const url = s.attributes['http.url'] || s.attributes['http.target'] || '';
-        return !String(url).includes('/health') && !String(url).includes('/test');
-      });
-      if (interesting.length) new ConsoleSpanExporter().export(interesting, cb);
-      else cb({ code: 0 });
-    },
-    shutdown: () => Promise.resolve()
-  };
-  provider.addSpanProcessor(new SimpleSpanProcessor(filtered));
-  console.log('[Tracing] Console exporter active (set OTEL_EXPORTER_OTLP_ENDPOINT for Jaeger)');
+// OTLP exporter — endpoint is guaranteed set by the guard above
+try {
+  const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+  const exporter = new OTLPTraceExporter({ url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT });
+  provider.addSpanProcessor(new BatchSpanProcessor(exporter));
+  console.log(`[Tracing] OTLP exporter → ${process.env.OTEL_EXPORTER_OTLP_ENDPOINT}`);
+} catch {
+  console.warn('[Tracing] OTLP exporter package missing — tracing disabled');
+  module.exports = null;
+  return;
 }
 
 provider.register();
