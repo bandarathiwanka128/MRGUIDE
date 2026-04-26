@@ -3,7 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const { Guide, GuidePhoto, GuideLocation, GuideReview, User } = require('../config/database');
-const { authenticateToken } = require('../middleware/auth');
+const authenticateToken = require('../middleware/auth');
 const { fareBreakdown } = require('../utils/fareCalculator');
 
 const storage = multer.diskStorage({

@@ -9,7 +9,7 @@ const getStripe = () => {
   return _stripe;
 };
 const { GuideTrip, Guide, GuidePayout, GuideReview, User } = require('../config/database');
-const { authenticateToken } = require('../middleware/auth');
+const authenticateToken = require('../middleware/auth');
 const { calculateFare, fareBreakdown } = require('../utils/fareCalculator');
 const eventBus = require('../events/eventBus');
 

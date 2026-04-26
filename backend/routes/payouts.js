@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { GuidePayout, GuideTrip, Guide } = require('../config/database');
-const { authenticateToken } = require('../middleware/auth');
+const authenticateToken = require('../middleware/auth');
 const { Op } = require('sequelize');
 
 // GET /api/payouts/guide/:guideId — guide's payout history
