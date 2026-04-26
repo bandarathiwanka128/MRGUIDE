@@ -46,16 +46,6 @@ function createGeminiBreaker(asyncFn, options = {}) {
   breaker.on('timeout',  () => console.warn  ('[CircuitBreaker] ⏱️  TIMEOUT  — Gemini exceeded 35s'));
   breaker.on('reject',   () => console.warn  ('[CircuitBreaker] ⛔ REJECTED  — Circuit is OPEN'));
 
-  // Expose Prometheus-style stats at /api/ai/breaker-stats
-  breaker.stats = () => ({
-    state:              breaker.opened ? 'OPEN' : breaker.halfOpen ? 'HALF_OPEN' : 'CLOSED',
-    failures:           breaker.stats.failures,
-    successes:          breaker.stats.successes,
-    totalRequests:      breaker.stats.fires,
-    percentiles:        breaker.stats.latencyMean,
-    lastFailureTime:    breaker.stats.lastFailureTime
-  });
-
   return breaker;
 }
 

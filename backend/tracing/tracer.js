@@ -3,16 +3,28 @@
  * MUST be required as the very first line in server.js before any other imports.
  * Without a running collector, traces are printed to console (dev-friendly).
  *
+ * Only activates when OTEL_ENABLED=true is set — this avoids crashes on
+ * Node.js v22 where require-in-the-middle patches CJS internals that changed.
+ *
  * WSO2 Choreo interview talking point:
  *   "Every HTTP request + DB query generates a trace that can be visualised
  *    in Jaeger/Zipkin — mirrors Choreo's built-in observability pipeline."
  *
+ * To enable:
+ *   OTEL_ENABLED=true node server.js
  * To send to Jaeger:
  *   docker run -p 16686:16686 -p 14268:14268 jaegertracing/all-in-one
- *   Set OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:14268/api/traces
+ *   OTEL_ENABLED=true OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:14268/api/traces node server.js
  */
 
 'use strict';
+
+// Guard: skip entirely unless explicitly enabled (prevents Node.js v22 compat issues)
+if (process.env.OTEL_ENABLED !== 'true') {
+  console.log('[Tracing] Disabled — set OTEL_ENABLED=true to enable');
+  module.exports = null;
+  return;
+}
 
 const { NodeTracerProvider } = require('@opentelemetry/sdk-trace-node');
 const {
@@ -24,14 +36,13 @@ const { registerInstrumentations } = require('@opentelemetry/instrumentation');
 const { HttpInstrumentation }     = require('@opentelemetry/instrumentation-http');
 const { ExpressInstrumentation }  = require('@opentelemetry/instrumentation-express');
 const { Resource }                = require('@opentelemetry/resources');
-const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
 
+// Use string literals — compatible with all @opentelemetry/semantic-conventions versions
 const provider = new NodeTracerProvider({
   resource: new Resource({
-    [SemanticResourceAttributes.SERVICE_NAME]:    'mrguide-backend',
-    [SemanticResourceAttributes.SERVICE_VERSION]: '1.0.0',
-    [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]:
-      process.env.NODE_ENV || 'development'
+    'service.name':            'mrguide-backend',
+    'service.version':         '1.0.0',
+    'deployment.environment':  process.env.NODE_ENV || 'development'
   })
 });
 
