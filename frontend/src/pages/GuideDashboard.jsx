@@ -255,17 +255,34 @@ export default function GuideDashboard({ user }) {
     setLiveToggling(true);
     try {
       const newStatus = !guide.is_available;
-      const pos = await new Promise((res, rej) =>
-        navigator.geolocation.getCurrentPosition(res, rej, { timeout: 5000 })
-      ).catch(() => null);
+
+      // Going offline doesn't need GPS
+      if (!newStatus) {
+        await axios.put(`${API_BASE_URL}/guides/${guide.id}/availability`, {
+          is_available: false
+        }, { headers: { Authorization: `Bearer ${token}` } });
+        setGuide(g => ({ ...g, is_available: false }));
+        return;
+      }
+
+      // Going live — GPS is required to appear on the map
+      let pos = null;
+      try {
+        pos = await new Promise((res, rej) =>
+          navigator.geolocation.getCurrentPosition(res, rej, { timeout: 8000, enableHighAccuracy: true })
+        );
+      } catch {
+        alert('Location access is required to go live.\n\nPlease allow location permission in your browser and try again.');
+        return;
+      }
 
       await axios.put(`${API_BASE_URL}/guides/${guide.id}/availability`, {
-        is_available: newStatus,
-        lat: pos?.coords.latitude,
-        lng: pos?.coords.longitude
+        is_available: true,
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude
       }, { headers: { Authorization: `Bearer ${token}` } });
 
-      setGuide(g => ({ ...g, is_available: newStatus }));
+      setGuide(g => ({ ...g, is_available: true }));
     } catch (err) {
       alert(err.response?.data?.error || 'Failed to update availability');
     } finally {
