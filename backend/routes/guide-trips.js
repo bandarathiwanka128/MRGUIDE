@@ -133,6 +133,36 @@ router.put('/:id/confirm', authenticateToken, async (req, res) => {
   }
 });
 
+// PUT /api/guide-trips/:id/reject — guide rejects booking
+router.put('/:id/reject', authenticateToken, async (req, res) => {
+  try {
+    const trip = await GuideTrip.findByPk(req.params.id, { include: [Guide] });
+    if (!trip) return res.status(404).json({ error: 'Trip not found' });
+    if (trip.Guide.user_id !== req.user.id) return res.status(403).json({ error: 'Forbidden' });
+    if (trip.status !== 'pending') return res.status(400).json({ error: 'Trip cannot be rejected' });
+
+    await trip.update({ status: 'rejected' });
+
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`tourist:${trip.tourist_id}`).emit('booking:rejected', {
+        trip_id: trip.id,
+        guide_name: trip.Guide.display_name
+      });
+    }
+
+    eventBus.publish('guide.events', 'trip.rejected', {
+      trip_id:    trip.id,
+      guide_id:   trip.guide_id,
+      tourist_id: trip.tourist_id
+    }).catch(() => {});
+
+    res.json(trip);
+  } catch (err) {
+    res.status(500).json({ error: 'Reject failed' });
+  }
+});
+
 // PUT /api/guide-trips/:id/start — guide starts trip
 router.put('/:id/start', authenticateToken, async (req, res) => {
   try {

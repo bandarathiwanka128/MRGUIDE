@@ -2,10 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { io } from 'socket.io-client';
-import { API_BASE_URL } from '../config';
+import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
+import { API_BASE_URL, GOOGLE_MAPS_API_KEY } from '../config';
 import './GuideDashboard.css';
 
 const TABS = ['Earnings', 'Trips', 'Payouts', 'Profile'];
+const LIBRARIES = ['places'];
+const BOOKING_MAP_STYLE = { width: '100%', height: 220, borderRadius: 12 };
 
 function formatDuration(totalSeconds) {
   const seconds = Math.max(0, parseInt(totalSeconds || 0, 10));
@@ -80,6 +83,8 @@ export default function GuideDashboard({ user }) {
   const [stopPrompt, setStopPrompt] = useState(false);
   const [showStartConfirm, setShowStartConfirm] = useState(false);
   const [showEndConfirm, setShowEndConfirm] = useState(false);
+  const [showRejectConfirm, setShowRejectConfirm] = useState(false);
+  const [guidePos, setGuidePos] = useState(null);
   const socketRef = useRef(null);
   const watchIdRef = useRef(null);
   const lastCoordsRef = useRef(null);
@@ -87,6 +92,7 @@ export default function GuideDashboard({ user }) {
   const activeTripRef = useRef(null);
 
   const token = localStorage.getItem('token');
+  const { isLoaded: mapsLoaded } = useJsApiLoader({ googleMapsApiKey: GOOGLE_MAPS_API_KEY, libraries: LIBRARIES });
 
   useEffect(() => {
     axios.get(`${API_BASE_URL}/guides/me/profile`, {
@@ -160,6 +166,15 @@ export default function GuideDashboard({ user }) {
       setStopPrompt(true);
     });
 
+    socket.on('booking:new', (payload) => {
+      axios.get(`${API_BASE_URL}/guide-trips/${payload.trip_id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      }).then(r => {
+        setActiveTrip(r.data);
+        setTrips(prev => [r.data, ...prev.filter(t => t.id !== r.data.id)]);
+      }).catch(() => {});
+    });
+
     return () => socket.disconnect();
   }, [guide?.id]);
 
@@ -186,15 +201,16 @@ export default function GuideDashboard({ user }) {
   }, [activeTrip?.id]);
 
   useEffect(() => {
-    if (!activeTrip || activeTrip.status !== 'active') return;
+    if (!activeTrip || !['active', 'confirmed'].includes(activeTrip.status)) return;
     if (!navigator.geolocation) return;
 
     const watchId = navigator.geolocation.watchPosition(
       (pos) => {
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
+        setGuidePos({ lat, lng });
         const last = lastCoordsRef.current;
-        if (last) {
+        if (activeTrip.status === 'active' && last) {
           const delta = haversineKm(last.lat, last.lng, lat, lng);
           distanceKmRef.current = distanceKmRef.current + delta;
         }
@@ -207,7 +223,7 @@ export default function GuideDashboard({ user }) {
             lng,
             accuracy: pos.coords.accuracy,
             trip_id: activeTrip.id,
-            distance_km_total: distanceKmRef.current
+            distance_km_total: activeTrip.status === 'active' ? distanceKmRef.current : 0
           });
         }
       },
@@ -279,6 +295,34 @@ export default function GuideDashboard({ user }) {
       alert(err.response?.data?.error || 'Failed to update availability');
     } finally {
       setLiveToggling(false);
+    }
+  };
+
+  const acceptTrip = async () => {
+    if (!activeTrip) return;
+    try {
+      const res = await axios.put(`${API_BASE_URL}/guide-trips/${activeTrip.id}/confirm`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setActiveTrip(res.data);
+      setTrips(prev => prev.map(t => (t.id === res.data.id ? res.data : t)));
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to accept trip');
+    }
+  };
+
+  const rejectTrip = async () => {
+    if (!activeTrip) return;
+    try {
+      await axios.put(`${API_BASE_URL}/guide-trips/${activeTrip.id}/reject`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setActiveTrip(null);
+      setTrips(prev => prev.filter(t => t.id !== activeTrip.id));
+      setShowRejectConfirm(false);
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to reject trip');
+      setShowRejectConfirm(false);
     }
   };
 
@@ -407,12 +451,85 @@ export default function GuideDashboard({ user }) {
               </div>
             )}
 
-            <div className="gd-live-actions">
-              {['pending', 'confirmed'].includes(activeTrip.status) && (
-                <button className="gd-trip-btn gd-trip-btn--start" onClick={() => setShowStartConfirm(true)}>
-                  Start Trip
+            {activeTrip.status === 'pending' && (
+              <div className="gd-booking-request">
+                {mapsLoaded && activeTrip.origin_lat && (
+                  <div className="gd-booking-map-wrap">
+                    <GoogleMap
+                      mapContainerStyle={BOOKING_MAP_STYLE}
+                      center={{ lat: parseFloat(activeTrip.origin_lat), lng: parseFloat(activeTrip.origin_lng) }}
+                      zoom={14}
+                      options={{ disableDefaultUI: true, zoomControl: true }}
+                    >
+                      <Marker
+                        position={{ lat: parseFloat(activeTrip.origin_lat), lng: parseFloat(activeTrip.origin_lng) }}
+                        icon={{
+                          url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="#FFCC00" stroke="white" stroke-width="2.5"/><text x="18" y="24" font-size="16" text-anchor="middle">👤</text></svg>')}`,
+                          scaledSize: new window.google.maps.Size(36, 36),
+                          anchor: new window.google.maps.Point(18, 18)
+                        }}
+                      />
+                    </GoogleMap>
+                    <p className="gd-booking-map-label">Tourist pickup location</p>
+                  </div>
+                )}
+                <div className="gd-booking-actions">
+                  <button className="gd-trip-btn gd-trip-btn--reject" onClick={() => setShowRejectConfirm(true)}>
+                    Reject
+                  </button>
+                  <button className="gd-trip-btn gd-trip-btn--accept" onClick={acceptTrip}>
+                    Accept Trip
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {activeTrip.status === 'confirmed' && (
+              <div className="gd-confirmed-section">
+                {mapsLoaded && (
+                  <div className="gd-booking-map-wrap">
+                    <GoogleMap
+                      mapContainerStyle={BOOKING_MAP_STYLE}
+                      center={
+                        guidePos ||
+                        (activeTrip.origin_lat
+                          ? { lat: parseFloat(activeTrip.origin_lat), lng: parseFloat(activeTrip.origin_lng) }
+                          : { lat: 6.9271, lng: 79.8612 })
+                      }
+                      zoom={13}
+                      options={{ disableDefaultUI: true, zoomControl: true }}
+                    >
+                      {activeTrip.origin_lat && (
+                        <Marker
+                          position={{ lat: parseFloat(activeTrip.origin_lat), lng: parseFloat(activeTrip.origin_lng) }}
+                          icon={{
+                            url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="#FFCC00" stroke="white" stroke-width="2.5"/><text x="18" y="24" font-size="16" text-anchor="middle">📍</text></svg>')}`,
+                            scaledSize: new window.google.maps.Size(36, 36),
+                            anchor: new window.google.maps.Point(18, 18)
+                          }}
+                        />
+                      )}
+                      {guidePos && (
+                        <Marker
+                          position={guidePos}
+                          icon={{
+                            url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="#34699A" stroke="white" stroke-width="2.5"/><text x="18" y="24" font-size="16" text-anchor="middle">🚗</text></svg>')}`,
+                            scaledSize: new window.google.maps.Size(36, 36),
+                            anchor: new window.google.maps.Point(18, 18)
+                          }}
+                        />
+                      )}
+                    </GoogleMap>
+                    <p className="gd-booking-map-label">Head to tourist · 📍 = pickup point · 🚗 = you</p>
+                  </div>
+                )}
+                <button className="gd-trip-btn gd-trip-btn--start gd-trip-btn--full" onClick={() => setShowStartConfirm(true)}>
+                  I've Arrived — Start Trip
                 </button>
-              )}
+              </div>
+            )}
+
+            <div className="gd-live-actions">
               {activeTrip.status === 'active' && (
                 <button className="gd-trip-btn gd-trip-btn--end" onClick={() => setShowEndConfirm(true)}>
                   End Trip
@@ -676,6 +793,23 @@ export default function GuideDashboard({ user }) {
             <div className="gd-modal-actions">
               <button className="gd-trip-btn gd-trip-btn--ghost" onClick={() => setShowEndConfirm(false)}>Cancel</button>
               <button className="gd-trip-btn gd-trip-btn--end" onClick={endTrip}>Yes, End Trip</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showRejectConfirm && activeTrip && (
+        <div className="gd-modal-backdrop" onClick={() => setShowRejectConfirm(false)}>
+          <div className="gd-modal" onClick={e => e.stopPropagation()}>
+            <h3>Reject this booking?</h3>
+            <div className="gd-modal-body">
+              <p><strong>Tourist:</strong> {activeTrip.tourist?.username || 'Tourist'}</p>
+              <p><strong>From:</strong> {activeTrip.origin_address || '—'}</p>
+              <p><strong>To:</strong> {activeTrip.dest_address || '—'}</p>
+            </div>
+            <div className="gd-modal-actions">
+              <button className="gd-trip-btn gd-trip-btn--ghost" onClick={() => setShowRejectConfirm(false)}>Cancel</button>
+              <button className="gd-trip-btn gd-trip-btn--reject" onClick={rejectTrip}>Yes, Reject</button>
             </div>
           </div>
         </div>

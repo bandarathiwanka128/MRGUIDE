@@ -108,6 +108,12 @@ export default function LiveTripView({ user }) {
       setShowQR(true);
     });
 
+    socket.on('booking:rejected', ({ guide_name }) => {
+      setTrip(prev => prev ? { ...prev, status: 'rejected' } : prev);
+      alert(`${guide_name || 'The guide'} declined your booking. Please choose another guide.`);
+      navigate('/guides');
+    });
+
     socket.on('trip:payment_confirmed', () => {
       navigate(`/guides/${trip?.guide_id}`);
     });
@@ -173,7 +179,10 @@ export default function LiveTripView({ user }) {
         {isLoaded ? (
           <GoogleMap
             mapContainerStyle={MAP_CONTAINER}
-            center={guidePos || { lat: 6.9271, lng: 79.8612 }}
+            center={
+              guidePos ||
+              (trip?.origin_lat ? { lat: parseFloat(trip.origin_lat), lng: parseFloat(trip.origin_lng) } : { lat: 6.9271, lng: 79.8612 })
+            }
             zoom={14}
             onLoad={map => { mapRef.current = map; }}
             options={{ disableDefaultUI: true, zoomControl: true }}
@@ -183,6 +192,16 @@ export default function LiveTripView({ user }) {
                 position={guidePos}
                 icon={{
                   url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="#34699A" stroke="white" stroke-width="3"/><text x="20" y="27" font-size="18" text-anchor="middle" fill="white">🚗</text></svg>')}`,
+                  scaledSize: new window.google.maps.Size(40, 40),
+                  anchor: new window.google.maps.Point(20, 20)
+                }}
+              />
+            )}
+            {trip?.status === 'confirmed' && trip?.origin_lat && (
+              <Marker
+                position={{ lat: parseFloat(trip.origin_lat), lng: parseFloat(trip.origin_lng) }}
+                icon={{
+                  url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="#FFCC00" stroke="white" stroke-width="3"/><text x="20" y="27" font-size="18" text-anchor="middle">📍</text></svg>')}`,
                   scaledSize: new window.google.maps.Size(40, 40),
                   anchor: new window.google.maps.Point(20, 20)
                 }}
@@ -209,8 +228,8 @@ export default function LiveTripView({ user }) {
               <span className={`ltv-trip-status ltv-status-${trip?.status}`}>
                 {trip?.status === 'active' ? '● Trip in Progress' :
                  trip?.status === 'completed' ? '✓ Trip Completed' :
-                 trip?.status === 'confirmed' ? '✓ Guide Confirmed' :
-                 '⏳ Waiting for guide'}
+                 trip?.status === 'confirmed' ? '🚗 Guide on the way to you' :
+                 '⏳ Waiting for guide to accept'}
               </span>
             </div>
           </div>
@@ -256,11 +275,17 @@ export default function LiveTripView({ user }) {
             </div>
           )}
 
-          {/* Pending state */}
-          {['pending', 'confirmed'].includes(trip?.status) && (
+          {/* Pending / Confirmed state */}
+          {trip?.status === 'pending' && (
             <div className="ltv-pending-section">
               <div className="ltv-pending-dots"><span /><span /><span /></div>
-              <p>{trip?.status === 'pending' ? 'Waiting for guide to accept your booking...' : 'Guide confirmed! They\'re on the way.'}</p>
+              <p>Waiting for guide to accept your booking...</p>
+            </div>
+          )}
+          {trip?.status === 'confirmed' && (
+            <div className="ltv-pending-section">
+              <div className="ltv-pending-dots"><span /><span /><span /></div>
+              <p>Your guide accepted and is on the way to you. Watch the map above.</p>
             </div>
           )}
         </div>

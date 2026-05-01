@@ -573,3 +573,51 @@
   50% { opacity: 1; }
   100% { opacity: 0.6; }
 }
+
+/* Accept / Reject booking UI */
+.gd-booking-request,
+.gd-confirmed-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.gd-booking-map-wrap {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border-subtle, #e2e8f0);
+}
+
+.gd-booking-map-label {
+  font-size: 0.78rem;
+  color: var(--text-secondary, #64748b);
+  text-align: center;
+  padding: 6px 12px;
+  background: var(--bg, #f8fafc);
+  margin: 0;
+  border-top: 1px solid var(--border-subtle, #e2e8f0);
+}
+
+.gd-booking-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.gd-trip-btn--accept {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  flex: 1;
+}
+
+.gd-trip-btn--reject {
+  background: #ef4444;
+  color: white;
+  min-width: 90px;
+}
+
+.gd-trip-btn--full {
+  width: 100%;
+  padding: 13px;
+  font-size: 1rem;
+}
