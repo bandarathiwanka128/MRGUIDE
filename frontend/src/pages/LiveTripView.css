@@ -106,7 +106,7 @@
 /* Stats */
 .ltv-stats-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 10px;
   margin-bottom: 14px;
 }
@@ -213,4 +213,66 @@
   color: var(--text-secondary, #64748b);
   font-size: 0.9rem;
   margin: 0;
+}
+
+/* Waiting + warning overlays */
+.ltv-waiting-banner {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fef3c7;
+  color: #92400e;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+  z-index: 5;
+}
+
+.ltv-waiting-banner--start {
+  background: #fde68a;
+}
+
+.ltv-fullscreen-warning {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 30;
+}
+
+.ltv-warning-card {
+  background: white;
+  border-radius: 18px;
+  padding: 24px;
+  max-width: 420px;
+  text-align: center;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.2);
+}
+
+.ltv-warning-card h3 {
+  margin: 0 0 10px;
+  font-size: 1.1rem;
+  color: var(--text-primary, #1a202c);
+}
+
+.ltv-warning-card p {
+  margin: 0 0 16px;
+  color: var(--text-secondary, #475569);
+  font-size: 0.9rem;
+}
+
+.ltv-warning-btn {
+  padding: 10px 22px;
+  border-radius: 10px;
+  border: none;
+  background: #0f172a;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
 }

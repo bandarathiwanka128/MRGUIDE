@@ -21,6 +21,15 @@ export default function LiveTripView({ user }) {
   const [loading, setLoading] = useState(true);
   const [elapsed, setElapsed] = useState(0);
   const [showQR, setShowQR] = useState(false);
+  const [liveFare, setLiveFare] = useState({
+    elapsed_seconds: 0,
+    distance_km: 0,
+    base_fare: 0,
+    waiting_charge: 0
+  });
+  const [waitingBanner, setWaitingBanner] = useState('');
+  const [showDataWarning, setShowDataWarning] = useState(false);
+  const [dataWarningDismissed, setDataWarningDismissed] = useState(false);
   const socketRef = useRef(null);
   const timerRef = useRef(null);
   const mapRef = useRef(null);
@@ -33,6 +42,16 @@ export default function LiveTripView({ user }) {
       setTrip(r.data);
       if (r.data.Guide) setGuide(r.data.Guide);
       if (r.data.status === 'completed') setShowQR(true);
+      if (r.data.status === 'active' && !dataWarningDismissed) setShowDataWarning(true);
+      if (r.data.status === 'active') {
+        setLiveFare(prev => ({
+          ...prev,
+          elapsed_seconds: r.data.started_at ? Math.floor((Date.now() - new Date(r.data.started_at).getTime()) / 1000) : 0,
+          distance_km: parseFloat(r.data.distance_km || 0),
+          base_fare: parseFloat(r.data.base_fare || 0),
+          waiting_charge: parseFloat(r.data.waiting_charge_total || 0)
+        }));
+      }
     }).catch(() => navigate('/guides'))
     .finally(() => setLoading(false));
   }, [tripId]);
@@ -52,8 +71,48 @@ export default function LiveTripView({ user }) {
       setGuidePos({ lat: parseFloat(lat), lng: parseFloat(lng) });
     });
 
-    socket.on('trip:ended', ({ final_fare }) => {
-      setTrip(prev => ({ ...prev, status: 'completed', base_fare: final_fare }));
+    socket.on('trip:fare_update', (payload) => {
+      if (String(payload.trip_id) !== String(tripId)) return;
+      setLiveFare({
+        elapsed_seconds: payload.elapsed_seconds,
+        distance_km: payload.distance_km,
+        base_fare: payload.base_fare,
+        waiting_charge: payload.waiting_charge
+      });
+      setElapsed(payload.elapsed_seconds);
+    });
+
+    socket.on('trip:started', ({ trip_id }) => {
+      if (String(trip_id) !== String(tripId)) return;
+      setTrip(prev => ({ ...prev, status: 'active', started_at: new Date().toISOString() }));
+      if (!dataWarningDismissed) setShowDataWarning(true);
+    });
+
+    socket.on('trip:waiting_started', ({ trip_id }) => {
+      if (String(trip_id) !== String(tripId)) return;
+      setWaitingBanner('pause');
+      setTimeout(() => setWaitingBanner(''), 6000);
+    });
+
+    socket.on('trip:waiting_stopped', ({ trip_id, minutes, charge_lkr, total }) => {
+      if (String(trip_id) !== String(tripId)) return;
+      setWaitingBanner(`Waiting charge added: LKR ${parseFloat(charge_lkr || 0).toLocaleString()} (${parseFloat(minutes || 0).toFixed(2)} min)`);
+      setLiveFare(prev => ({ ...prev, waiting_charge: parseFloat(total || 0) }));
+      setTimeout(() => setWaitingBanner(''), 6000);
+    });
+
+    socket.on('trip:ended', ({ final_fare, waiting_charge_total }) => {
+      setTrip(prev => ({
+        ...prev,
+        status: 'completed',
+        base_fare: final_fare,
+        waiting_charge_total: waiting_charge_total
+      }));
+      setLiveFare(prev => ({
+        ...prev,
+        base_fare: parseFloat(final_fare || 0),
+        waiting_charge: parseFloat(waiting_charge_total || 0)
+      }));
       setShowQR(true);
     });
 
@@ -62,7 +121,7 @@ export default function LiveTripView({ user }) {
     });
 
     return () => socket.disconnect();
-  }, [tripId, user]);
+  }, [tripId, user, dataWarningDismissed]);
 
   // Elapsed timer
   useEffect(() => {
@@ -78,12 +137,11 @@ export default function LiveTripView({ user }) {
     const h = Math.floor(secs / 3600);
     const m = Math.floor((secs % 3600) / 60);
     const s = secs % 60;
-    return h > 0
-      ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
-      : `${m}:${String(s).padStart(2,'0')}`;
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
   };
 
   const paymentUrl = `${window.location.origin}/pay/${tripId}`;
+  const totalEstimate = parseFloat(liveFare.base_fare || 0) + parseFloat(liveFare.waiting_charge || 0);
 
   if (loading) return (
     <div className="ltv-loading">
@@ -94,6 +152,27 @@ export default function LiveTripView({ user }) {
 
   return (
     <div className="live-trip-view">
+      {showDataWarning && (
+        <div className="ltv-fullscreen-warning">
+          <div className="ltv-warning-card">
+            <h3>Do not turn off your location or mobile data until the trip ends.</h3>
+            <p>Your guide's position and fare are calculated in real time.</p>
+            <button
+              className="ltv-warning-btn"
+              onClick={() => { setShowDataWarning(false); setDataWarningDismissed(true); }}
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
+
+      {waitingBanner && (
+        <div className={`ltv-waiting-banner ${waitingBanner === 'pause' ? 'ltv-waiting-banner--start' : ''}`}>
+          {waitingBanner === 'pause' ? 'Guide has started a waiting charge.' : waitingBanner}
+        </div>
+      )}
+
       {/* Map */}
       <div className="ltv-map">
         {isLoaded ? (
@@ -146,15 +225,23 @@ export default function LiveTripView({ user }) {
             <div className="ltv-stats-row">
               <div className="ltv-stat">
                 <span className="ltv-stat-label">Elapsed</span>
-                <span className="ltv-stat-val">{formatTime(elapsed)}</span>
+                <span className="ltv-stat-val">{formatTime(liveFare.elapsed_seconds || elapsed)}</span>
               </div>
               <div className="ltv-stat">
                 <span className="ltv-stat-label">Distance</span>
-                <span className="ltv-stat-val">{parseFloat(trip.distance_km || 0).toFixed(1)} km</span>
+                <span className="ltv-stat-val">{parseFloat(liveFare.distance_km || 0).toFixed(2)} km</span>
               </div>
               <div className="ltv-stat">
-                <span className="ltv-stat-label">Est. Fare</span>
-                <span className="ltv-stat-val ltv-fare">LKR {parseFloat(trip.base_fare || 0).toLocaleString()}</span>
+                <span className="ltv-stat-label">Base Fare</span>
+                <span className="ltv-stat-val ltv-fare">LKR {parseFloat(liveFare.base_fare || 0).toLocaleString()}</span>
+              </div>
+              <div className="ltv-stat">
+                <span className="ltv-stat-label">Waiting Charge</span>
+                <span className="ltv-stat-val">LKR {parseFloat(liveFare.waiting_charge || 0).toLocaleString()}</span>
+              </div>
+              <div className="ltv-stat">
+                <span className="ltv-stat-label">Total</span>
+                <span className="ltv-stat-val">LKR {parseFloat(totalEstimate || 0).toLocaleString()}</span>
               </div>
             </div>
           )}
@@ -163,7 +250,7 @@ export default function LiveTripView({ user }) {
           {showQR && trip?.status === 'completed' && (
             <div className="ltv-qr-section">
               <h3>Scan to Pay</h3>
-              <p>Final Fare: <strong>LKR {parseFloat(trip.base_fare || 0).toLocaleString()}</strong></p>
+              <p>Final Fare: <strong>LKR {parseFloat((parseFloat(trip.base_fare || 0) + parseFloat(trip.waiting_charge_total || 0)) || 0).toLocaleString()}</strong></p>
               <div className="ltv-qr-code">
                 <QRCodeSVG value={paymentUrl} size={180} level="M" includeMargin />
               </div>
