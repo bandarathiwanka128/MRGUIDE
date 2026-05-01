@@ -10,7 +10,7 @@ const getStripe = () => {
 };
 const { GuideTrip, Guide, GuidePayout, GuideReview, User } = require('../config/database');
 const authenticateToken = require('../middleware/auth');
-const { calculateFare, fareBreakdown } = require('../utils/fareCalculator');
+const { calculateFare, fareBreakdown, calculateWaitingCharge } = require('../utils/fareCalculator');
 const eventBus = require('../events/eventBus');
 
 // GET /api/guide-trips/fare-estimate
@@ -162,6 +162,82 @@ router.put('/:id/start', authenticateToken, async (req, res) => {
   }
 });
 
+// PUT /api/guide-trips/:id/waiting/start — guide starts waiting charge
+router.put('/:id/waiting/start', authenticateToken, async (req, res) => {
+  try {
+    const trip = await GuideTrip.findByPk(req.params.id, { include: [Guide] });
+    if (!trip) return res.status(404).json({ error: 'Trip not found' });
+    if (trip.Guide.user_id !== req.user.id) return res.status(403).json({ error: 'Forbidden' });
+    if (trip.status !== 'active') return res.status(400).json({ error: 'Trip is not active' });
+
+    await trip.update({
+      is_waiting: true,
+      waiting_started_at: new Date()
+    });
+
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`trip:${trip.id}`).emit('trip:waiting_started', {
+        trip_id: trip.id,
+        started_at: trip.waiting_started_at
+      });
+    }
+
+    res.json(trip);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to start waiting charge' });
+  }
+});
+
+// PUT /api/guide-trips/:id/waiting/stop — guide stops waiting charge
+router.put('/:id/waiting/stop', authenticateToken, async (req, res) => {
+  try {
+    const trip = await GuideTrip.findByPk(req.params.id, { include: [Guide] });
+    if (!trip) return res.status(404).json({ error: 'Trip not found' });
+    if (trip.Guide.user_id !== req.user.id) return res.status(403).json({ error: 'Forbidden' });
+    if (!trip.is_waiting || !trip.waiting_started_at) {
+      return res.status(400).json({ error: 'Trip is not in waiting state' });
+    }
+
+    const now = new Date();
+    const minutesRaw = (now - new Date(trip.waiting_started_at)) / 60000;
+    const minutes = Math.round(minutesRaw * 100) / 100;
+    const charge = calculateWaitingCharge(minutes, trip.Guide);
+
+    const existingSessions = Array.isArray(trip.waiting_sessions) ? trip.waiting_sessions : [];
+    const nextSessions = existingSessions.concat({
+      start: trip.waiting_started_at,
+      end: now,
+      minutes: charge.minutes,
+      charge_lkr: charge.charge_lkr
+    });
+    const nextTotal = Math.round((parseFloat(trip.waiting_charge_total || 0) + charge.charge_lkr) * 100) / 100;
+
+    await trip.update({
+      waiting_sessions: nextSessions,
+      waiting_charge_total: nextTotal,
+      is_waiting: false,
+      waiting_started_at: null
+    });
+
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`trip:${trip.id}`).emit('trip:waiting_stopped', {
+        trip_id: trip.id,
+        minutes: charge.minutes,
+        charge_lkr: charge.charge_lkr,
+        total: nextTotal
+      });
+    }
+
+    res.json(trip);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to stop waiting charge' });
+  }
+});
+
 // PUT /api/guide-trips/:id/end — guide ends trip, compute fare, create payment intent
 router.put('/:id/end', authenticateToken, async (req, res) => {
   try {
@@ -173,13 +249,35 @@ router.put('/:id/end', authenticateToken, async (req, res) => {
     const { distance_km, route_polyline } = req.body;
     const finalDistance = distance_km || parseFloat(trip.distance_km) || 1;
     const fare = fareBreakdown(finalDistance, trip.Guide);
+    let waitingChargeTotal = parseFloat(trip.waiting_charge_total || 0);
+
+    if (trip.is_waiting && trip.waiting_started_at) {
+      const now = new Date();
+      const minutesRaw = (now - new Date(trip.waiting_started_at)) / 60000;
+      const minutes = Math.round(minutesRaw * 100) / 100;
+      const charge = calculateWaitingCharge(minutes, trip.Guide);
+      const existingSessions = Array.isArray(trip.waiting_sessions) ? trip.waiting_sessions : [];
+      const nextSessions = existingSessions.concat({
+        start: trip.waiting_started_at,
+        end: now,
+        minutes: charge.minutes,
+        charge_lkr: charge.charge_lkr
+      });
+      waitingChargeTotal = Math.round((waitingChargeTotal + charge.charge_lkr) * 100) / 100;
+      await trip.update({
+        waiting_sessions: nextSessions,
+        waiting_charge_total: waitingChargeTotal,
+        is_waiting: false,
+        waiting_started_at: null
+      });
+    }
 
     // Create Stripe PaymentIntent (amount in cents LKR)
     let paymentIntentId = null;
     let clientSecret = null;
     try {
       const pi = await getStripe().paymentIntents.create({
-        amount: Math.round(fare.base_fare * 100),
+        amount: Math.round((fare.base_fare + waitingChargeTotal) * 100),
         currency: 'lkr',
         metadata: { trip_id: String(trip.id), guide_id: String(trip.guide_id) }
       });
@@ -195,6 +293,7 @@ router.put('/:id/end', authenticateToken, async (req, res) => {
       ended_at: new Date(),
       distance_km: finalDistance,
       base_fare: fare.base_fare,
+      waiting_charge_total: waitingChargeTotal,
       platform_commission: fare.platform_commission,
       guide_earnings: fare.guide_earnings,
       route_polyline: route_polyline || null,
@@ -207,6 +306,7 @@ router.put('/:id/end', authenticateToken, async (req, res) => {
         trip_id: trip.id,
         final_fare: fare.base_fare,
         final_distance: finalDistance,
+        waiting_charge_total: waitingChargeTotal,
         payment_url: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/pay/${trip.id}`
       });
       io.to('admin:live').emit('trip:ended', { trip_id: trip.id });
@@ -221,7 +321,7 @@ router.put('/:id/end', authenticateToken, async (req, res) => {
       ended_at:      new Date().toISOString()
     }).catch(() => {});
 
-    res.json({ trip, fare, client_secret: clientSecret });
+    res.json({ trip, fare, waiting_charge_total: waitingChargeTotal, client_secret: clientSecret });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'End trip failed', details: err.message });
