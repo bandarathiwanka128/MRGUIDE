@@ -24,6 +24,7 @@ export default function BookingConfirmModal({ guide, user, distanceKm, destInput
         dest_address: destInput || '',
         origin_address: 'Current Location'
       }, { headers: { Authorization: `Bearer ${token}` } });
+      localStorage.setItem('mrguide_active_trip', res.data.id);
       setSuccess(true);
       setTimeout(() => onBooked(res.data), 1200);
     } catch (err) {

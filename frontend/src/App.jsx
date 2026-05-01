@@ -17,6 +17,7 @@ import GuideRegister from './pages/GuideRegister';
 import GuideDashboard from './pages/GuideDashboard';
 import TripPayment from './pages/TripPayment';
 import LiveTripView from './pages/LiveTripView';
+import MyTrip from './pages/MyTrip';
 
 import { API_BASE_URL } from './config';
 
@@ -96,6 +97,9 @@ const App = () => {
             <Link to="/guides">Find a Guide</Link>
             <Link to="/about">About Us</Link>
             {user && <Link to="/guide/dashboard">My Guide</Link>}
+            {user && localStorage.getItem('mrguide_active_trip') && (
+              <Link to="/my-trip" className="nav-active-trip">🗺 My Trip</Link>
+            )}
           </div>
 
           <div className="nav-right">
@@ -137,6 +141,7 @@ const App = () => {
           <Route path="/guide/dashboard" element={user ? <GuideDashboard user={user} /> : <Navigate to="/login" />} />
           <Route path="/pay/:tripId" element={<TripPayment user={user} />} />
           <Route path="/trip/live/:tripId" element={user ? <LiveTripView user={user} /> : <Navigate to="/login" />} />
+          <Route path="/my-trip" element={user ? <MyTrip user={user} /> : <Navigate to="/login" />} />
           <Route path="/login" element={user ? <Navigate to="/" /> : <Login setUser={setUser} />} />
           <Route path="/register" element={user ? <Navigate to="/" /> : <Register setUser={setUser} />} />
           <Route path="/about" element={<AboutUs />} />

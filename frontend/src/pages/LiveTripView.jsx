@@ -37,7 +37,13 @@ export default function LiveTripView({ user }) {
     }).then(r => {
       setTrip(r.data);
       if (r.data.Guide) setGuide(r.data.Guide);
-      if (r.data.status === 'completed') setShowQR(true);
+      if (['pending', 'confirmed', 'active'].includes(r.data.status)) {
+        localStorage.setItem('mrguide_active_trip', tripId);
+      }
+      if (r.data.status === 'completed') {
+        setShowQR(true);
+        localStorage.removeItem('mrguide_active_trip');
+      }
       if (r.data.status === 'active' && !dataWarningDismissedRef.current) setShowDataWarning(true);
       if (r.data.status === 'active') {
         setLiveFare({
@@ -99,6 +105,7 @@ export default function LiveTripView({ user }) {
     });
 
     socket.on('trip:ended', ({ final_fare, waiting_charge_total }) => {
+      localStorage.removeItem('mrguide_active_trip');
       setTrip(prev => ({
         ...prev,
         status: 'completed',
@@ -114,6 +121,7 @@ export default function LiveTripView({ user }) {
     });
 
     socket.on('booking:rejected', ({ guide_name }) => {
+      localStorage.removeItem('mrguide_active_trip');
       setTrip(prev => prev ? { ...prev, status: 'rejected' } : prev);
       alert(`${guide_name || 'The guide'} declined your booking. Please choose another guide.`);
       navigate('/guides');

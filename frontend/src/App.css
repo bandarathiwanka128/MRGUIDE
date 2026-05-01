@@ -221,6 +221,21 @@ body {
 .nav-links a:hover { color: var(--primary); }
 .nav-links a:hover::after { width: 100%; }
 
+.nav-active-trip {
+  background: linear-gradient(135deg, #34699A, #1e4a75) !important;
+  color: white !important;
+  padding: 5px 14px !important;
+  border-radius: 20px !important;
+  font-weight: 700 !important;
+  font-size: 0.85rem !important;
+  animation: pulse-nav 2s ease-in-out infinite;
+}
+.nav-active-trip::after { display: none !important; }
+@keyframes pulse-nav {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(52,105,154,0.5); }
+  50% { box-shadow: 0 0 0 7px rgba(52,105,154,0); }
+}
+
 /* ── Right: toggle + auth ── */
 .nav-right {
   display: flex;

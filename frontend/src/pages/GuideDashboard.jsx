@@ -85,6 +85,7 @@ export default function GuideDashboard({ user }) {
   const [showEndConfirm, setShowEndConfirm] = useState(false);
   const [showRejectConfirm, setShowRejectConfirm] = useState(false);
   const [guidePos, setGuidePos] = useState(null);
+  const [guideElapsed, setGuideElapsed] = useState(0);
   const socketRef = useRef(null);
   const watchIdRef = useRef(null);
   const lastCoordsRef = useRef(null);
@@ -265,6 +266,19 @@ export default function GuideDashboard({ user }) {
     const interval = setInterval(updatePreview, 10000);
     return () => clearInterval(interval);
   }, [isWaiting, waitingStartedAt, guide]);
+
+  // Independent elapsed timer for active trip (not dependent on socket)
+  useEffect(() => {
+    if (!activeTrip?.started_at || activeTrip.status !== 'active') {
+      setGuideElapsed(0);
+      return;
+    }
+    const start = new Date(activeTrip.started_at).getTime();
+    const tick = () => setGuideElapsed(Math.floor((Date.now() - start) / 1000));
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [activeTrip?.started_at, activeTrip?.status]);
 
   const toggleLive = async () => {
     if (!guide || !guide.is_verified) return;
@@ -456,7 +470,7 @@ export default function GuideDashboard({ user }) {
                 <div className="gd-fare-panel">
                   <div className="gd-fare-item">
                     <span>Elapsed Time</span>
-                    <strong>{formatDuration(liveFare.elapsed_seconds)}</strong>
+                    <strong>{formatDuration(guideElapsed)}</strong>
                   </div>
                   <div className="gd-fare-item">
                     <span>Distance</span>
@@ -811,9 +825,9 @@ export default function GuideDashboard({ user }) {
           <div className="gd-modal" onClick={e => e.stopPropagation()}>
             <h3>Are you sure you want to end the trip?</h3>
             <div className="gd-modal-body">
-              <p><strong>Elapsed time:</strong> {formatDuration(liveFare.elapsed_seconds)}</p>
-              <p><strong>Distance tracked:</strong> {parseFloat(liveFare.distance_km || 0).toFixed(2)} km</p>
-              <p><strong>Current fare:</strong> LKR {parseFloat((parseFloat(liveFare.base_fare || activeTrip.base_fare || 0) + parseFloat(waitingTotal || 0)) || 0).toLocaleString()}</p>
+              <p><strong>Elapsed time:</strong> {formatDuration(guideElapsed)}</p>
+              <p><strong>Distance tracked:</strong> {distanceKmRef.current.toFixed(2)} km</p>
+              <p><strong>Current fare:</strong> LKR {(parseFloat(liveFare.base_fare || activeTrip.base_fare || 0) + parseFloat(waitingTotal || 0)).toLocaleString()}</p>
             </div>
             <div className="gd-modal-actions">
               <button className="gd-trip-btn gd-trip-btn--ghost" onClick={() => setShowEndConfirm(false)}>Cancel</button>

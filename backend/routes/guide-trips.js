@@ -83,6 +83,27 @@ router.post('/', authenticateToken, async (req, res) => {
   }
 });
 
+// GET /api/guide-trips/my/active — tourist's current active trip
+router.get('/my/active', authenticateToken, async (req, res) => {
+  try {
+    const { Op } = require('sequelize');
+    const trip = await GuideTrip.findOne({
+      where: {
+        tourist_id: req.user.id,
+        status: { [Op.in]: ['pending', 'confirmed', 'active'] }
+      },
+      include: [
+        { model: Guide, include: [{ model: User, attributes: ['username'] }] },
+        { model: User, as: 'tourist', attributes: ['username', 'id'] }
+      ],
+      order: [['created_at', 'DESC']]
+    });
+    res.json(trip || null);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch active trip' });
+  }
+});
+
 // GET /api/guide-trips/:id
 router.get('/:id', authenticateToken, async (req, res) => {
   try {
@@ -216,7 +237,7 @@ router.put('/:id/waiting/start', authenticateToken, async (req, res) => {
     res.json(trip);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to start waiting charge' });
+    res.status(500).json({ error: 'Failed to start waiting charge', details: err.message });
   }
 });
 
@@ -264,7 +285,7 @@ router.put('/:id/waiting/stop', authenticateToken, async (req, res) => {
     res.json(trip);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to stop waiting charge' });
+    res.status(500).json({ error: 'Failed to stop waiting charge', details: err.message });
   }
 });
 
