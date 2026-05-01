@@ -27,7 +27,7 @@ console.log('========================');
 let sequelize, authRoutes, placesRoutes, storesRoutes, aiRoutes, tripsRoutes,
     weatherRoutes, seedRoutes, guidesRoutes, guideTripsRoutes, payoutsRoutes,
     adminGuidesRoutes, defaultLimiter, aiLimiter, authLimiter, paymentLimiter,
-    oauthRouter, passport, eventBus, createGraphQLMiddleware, generateAPIKey;
+  oauthRouter, passport, eventBus, createGraphQLMiddleware, generateAPIKey, calculateFare;
 
 try {
   ({ sequelize }         = require('./config/database'));
@@ -47,6 +47,7 @@ try {
   eventBus                = require('./events/eventBus');
   ({ createGraphQLMiddleware }         = require('./graphql/schema'));
   ({ generateAPIKey }                  = require('./gateway/apiKey'));
+  ({ calculateFare }                   = require('./utils/fareCalculator'));
 } catch (bootErr) {
   console.error('\n❌ STARTUP FAILED — module load error:');
   console.error('   ', bootErr.message);
@@ -83,6 +84,19 @@ io.use((socket, next) => {
 // Bug #8: Per-guide location update throttle (max 1 DB write per 3 s)
 const locationThrottle = new Map();
 const LOCATION_THROTTLE_MS = 3000;
+const guideStopTracker = new Map();
+const STOP_DISTANCE_KM = 0.05;
+const STOP_MINUTES_MS = 4 * 60 * 1000;
+
+function haversineKm(lat1, lng1, lat2, lng2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
 
 io.on('connection', (socket) => {
   // Validate room joins against the authenticated user
@@ -101,9 +115,54 @@ io.on('connection', (socket) => {
     if (socket.user.role === 'admin') socket.join('admin:live');
   });
 
-  socket.on('guide:location_update', async ({ guide_id, lat, lng, accuracy, trip_id }) => {
-    // Bug #8: Throttle — skip DB write if last update was < 3 s ago
+  socket.on('guide:location_update', async ({ guide_id, lat, lng, accuracy, trip_id, distance_km_total }) => {
     const now = Date.now();
+    const stopEntry = guideStopTracker.get(guide_id);
+    if (!stopEntry) {
+      guideStopTracker.set(guide_id, { since: now, lat, lng, notified: false });
+    } else {
+      const distKm = haversineKm(stopEntry.lat, stopEntry.lng, lat, lng);
+      if (distKm > STOP_DISTANCE_KM) {
+        guideStopTracker.set(guide_id, { since: now, lat, lng, notified: false });
+      } else if (now - stopEntry.since >= STOP_MINUTES_MS && !stopEntry.notified && trip_id) {
+        try {
+          const { GuideTrip } = require('./config/database');
+          const trip = await GuideTrip.findByPk(trip_id);
+          if (trip && !trip.is_waiting) {
+            socket.emit('trip:stop_detected', { trip_id, stopped_minutes: 4 });
+            guideStopTracker.set(guide_id, { ...stopEntry, notified: true });
+          }
+        } catch (err) {
+          console.error('Stop detection error:', err.message);
+        }
+      }
+    }
+
+    if (trip_id && distance_km_total !== undefined && distance_km_total !== null) {
+      try {
+        const { GuideTrip, Guide } = require('./config/database');
+        const trip = await GuideTrip.findByPk(trip_id, { include: [Guide] });
+        if (trip && trip.status === 'active') {
+          const baseFare = calculateFare(distance_km_total, trip.Guide);
+          const startedAt = trip.started_at ? new Date(trip.started_at).getTime() : now;
+          const elapsedSeconds = Math.max(0, Math.floor((now - startedAt) / 1000));
+          const waitingCharge = parseFloat(trip.waiting_charge_total || 0);
+          io.to(`trip:${trip_id}`).emit('trip:fare_update', {
+            trip_id,
+            lat,
+            lng,
+            distance_km: parseFloat(distance_km_total.toFixed(3)),
+            base_fare: Math.round(baseFare * 100) / 100,
+            waiting_charge: waitingCharge,
+            elapsed_seconds: elapsedSeconds
+          });
+        }
+      } catch (err) {
+        console.error('Fare update error:', err.message);
+      }
+    }
+
+    // Bug #8: Throttle — skip DB write if last update was < 3 s ago
     if (now - (locationThrottle.get(guide_id) || 0) < LOCATION_THROTTLE_MS) {
       // Still broadcast the live position even if we skip the DB write
       if (trip_id) socket.to(`trip:${trip_id}`).emit('trip:guide_location', { trip_id, lat, lng });
@@ -124,6 +183,7 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     // Clean up throttle entry when guide disconnects
     if (socket.user?.guideId) locationThrottle.delete(socket.user.guideId);
+    if (socket.user?.guideId) guideStopTracker.delete(socket.user.guideId);
   });
 });
 
