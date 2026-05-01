@@ -8,12 +8,15 @@ import './TripPayment.css';
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
-function PaymentForm({ trip, guide, tip, setTip, onSuccess, onError }) {
+function PaymentForm({ trip, guide, tip, setTip, onSuccess, onError, showTip }) {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
 
-  const total = parseFloat(trip.base_fare || 0) + parseFloat(tip || 0);
+  const waitingCharge = parseFloat(trip.waiting_charge_total || 0);
+  const baseFare = parseFloat(trip.base_fare || 0);
+  const effectiveTip = showTip ? parseFloat(tip || 0) : 0;
+  const total = baseFare + waitingCharge + effectiveTip;
 
   const handlePay = async (e) => {
     e.preventDefault();
@@ -54,24 +57,27 @@ function PaymentForm({ trip, guide, tip, setTip, onSuccess, onError }) {
     <form onSubmit={handlePay} className="payment-form">
       <div className="payment-fare-breakdown">
         <div className="pf-row"><span>Base Fare</span><span>LKR {parseFloat(trip.base_fare || 0).toLocaleString()}</span></div>
-        <div className="pf-row pf-tip-row">
-          <span>Add Tip (optional)</span>
-          <div className="tip-input-wrap">
-            <span>LKR</span>
-            <input
-              type="number"
-              min="0"
-              step="50"
-              value={tip}
-              onChange={e => setTip(e.target.value)}
-              placeholder="0"
-              className="tip-input"
-            />
+        <div className="pf-row"><span>Waiting Charge</span><span>LKR {waitingCharge.toLocaleString()}</span></div>
+        {showTip && (
+          <div className="pf-row pf-tip-row">
+            <span>Add Tip (optional)</span>
+            <div className="tip-input-wrap">
+              <span>LKR</span>
+              <input
+                type="number"
+                min="0"
+                step="50"
+                value={tip}
+                onChange={e => setTip(e.target.value)}
+                placeholder="0"
+                className="tip-input"
+              />
+            </div>
           </div>
-        </div>
+        )}
         <div className="pf-row pf-total"><span>Total</span><strong>LKR {total.toLocaleString()}</strong></div>
-        <div className="pf-row pf-muted"><span>Platform (5%)</span><span>LKR {parseFloat(trip.platform_commission || 0).toLocaleString()}</span></div>
-        <div className="pf-row pf-muted"><span>Tip goes 100% to guide</span><span>LKR {parseFloat(tip || 0).toLocaleString()}</span></div>
+        <div className="pf-row pf-muted"><span>Platform (5%)</span><span>LKR {parseFloat((baseFare + waitingCharge) * 0.05).toLocaleString()}</span></div>
+        <div className="pf-row pf-muted"><span>Tip goes 100% to guide</span><span>LKR {effectiveTip.toLocaleString()}</span></div>
       </div>
 
       <div className="card-element-wrap">
@@ -102,6 +108,7 @@ export default function TripPayment({ user }) {
   const [tip, setTip] = useState(0);
   const [paid, setPaid] = useState(false);
   const [error, setError] = useState('');
+  const [qrScanned, setQrScanned] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -110,6 +117,7 @@ export default function TripPayment({ user }) {
     }).then(r => {
       setTrip(r.data);
       if (r.data.Guide) setGuide(r.data.Guide);
+      setQrScanned(true);
     }).catch(() => setError('Trip not found'))
     .finally(() => setLoading(false));
   }, [tripId]);
@@ -136,7 +144,7 @@ export default function TripPayment({ user }) {
           <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
         <h2>Payment Successful!</h2>
-        <p>LKR {(parseFloat(trip?.base_fare || 0) + parseFloat(tip || 0)).toLocaleString()} paid.</p>
+        <p>LKR {(parseFloat(trip?.base_fare || 0) + parseFloat(trip?.waiting_charge_total || 0) + parseFloat(tip || 0)).toLocaleString()} paid.</p>
         <p className="tp-success-sub">Your guide has been notified. Thank you for using Mr. Guide!</p>
         {trip && (
           <button onClick={() => navigate(`/guides/${trip.guide_id}`)} className="tp-rate-btn">
@@ -172,10 +180,11 @@ export default function TripPayment({ user }) {
             <PaymentForm
               trip={trip}
               guide={guide}
-              tip={tip}
+              tip={qrScanned ? tip : 0}
               setTip={setTip}
               onSuccess={() => setPaid(true)}
               onError={setError}
+              showTip={qrScanned}
             />
           </Elements>
 
