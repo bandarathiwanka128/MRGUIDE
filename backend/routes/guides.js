@@ -102,6 +102,9 @@ router.post('/register', authenticateToken, async (req, res) => {
     const {
       display_name, bio, about_tours, languages, speciality_regions,
       tier_1km, tier_5km, tier_10km, tier_20km, tier_per_km_over20,
+      wait_rate_10m, wait_rate_20m, wait_rate_30m, wait_rate_40m,
+      wait_rate_1h, wait_rate_2h, wait_rate_3h, wait_rate_5h,
+      wait_rate_per_hour, wait_rate_per_30m, wait_rate_per_15m,
       phone, whatsapp, payment_ref,
       bank_name, bank_account_number, bank_branch,
       nic_number, card_last4, card_expiry
@@ -117,6 +120,9 @@ router.post('/register', authenticateToken, async (req, res) => {
       languages: languages || [],
       speciality_regions: speciality_regions || [],
       tier_1km, tier_5km, tier_10km, tier_20km, tier_per_km_over20,
+      wait_rate_10m, wait_rate_20m, wait_rate_30m, wait_rate_40m,
+      wait_rate_1h, wait_rate_2h, wait_rate_3h, wait_rate_5h,
+      wait_rate_per_hour, wait_rate_per_30m, wait_rate_per_15m,
       phone, whatsapp, payment_ref,
       bank_name, bank_account_number, bank_branch,
       nic_number, card_last4, card_expiry,
@@ -140,6 +146,9 @@ router.put('/:id', authenticateToken, async (req, res) => {
     const allowed = [
       'display_name', 'bio', 'about_tours', 'languages', 'speciality_regions',
       'tier_1km', 'tier_5km', 'tier_10km', 'tier_20km', 'tier_per_km_over20',
+      'wait_rate_10m', 'wait_rate_20m', 'wait_rate_30m', 'wait_rate_40m',
+      'wait_rate_1h', 'wait_rate_2h', 'wait_rate_3h', 'wait_rate_5h',
+      'wait_rate_per_hour', 'wait_rate_per_30m', 'wait_rate_per_15m',
       'phone', 'whatsapp', 'payment_ref', 'bank_name', 'bank_account_number', 'bank_branch'
     ];
     const updates = {};

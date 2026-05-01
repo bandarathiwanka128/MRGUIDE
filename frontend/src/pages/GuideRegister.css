@@ -217,6 +217,60 @@
 .gr-fare-preview-val { display: block; font-size: 0.9rem; font-weight: 700; color: #34699A; }
 .gr-fare-note { font-size: 0.78rem; color: var(--text-secondary, #64748b); margin: 0; }
 
+/* Waiting charges table */
+.gr-waiting-section { margin-top: 22px; }
+.gr-waiting-table {
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--bg-card, #fff);
+}
+.gr-waiting-row {
+  display: grid;
+  grid-template-columns: 1.6fr 0.8fr 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--border-subtle, #e2e8f0);
+  font-size: 0.9rem;
+  color: var(--text-primary, #1a202c);
+}
+.gr-waiting-row:first-child { border-top: none; }
+.gr-waiting-header {
+  background: var(--bg, #f8fafc);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-secondary, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.gr-waiting-label { font-weight: 600; }
+.gr-waiting-duration { color: var(--text-secondary, #64748b); }
+.gr-waiting-input {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--border-subtle, #e2e8f0);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg, #f8fafc);
+}
+.gr-waiting-input span {
+  padding: 0 10px;
+  font-size: 0.8rem;
+  color: var(--text-secondary, #64748b);
+  border-right: 1px solid var(--border-subtle, #e2e8f0);
+  white-space: nowrap;
+}
+.gr-waiting-input input {
+  border: none;
+  background: transparent;
+  padding: 8px 10px;
+  width: 100%;
+  color: var(--text-primary, #1a202c);
+  font-size: 0.9rem;
+}
+.gr-waiting-input input:focus { outline: none; }
+
 /* Commission notice */
 .gr-commission-notice {
   background: rgba(255,204,0,0.1);

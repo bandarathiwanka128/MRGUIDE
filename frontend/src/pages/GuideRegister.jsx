@@ -15,6 +15,20 @@ const SAMPLE_FARES = [
   { km: 25, label: '25 km' },
 ];
 
+const WAITING_RATE_FIELDS = [
+  { label: '10 Minutes', duration: '10 min', key: 'wait_rate_10m' },
+  { label: '20 Minutes', duration: '20 min', key: 'wait_rate_20m' },
+  { label: '30 Minutes', duration: '30 min', key: 'wait_rate_30m' },
+  { label: '40 Minutes', duration: '40 min', key: 'wait_rate_40m' },
+  { label: '1 Hour', duration: '60 min', key: 'wait_rate_1h' },
+  { label: '2 Hours', duration: '120 min', key: 'wait_rate_2h' },
+  { label: '3 Hours', duration: '180 min', key: 'wait_rate_3h' },
+  { label: '5 Hours', duration: '300 min', key: 'wait_rate_5h' },
+  { label: 'Per additional hour', duration: '60 min', key: 'wait_rate_per_hour' },
+  { label: 'Per additional 30m', duration: '30 min', key: 'wait_rate_per_30m' },
+  { label: 'Per additional 15m', duration: '15 min', key: 'wait_rate_per_15m' }
+];
+
 function calcFare(km, form) {
   const d = parseFloat(km);
   const t1 = parseFloat(form.tier_1km) || 0;
@@ -48,6 +62,17 @@ export default function GuideRegister({ user }) {
     tier_10km: '',
     tier_20km: '',
     tier_per_km_over20: '',
+    wait_rate_10m: '',
+    wait_rate_20m: '',
+    wait_rate_30m: '',
+    wait_rate_40m: '',
+    wait_rate_1h: '',
+    wait_rate_2h: '',
+    wait_rate_3h: '',
+    wait_rate_5h: '',
+    wait_rate_per_hour: '',
+    wait_rate_per_30m: '',
+    wait_rate_per_15m: '',
     bank_name: '',
     bank_account_number: '',
     bank_branch: '',
@@ -227,6 +252,35 @@ export default function GuideRegister({ user }) {
                   ))}
                 </div>
                 <p className="gr-fare-note">Example: 28 km trip = LKR {calcFare(28, form).toLocaleString()} (using your tier_20km + (8 × per_km))</p>
+              </div>
+
+              <div className="gr-waiting-section">
+                <h3>Waiting / Stop Charges</h3>
+                <p className="gr-pricing-note">Optional rates for stops during a trip. Enter 0 for free waiting.</p>
+                <div className="gr-waiting-table">
+                  <div className="gr-waiting-row gr-waiting-header">
+                    <span>Bracket</span>
+                    <span>Duration</span>
+                    <span>Rate (LKR)</span>
+                  </div>
+                  {WAITING_RATE_FIELDS.map(field => (
+                    <div className="gr-waiting-row" key={field.key}>
+                      <span className="gr-waiting-label">{field.label}</span>
+                      <span className="gr-waiting-duration">{field.duration}</span>
+                      <div className="gr-waiting-input">
+                        <span>LKR</span>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={form[field.key]}
+                          onChange={e => set(field.key, e.target.value)}
+                          placeholder="0"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}
