@@ -38,4 +38,34 @@ function fareBreakdown(distanceKm, guide) {
   };
 }
 
-module.exports = { calculateFare, fareBreakdown };
+function calculateWaitingCharge(minutes, guide) {
+  const mins = Math.max(0, parseFloat(minutes) || 0);
+  const roundedMinutes = Math.round(mins * 100) / 100;
+  const rate = key => parseFloat(guide[key]) || 0;
+
+  let total = 0;
+  if (roundedMinutes <= 10) total = rate('wait_rate_10m');
+  else if (roundedMinutes <= 20) total = rate('wait_rate_20m');
+  else if (roundedMinutes <= 30) total = rate('wait_rate_30m');
+  else if (roundedMinutes <= 40) total = rate('wait_rate_40m');
+  else if (roundedMinutes <= 60) total = rate('wait_rate_1h');
+  else if (roundedMinutes <= 120) total = rate('wait_rate_2h');
+  else if (roundedMinutes <= 180) total = rate('wait_rate_3h');
+  else if (roundedMinutes <= 300) total = rate('wait_rate_5h');
+  else {
+    total = rate('wait_rate_5h');
+    let remaining = roundedMinutes - 300;
+    const hours = Math.floor(remaining / 60);
+    total += hours * rate('wait_rate_per_hour');
+    remaining = remaining % 60;
+    const halfHours = Math.floor(remaining / 30);
+    total += halfHours * rate('wait_rate_per_30m');
+    remaining = remaining % 30;
+    const quarterHours = Math.floor(remaining / 15);
+    total += quarterHours * rate('wait_rate_per_15m');
+  }
+
+  return { minutes: roundedMinutes, charge_lkr: Math.round(total * 100) / 100 };
+}
+
+module.exports = { calculateFare, fareBreakdown, calculateWaitingCharge };
