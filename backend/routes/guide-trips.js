@@ -83,6 +83,22 @@ router.post('/', authenticateToken, async (req, res) => {
   }
 });
 
+// GET /api/guide-trips/:id/client-secret — retrieve Stripe client_secret for payment page
+router.get('/:id/client-secret', authenticateToken, async (req, res) => {
+  try {
+    const trip = await GuideTrip.findByPk(req.params.id);
+    if (!trip) return res.status(404).json({ error: 'Trip not found' });
+    if (trip.tourist_id !== req.user.id) return res.status(403).json({ error: 'Forbidden' });
+    if (!trip.stripe_payment_intent_id) return res.status(404).json({ error: 'No payment intent for this trip' });
+    if (trip.paid) return res.json({ already_paid: true });
+    const pi = await getStripe().paymentIntents.retrieve(trip.stripe_payment_intent_id);
+    res.json({ client_secret: pi.client_secret, status: pi.status });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Could not retrieve payment info' });
+  }
+});
+
 // GET /api/guide-trips/my/active — tourist's current active trip
 router.get('/my/active', authenticateToken, async (req, res) => {
   try {

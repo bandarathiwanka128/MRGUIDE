@@ -8,7 +8,7 @@ import './TripPayment.css';
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
-function PaymentForm({ trip, guide, tip, setTip, onSuccess, onError }) {
+function PaymentForm({ trip, clientSecret, tip, setTip, onSuccess, onError }) {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
@@ -24,13 +24,22 @@ function PaymentForm({ trip, guide, tip, setTip, onSuccess, onError }) {
     setLoading(true);
 
     try {
-      // Confirm payment with Stripe (using client_secret from trip)
+      const token = localStorage.getItem('token');
+
+      // Check if already paid (idempotency)
+      if (trip.paid) { onSuccess(); return; }
+
+      // Confirm card payment with Stripe using fetched client_secret
       if (trip.stripe_payment_intent_id) {
+        if (!clientSecret) {
+          onError('Payment details not ready. Please refresh and try again.');
+          setLoading(false);
+          return;
+        }
         const cardEl = elements.getElement(CardElement);
-        const result = await stripe.confirmCardPayment(trip.client_secret || '', {
+        const result = await stripe.confirmCardPayment(clientSecret, {
           payment_method: { card: cardEl }
         });
-
         if (result.error) {
           onError(result.error.message);
           setLoading(false);
@@ -38,14 +47,13 @@ function PaymentForm({ trip, guide, tip, setTip, onSuccess, onError }) {
         }
       }
 
-      // Mark trip as QR paid
-      const token = localStorage.getItem('token');
-      await axios.put(`${API_BASE_URL}/guide-trips/${trip.id}/pay/qr`, {
+      // Mark trip as paid in our DB
+      const res = await axios.put(`${API_BASE_URL}/guide-trips/${trip.id}/pay/qr`, {
         tip_amount: parseFloat(tip) || 0,
         payment_intent_id: trip.stripe_payment_intent_id
       }, { headers: { Authorization: `Bearer ${token}` } });
 
-      onSuccess();
+      if (res.data.already_paid || res.data.ok) onSuccess();
     } catch (err) {
       onError(err.response?.data?.error || 'Payment failed. Please try again.');
     } finally {
@@ -98,6 +106,7 @@ export default function TripPayment({ user }) {
   const [tip, setTip] = useState(0);
   const [paid, setPaid] = useState(false);
   const [error, setError] = useState('');
+  const [clientSecret, setClientSecret] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -106,6 +115,16 @@ export default function TripPayment({ user }) {
     }).then(r => {
       setTrip(r.data);
       if (r.data.Guide) setGuide(r.data.Guide);
+      if (r.data.paid) { setPaid(true); return; }
+      // Fetch Stripe client_secret separately (not stored in DB)
+      if (r.data.stripe_payment_intent_id && token) {
+        axios.get(`${API_BASE_URL}/guide-trips/${tripId}/client-secret`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }).then(cs => {
+          if (cs.data.already_paid) setPaid(true);
+          else setClientSecret(cs.data.client_secret);
+        }).catch(() => {});
+      }
     }).catch(() => setError('Trip not found'))
     .finally(() => setLoading(false));
   }, [tripId]);
@@ -167,10 +186,13 @@ export default function TripPayment({ user }) {
           <Elements stripe={stripePromise}>
             <PaymentForm
               trip={trip}
-              guide={guide}
+              clientSecret={clientSecret}
               tip={tip}
               setTip={setTip}
-              onSuccess={() => setPaid(true)}
+              onSuccess={() => {
+                localStorage.removeItem('mrguide_active_trip');
+                setPaid(true);
+              }}
               onError={setError}
             />
           </Elements>
