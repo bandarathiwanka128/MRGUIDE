@@ -128,10 +128,10 @@
 }
 
 .card-element-box {
-  border: 1.5px solid var(--border-subtle, #e2e8f0);
+  border: 1.5px solid rgba(255,255,255,0.15);
   border-radius: 10px;
   padding: 14px;
-  background: var(--bg, #f8fafc);
+  background: rgba(255,255,255,0.06);
 }
 
 .card-test-hint {

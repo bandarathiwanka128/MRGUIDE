@@ -81,7 +81,7 @@ function PaymentForm({ trip, clientSecret, tip, setTip, onSuccess, onError }) {
       <div className="card-element-wrap">
         <label>Card Details</label>
         <div className="card-element-box">
-          <CardElement options={{ style: { base: { fontSize: '16px', color: '#1a202c', '::placeholder': { color: '#94a3b8' } } } }} />
+          <CardElement options={{ style: { base: { fontSize: '16px', color: '#ffffff', '::placeholder': { color: '#94a3b8' }, iconColor: '#94a3b8' }, invalid: { color: '#f87171' } } }} />
         </div>
         <p className="card-test-hint">Test card: 4242 4242 4242 4242 · Any future expiry · Any CVC</p>
       </div>
