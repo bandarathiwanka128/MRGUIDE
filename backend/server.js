@@ -67,13 +67,50 @@ const io = new Server(httpServer, {
 });
 app.set('io', io);
 
+// Bug #7: Require JWT on every Socket.io connection
+io.use((socket, next) => {
+  const token = socket.handshake.auth?.token;
+  if (!token) return next(new Error('Authentication required'));
+  try {
+    const jwt = require('jsonwebtoken');
+    socket.user = jwt.verify(token, process.env.JWT_SECRET);
+    next();
+  } catch {
+    next(new Error('Invalid token'));
+  }
+});
+
+// Bug #8: Per-guide location update throttle (max 1 DB write per 3 s)
+const locationThrottle = new Map();
+const LOCATION_THROTTLE_MS = 3000;
+
 io.on('connection', (socket) => {
-  socket.on('guide:join',    ({ guide_id })   => socket.join(`guide:${guide_id}`));
-  socket.on('tourist:join',  ({ tourist_id }) => socket.join(`tourist:${tourist_id}`));
-  socket.on('trip:join',     ({ trip_id })    => socket.join(`trip:${trip_id}`));
-  socket.on('admin:join_live', ()             => socket.join('admin:live'));
+  // Validate room joins against the authenticated user
+  socket.on('guide:join', ({ guide_id }) => {
+    if (String(socket.user.guideId || socket.user.id) === String(guide_id) || socket.user.role === 'admin') {
+      socket.join(`guide:${guide_id}`);
+    }
+  });
+  socket.on('tourist:join', ({ tourist_id }) => {
+    if (String(socket.user.id) === String(tourist_id) || socket.user.role === 'admin') {
+      socket.join(`tourist:${tourist_id}`);
+    }
+  });
+  socket.on('trip:join', ({ trip_id }) => socket.join(`trip:${trip_id}`));
+  socket.on('admin:join_live', () => {
+    if (socket.user.role === 'admin') socket.join('admin:live');
+  });
 
   socket.on('guide:location_update', async ({ guide_id, lat, lng, accuracy, trip_id }) => {
+    // Bug #8: Throttle — skip DB write if last update was < 3 s ago
+    const now = Date.now();
+    if (now - (locationThrottle.get(guide_id) || 0) < LOCATION_THROTTLE_MS) {
+      // Still broadcast the live position even if we skip the DB write
+      if (trip_id) socket.to(`trip:${trip_id}`).emit('trip:guide_location', { trip_id, lat, lng });
+      return;
+    }
+    locationThrottle.set(guide_id, now);
+
     try {
       const { GuideLocation } = require('./config/database');
       await GuideLocation.upsert({ guide_id, lat, lng, accuracy: accuracy || null });
@@ -84,7 +121,10 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('disconnect', () => {});
+  socket.on('disconnect', () => {
+    // Clean up throttle entry when guide disconnects
+    if (socket.user?.guideId) locationThrottle.delete(socket.user.guideId);
+  });
 });
 
 // ─── Security headers (Helmet + CSP) ─────────────────────────────────────────

@@ -186,7 +186,8 @@ router.put('/:id/end', authenticateToken, async (req, res) => {
       paymentIntentId = pi.id;
       clientSecret = pi.client_secret;
     } catch (stripeErr) {
-      console.warn('Stripe PaymentIntent failed (test mode?):', stripeErr.message);
+      console.error('Stripe PaymentIntent creation failed:', stripeErr.message);
+      // Trip still ends — guide should inform tourist to pay cash
     }
 
     await trip.update({
@@ -234,8 +235,33 @@ router.put('/:id/pay/qr', authenticateToken, async (req, res) => {
     if (!trip) return res.status(404).json({ error: 'Trip not found' });
     if (trip.tourist_id !== req.user.id) return res.status(403).json({ error: 'Forbidden' });
 
-    const { tip_amount, payment_intent_id } = req.body;
+    // Bug #3: Idempotency — reject duplicate payment attempts
+    if (trip.paid) return res.json({ ok: true, already_paid: true, trip });
+
+    // Bug #4: If Stripe failed at trip end, QR payment is not possible
+    if (!trip.stripe_payment_intent_id) {
+      return res.status(402).json({ error: 'Card payment unavailable for this trip. Ask your guide to record cash payment.' });
+    }
+
+    // Bug #2: Verify payment actually succeeded with Stripe before marking paid
+    try {
+      const pi = await getStripe().paymentIntents.retrieve(trip.stripe_payment_intent_id);
+      if (pi.status !== 'succeeded') {
+        return res.status(402).json({ error: 'Payment not yet completed. Please complete card payment first.' });
+      }
+    } catch (stripeErr) {
+      console.error('Stripe PI verification failed:', stripeErr.message);
+      return res.status(502).json({ error: 'Could not verify payment status. Please try again.' });
+    }
+
+    const { tip_amount } = req.body;
     const tip = parseFloat(tip_amount) || 0;
+
+    // Bug #9: Validate tip amount
+    if (tip < 0 || tip > parseFloat(trip.base_fare) * 2) {
+      return res.status(400).json({ error: 'Invalid tip amount' });
+    }
+
     const total = parseFloat(trip.base_fare) + tip;
 
     await trip.update({
@@ -295,12 +321,11 @@ router.put('/:id/pay/cash', authenticateToken, async (req, res) => {
       total_paid: total
     });
 
-    // Add cash commission to guide's pending balance
+    // Add cash commission to guide's pending balance (not collected yet — deducted at payout)
     await trip.Guide.increment({
       pending_cash_commission: parseFloat(trip.platform_commission),
       total_earnings_base: parseFloat(trip.guide_earnings),
-      total_tips_received: tip,
-      total_commission_paid: parseFloat(trip.platform_commission)
+      total_tips_received: tip
     });
 
     const io = req.app.get('io');

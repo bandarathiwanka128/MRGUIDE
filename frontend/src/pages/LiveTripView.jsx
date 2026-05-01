@@ -39,7 +39,10 @@ export default function LiveTripView({ user }) {
 
   // Socket connection
   useEffect(() => {
-    const socket = io(process.env.REACT_APP_SOCKET_URL || 'http://localhost:3001');
+    const token = localStorage.getItem('token');
+    const socket = io(process.env.REACT_APP_SOCKET_URL || 'http://localhost:3001', {
+      auth: { token }
+    });
     socketRef.current = socket;
 
     socket.emit('trip:join', { trip_id: tripId });
