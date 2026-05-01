@@ -8,15 +8,15 @@ import './TripPayment.css';
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
-function PaymentForm({ trip, guide, tip, setTip, onSuccess, onError, showTip }) {
+function PaymentForm({ trip, guide, tip, setTip, onSuccess, onError }) {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
 
   const waitingCharge = parseFloat(trip.waiting_charge_total || 0);
   const baseFare = parseFloat(trip.base_fare || 0);
-  const effectiveTip = showTip ? parseFloat(tip || 0) : 0;
-  const total = baseFare + waitingCharge + effectiveTip;
+  const tipAmount = parseFloat(tip || 0);
+  const total = baseFare + waitingCharge + tipAmount;
 
   const handlePay = async (e) => {
     e.preventDefault();
@@ -58,26 +58,16 @@ function PaymentForm({ trip, guide, tip, setTip, onSuccess, onError, showTip }) 
       <div className="payment-fare-breakdown">
         <div className="pf-row"><span>Base Fare</span><span>LKR {parseFloat(trip.base_fare || 0).toLocaleString()}</span></div>
         <div className="pf-row"><span>Waiting Charge</span><span>LKR {waitingCharge.toLocaleString()}</span></div>
-        {showTip && (
-          <div className="pf-row pf-tip-row">
-            <span>Add Tip (optional)</span>
-            <div className="tip-input-wrap">
-              <span>LKR</span>
-              <input
-                type="number"
-                min="0"
-                step="50"
-                value={tip}
-                onChange={e => setTip(e.target.value)}
-                placeholder="0"
-                className="tip-input"
-              />
-            </div>
+        <div className="pf-row pf-tip-row">
+          <span>Add Tip (optional)</span>
+          <div className="tip-input-wrap">
+            <span>LKR</span>
+            <input type="number" min="0" step="50" value={tip} onChange={e => setTip(e.target.value)} placeholder="0" className="tip-input" />
           </div>
-        )}
+        </div>
         <div className="pf-row pf-total"><span>Total</span><strong>LKR {total.toLocaleString()}</strong></div>
-        <div className="pf-row pf-muted"><span>Platform (5%)</span><span>LKR {parseFloat((baseFare + waitingCharge) * 0.05).toLocaleString()}</span></div>
-        <div className="pf-row pf-muted"><span>Tip goes 100% to guide</span><span>LKR {effectiveTip.toLocaleString()}</span></div>
+        <div className="pf-row pf-muted"><span>Platform (5%)</span><span>LKR {((baseFare + waitingCharge) * 0.05).toLocaleString()}</span></div>
+        <div className="pf-row pf-muted"><span>Tip goes 100% to guide</span><span>LKR {tipAmount.toLocaleString()}</span></div>
       </div>
 
       <div className="card-element-wrap">
@@ -108,7 +98,6 @@ export default function TripPayment({ user }) {
   const [tip, setTip] = useState(0);
   const [paid, setPaid] = useState(false);
   const [error, setError] = useState('');
-  const [qrScanned, setQrScanned] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -117,7 +106,6 @@ export default function TripPayment({ user }) {
     }).then(r => {
       setTrip(r.data);
       if (r.data.Guide) setGuide(r.data.Guide);
-      setQrScanned(true);
     }).catch(() => setError('Trip not found'))
     .finally(() => setLoading(false));
   }, [tripId]);
@@ -180,11 +168,10 @@ export default function TripPayment({ user }) {
             <PaymentForm
               trip={trip}
               guide={guide}
-              tip={qrScanned ? tip : 0}
+              tip={tip}
               setTip={setTip}
               onSuccess={() => setPaid(true)}
               onError={setError}
-              showTip={qrScanned}
             />
           </Elements>
 

@@ -255,34 +255,26 @@ export default function GuideDashboard({ user }) {
     setLiveToggling(true);
     try {
       const newStatus = !guide.is_available;
+      const payload = { is_available: newStatus };
 
-      // Going offline doesn't need GPS
-      if (!newStatus) {
-        await axios.put(`${API_BASE_URL}/guides/${guide.id}/availability`, {
-          is_available: false
-        }, { headers: { Authorization: `Bearer ${token}` } });
-        setGuide(g => ({ ...g, is_available: false }));
-        return;
+      if (newStatus) {
+        let pos;
+        try {
+          pos = await new Promise((res, rej) =>
+            navigator.geolocation.getCurrentPosition(res, rej, { timeout: 8000, enableHighAccuracy: true })
+          );
+        } catch {
+          alert('Location access is required to go live.\n\nPlease allow location permission in your browser and try again.');
+          return;
+        }
+        payload.lat = pos.coords.latitude;
+        payload.lng = pos.coords.longitude;
       }
 
-      // Going live — GPS is required to appear on the map
-      let pos = null;
-      try {
-        pos = await new Promise((res, rej) =>
-          navigator.geolocation.getCurrentPosition(res, rej, { timeout: 8000, enableHighAccuracy: true })
-        );
-      } catch {
-        alert('Location access is required to go live.\n\nPlease allow location permission in your browser and try again.');
-        return;
-      }
-
-      await axios.put(`${API_BASE_URL}/guides/${guide.id}/availability`, {
-        is_available: true,
-        lat: pos.coords.latitude,
-        lng: pos.coords.longitude
-      }, { headers: { Authorization: `Bearer ${token}` } });
-
-      setGuide(g => ({ ...g, is_available: true }));
+      await axios.put(`${API_BASE_URL}/guides/${guide.id}/availability`, payload, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setGuide(g => ({ ...g, is_available: newStatus }));
     } catch (err) {
       alert(err.response?.data?.error || 'Failed to update availability');
     } finally {
