@@ -427,26 +427,53 @@ export default function GuideDashboard({ user }) {
             </div>
 
             {activeTrip.status === 'active' && (
-              <div className="gd-fare-panel">
-                <div className="gd-fare-item">
-                  <span>Elapsed Time</span>
-                  <strong>{formatDuration(liveFare.elapsed_seconds)}</strong>
-                </div>
-                <div className="gd-fare-item">
-                  <span>Distance</span>
-                  <strong>{parseFloat(liveFare.distance_km || 0).toFixed(2)} km</strong>
-                </div>
-                <div className="gd-fare-item">
-                  <span>Base Fare</span>
-                  <strong>LKR {parseFloat(liveFare.base_fare || activeTrip.base_fare || 0).toLocaleString()}</strong>
-                </div>
-                <div className="gd-fare-item">
-                  <span>Waiting Charge</span>
-                  <strong>LKR {parseFloat(waitingTotal || 0).toLocaleString()}</strong>
-                </div>
-                <div className="gd-fare-item gd-fare-total">
-                  <span>Running Total</span>
-                  <strong>LKR {parseFloat((parseFloat(liveFare.base_fare || activeTrip.base_fare || 0) + parseFloat(waitingTotal || 0)) || 0).toLocaleString()}</strong>
+              <div className="gd-active-section">
+                {/* Live map */}
+                {mapsLoaded && (
+                  <div className="gd-booking-map-wrap">
+                    <GoogleMap
+                      mapContainerStyle={BOOKING_MAP_STYLE}
+                      center={guidePos || { lat: 6.9271, lng: 79.8612 }}
+                      zoom={15}
+                      options={{ disableDefaultUI: true, zoomControl: true }}
+                    >
+                      {guidePos && (
+                        <Marker
+                          position={guidePos}
+                          icon={{
+                            url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="#34699A" stroke="white" stroke-width="3"/><text x="20" y="27" font-size="18" text-anchor="middle">🚗</text></svg>')}`,
+                            scaledSize: new window.google.maps.Size(40, 40),
+                            anchor: new window.google.maps.Point(20, 20)
+                          }}
+                        />
+                      )}
+                    </GoogleMap>
+                    <p className="gd-booking-map-label">Your live position</p>
+                  </div>
+                )}
+
+                {/* Fare stats */}
+                <div className="gd-fare-panel">
+                  <div className="gd-fare-item">
+                    <span>Elapsed Time</span>
+                    <strong>{formatDuration(liveFare.elapsed_seconds)}</strong>
+                  </div>
+                  <div className="gd-fare-item">
+                    <span>Distance</span>
+                    <strong>{parseFloat(liveFare.distance_km || 0).toFixed(2)} km</strong>
+                  </div>
+                  <div className="gd-fare-item">
+                    <span>Base Fare</span>
+                    <strong>LKR {parseFloat(liveFare.base_fare || activeTrip.base_fare || 0).toLocaleString()}</strong>
+                  </div>
+                  <div className="gd-fare-item">
+                    <span>Waiting Charge</span>
+                    <strong>LKR {parseFloat(waitingTotal || 0).toLocaleString()}</strong>
+                  </div>
+                  <div className="gd-fare-item gd-fare-total">
+                    <span>Running Total</span>
+                    <strong>LKR {(parseFloat(liveFare.base_fare || activeTrip.base_fare || 0) + parseFloat(waitingTotal || 0)).toLocaleString()}</strong>
+                  </div>
                 </div>
               </div>
             )}
@@ -529,14 +556,6 @@ export default function GuideDashboard({ user }) {
               </div>
             )}
 
-            <div className="gd-live-actions">
-              {activeTrip.status === 'active' && (
-                <button className="gd-trip-btn gd-trip-btn--end" onClick={() => setShowEndConfirm(true)}>
-                  End Trip
-                </button>
-              )}
-            </div>
-
             {activeTrip.status === 'active' && (
               <div className="gd-waiting-card">
                 <div className="gd-waiting-header">
@@ -589,6 +608,12 @@ export default function GuideDashboard({ user }) {
                   <button className="gd-trip-btn gd-trip-btn--ghost" onClick={() => setStopPrompt(false)}>Dismiss</button>
                 </div>
               </div>
+            )}
+
+            {activeTrip.status === 'active' && (
+              <button className="gd-trip-btn gd-trip-btn--end gd-trip-btn--full" onClick={() => setShowEndConfirm(true)}>
+                End Trip
+              </button>
             )}
           </div>
         </div>

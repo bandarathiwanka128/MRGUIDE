@@ -70,6 +70,11 @@ export default function LiveTripView({ user }) {
       setLiveFare({ distance_km: payload.distance_km, base_fare: payload.base_fare, waiting_charge: payload.waiting_charge });
     });
 
+    socket.on('booking:accepted', ({ trip_id }) => {
+      if (String(trip_id) !== String(tripId)) return;
+      setTrip(prev => ({ ...prev, status: 'confirmed' }));
+    });
+
     socket.on('trip:started', ({ trip_id }) => {
       if (String(trip_id) !== String(tripId)) return;
       setTrip(prev => ({ ...prev, status: 'active', started_at: new Date().toISOString() }));
@@ -275,17 +280,29 @@ export default function LiveTripView({ user }) {
             </div>
           )}
 
-          {/* Pending / Confirmed state */}
+          {/* Pending state */}
           {trip?.status === 'pending' && (
             <div className="ltv-pending-section">
               <div className="ltv-pending-dots"><span /><span /><span /></div>
-              <p>Waiting for guide to accept your booking...</p>
+              <p>Waiting for your guide to accept the booking...</p>
             </div>
           )}
+
+          {/* Confirmed state — guide accepted, heading to tourist */}
           {trip?.status === 'confirmed' && (
-            <div className="ltv-pending-section">
-              <div className="ltv-pending-dots"><span /><span /><span /></div>
-              <p>Your guide accepted and is on the way to you. Watch the map above.</p>
+            <div className="ltv-confirmed-banner">
+              <div className="ltv-confirmed-icon">🚗</div>
+              <div>
+                <strong>Guide accepted! On the way to you.</strong>
+                <p>Watch the map — your guide is heading to your pickup point.</p>
+              </div>
+            </div>
+          )}
+
+          {/* Active state — trip in progress notice */}
+          {trip?.status === 'active' && (
+            <div className="ltv-active-notice">
+              <span>● Trip in progress — fare updates in real time</span>
             </div>
           )}
         </div>

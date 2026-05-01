@@ -574,6 +574,13 @@
   100% { opacity: 0.6; }
 }
 
+/* Active trip section */
+.gd-active-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
 /* Accept / Reject booking UI */
 .gd-booking-request,
 .gd-confirmed-section {

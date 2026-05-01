@@ -276,3 +276,41 @@
   font-weight: 700;
   cursor: pointer;
 }
+
+/* Confirmed state banner */
+.ltv-confirmed-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(135deg, rgba(52,105,154,0.12), rgba(52,105,154,0.06));
+  border: 1px solid rgba(52,105,154,0.3);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+
+.ltv-confirmed-icon {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+}
+
+.ltv-confirmed-banner strong {
+  display: block;
+  font-size: 0.95rem;
+  color: var(--text-primary, #1a202c);
+  margin-bottom: 2px;
+}
+
+.ltv-confirmed-banner p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-secondary, #64748b);
+}
+
+/* Active trip notice */
+.ltv-active-notice {
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #22c55e;
+  padding: 4px 0 2px;
+}
