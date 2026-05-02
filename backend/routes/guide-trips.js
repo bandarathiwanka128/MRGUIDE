@@ -91,7 +91,20 @@ router.get('/:id/client-secret', authenticateToken, async (req, res) => {
     if (trip.tourist_id !== req.user.id) return res.status(403).json({ error: 'Forbidden' });
     if (!trip.stripe_payment_intent_id) return res.status(404).json({ error: 'No payment intent for this trip' });
     if (trip.paid) return res.json({ already_paid: true });
-    const pi = await getStripe().paymentIntents.retrieve(trip.stripe_payment_intent_id);
+
+    let pi = await getStripe().paymentIntents.retrieve(trip.stripe_payment_intent_id);
+
+    // If the PI was created without payment_method_types (old format), recreate it
+    if (pi.status === 'requires_payment_method' && !pi.payment_method_types?.includes('card')) {
+      pi = await getStripe().paymentIntents.create({
+        amount: pi.amount,
+        currency: pi.currency,
+        payment_method_types: ['card'],
+        metadata: pi.metadata
+      });
+      await trip.update({ stripe_payment_intent_id: pi.id });
+    }
+
     res.json({ client_secret: pi.client_secret, status: pi.status });
   } catch (err) {
     console.error(err);
@@ -347,6 +360,7 @@ router.put('/:id/end', authenticateToken, async (req, res) => {
       const pi = await getStripe().paymentIntents.create({
         amount: Math.round((fare.base_fare + waitingChargeTotal) * 100),
         currency: 'lkr',
+        payment_method_types: ['card'],
         metadata: { trip_id: String(trip.id), guide_id: String(trip.guide_id) }
       });
       paymentIntentId = pi.id;
