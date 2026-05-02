@@ -174,9 +174,15 @@ router.put('/:id/availability', authenticateToken, async (req, res) => {
     const io = req.app.get('io');
     if (is_available && lat && lng) {
       await GuideLocation.upsert({ guide_id: guide.id, lat, lng, accuracy: accuracy || null });
-      if (io) io.to('admin:live').emit('guide:went_live', { guide_id: guide.id, lat, lng });
+      if (io) {
+        io.to('admin:live').emit('guide:went_live', { guide_id: guide.id, lat, lng });
+        io.to('guides:map').emit('guide:went_live', { guide_id: guide.id, lat, lng });
+      }
     } else {
-      if (io) io.to('admin:live').emit('guide:went_offline', { guide_id: guide.id });
+      if (io) {
+        io.to('admin:live').emit('guide:went_offline', { guide_id: guide.id });
+        io.to('guides:map').emit('guide:went_offline', { guide_id: guide.id });
+      }
     }
 
     res.json({ is_available: guide.is_available });

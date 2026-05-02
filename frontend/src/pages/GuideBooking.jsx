@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { io } from 'socket.io-client';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
 import { API_BASE_URL, GOOGLE_MAPS_API_KEY } from '../config';
 import { calculateFare } from '../utils/fareCalculator';
@@ -53,6 +54,38 @@ export default function GuideBooking({ user }) {
       .then(r => setGuides(r.data))
       .catch(() => setGuides([]))
       .finally(() => setLoading(false));
+  }, []);
+
+  // Real-time guide position updates via socket
+  useEffect(() => {
+    const socket = io(process.env.REACT_APP_SOCKET_URL || 'http://localhost:3001', {
+      auth: { token: localStorage.getItem('token') || '' }
+    });
+    socket.emit('guides:join_map');
+
+    socket.on('guide:location_update', ({ guide_id, lat, lng }) => {
+      setGuides(prev => prev.map(g =>
+        String(g.id) === String(guide_id)
+          ? { ...g, location: { ...(g.location || {}), lat, lng } }
+          : g
+      ));
+    });
+
+    socket.on('guide:went_live', ({ guide_id, lat, lng }) => {
+      setGuides(prev => prev.map(g =>
+        String(g.id) === String(guide_id)
+          ? { ...g, is_available: true, location: { ...(g.location || {}), lat, lng } }
+          : g
+      ));
+    });
+
+    socket.on('guide:went_offline', ({ guide_id }) => {
+      setGuides(prev => prev.map(g =>
+        String(g.id) === String(guide_id) ? { ...g, is_available: false } : g
+      ));
+    });
+
+    return () => socket.disconnect();
   }, []);
 
   // Google Places autocomplete for destination
@@ -141,7 +174,15 @@ export default function GuideBooking({ user }) {
       <aside className="guide-sidebar">
         <div className="guide-sidebar-header">
           <h2>Find a Guide</h2>
-          <span className="guide-count">{processedGuides.length} guides</span>
+          <div className="guide-count-wrap">
+            <span className="guide-count">{processedGuides.length} guides</span>
+            {processedGuides.filter(g => g.is_available).length > 0 && (
+              <span className="live-count-badge">
+                <span className="live-count-dot" />
+                {processedGuides.filter(g => g.is_available).length} live now
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Destination search */}
@@ -320,7 +361,7 @@ export default function GuideBooking({ user }) {
           >
             {processedGuides.map(guide => {
               const loc = guide.location;
-              if (!loc) return null;
+              if (!loc || !guide.is_available) return null;
               return (
                 <Marker
                   key={guide.id}

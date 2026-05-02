@@ -207,8 +207,9 @@ export default function GuideDashboard({ user }) {
     setStopPrompt(false);
   }, [activeTrip?.id]);
 
+  // GPS tracking: runs whenever guide is live (is_available), covers both idle and active-trip states
   useEffect(() => {
-    if (!activeTrip || !['active', 'confirmed'].includes(activeTrip.status)) return;
+    if (!guide?.is_available || !guide?.id) return;
     if (!navigator.geolocation) return;
 
     const watchId = navigator.geolocation.watchPosition(
@@ -216,36 +217,37 @@ export default function GuideDashboard({ user }) {
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
         setGuidePos({ lat, lng });
+
+        const trip = activeTripRef.current;
         const last = lastCoordsRef.current;
-        if (activeTrip.status === 'active' && last) {
-          const delta = haversineKm(last.lat, last.lng, lat, lng);
-          distanceKmRef.current = distanceKmRef.current + delta;
+        if (trip?.status === 'active' && last) {
+          distanceKmRef.current += haversineKm(last.lat, last.lng, lat, lng);
         }
         lastCoordsRef.current = { lat, lng };
 
         if (socketRef.current) {
           socketRef.current.emit('guide:location_update', {
-            guide_id: guide?.id,
+            guide_id: guide.id,
             lat,
             lng,
             accuracy: pos.coords.accuracy,
-            trip_id: activeTrip.id,
-            distance_km_total: activeTrip.status === 'active' ? distanceKmRef.current : 0
+            trip_id: trip?.status === 'active' ? trip.id : undefined,
+            distance_km_total: trip?.status === 'active' ? distanceKmRef.current : 0
           });
         }
       },
-      () => {},
-      { enableHighAccuracy: true, maximumAge: 2000, timeout: 10000 }
+      (err) => console.warn('GPS unavailable:', err.message),
+      { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 }
     );
 
     watchIdRef.current = watchId;
     return () => {
-      if (watchIdRef.current !== null) navigator.geolocation.clearWatch(watchIdRef.current);
+      navigator.geolocation.clearWatch(watchId);
       watchIdRef.current = null;
       lastCoordsRef.current = null;
       distanceKmRef.current = 0;
     };
-  }, [activeTrip?.id, activeTrip?.status, guide?.id]);
+  }, [guide?.is_available, guide?.id]);
 
   useEffect(() => {
     if (!isWaiting || !waitingStartedAt) return;
@@ -293,18 +295,17 @@ export default function GuideDashboard({ user }) {
       const newStatus = !guide.is_available;
       const payload = { is_available: newStatus };
 
-      if (newStatus) {
-        let pos;
+      if (newStatus && navigator.geolocation) {
         try {
-          pos = await new Promise((res, rej) =>
+          const pos = await new Promise((res, rej) =>
             navigator.geolocation.getCurrentPosition(res, rej, { timeout: 8000, enableHighAccuracy: true })
           );
+          payload.lat = pos.coords.latitude;
+          payload.lng = pos.coords.longitude;
         } catch {
-          alert('Location access is required to go live.\n\nPlease allow location permission in your browser and try again.');
-          return;
+          // No GPS (laptop / permission denied) — go live without initial location
+          // Guide will appear on map once continuous tracking gets a fix
         }
-        payload.lat = pos.coords.latitude;
-        payload.lng = pos.coords.longitude;
       }
 
       await axios.put(`${API_BASE_URL}/guides/${guide.id}/availability`, payload, {

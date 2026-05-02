@@ -111,6 +111,7 @@ io.on('connection', (socket) => {
     }
   });
   socket.on('trip:join', ({ trip_id }) => socket.join(`trip:${trip_id}`));
+  socket.on('guides:join_map', () => socket.join('guides:map'));
   socket.on('admin:join_live', () => {
     if (socket.user.role === 'admin') socket.join('admin:live');
   });
@@ -162,10 +163,10 @@ io.on('connection', (socket) => {
       }
     }
 
-    // Bug #8: Throttle — skip DB write if last update was < 3 s ago
+    // Throttle — skip DB write if last update was < 3 s ago
     if (now - (locationThrottle.get(guide_id) || 0) < LOCATION_THROTTLE_MS) {
-      // Still broadcast the live position even if we skip the DB write
       if (trip_id) socket.to(`trip:${trip_id}`).emit('trip:guide_location', { trip_id, lat, lng });
+      socket.to('guides:map').emit('guide:location_update', { guide_id, lat, lng });
       return;
     }
     locationThrottle.set(guide_id, now);
@@ -175,6 +176,7 @@ io.on('connection', (socket) => {
       await GuideLocation.upsert({ guide_id, lat, lng, accuracy: accuracy || null });
       if (trip_id) socket.to(`trip:${trip_id}`).emit('trip:guide_location', { trip_id, lat, lng });
       socket.to('admin:live').emit('guide:location_update', { guide_id, lat, lng });
+      socket.to('guides:map').emit('guide:location_update', { guide_id, lat, lng });
     } catch (e) {
       console.error('Location update error:', e.message);
     }
