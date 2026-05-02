@@ -317,4 +317,48 @@ router.get('/me/profile', authenticateToken, async (req, res) => {
   }
 });
 
+// POST /api/guides/:id/review — tourist leaves a review on guide profile
+router.post('/:id/review', authenticateToken, async (req, res) => {
+  try {
+    const guide = await Guide.findByPk(req.params.id);
+    if (!guide) return res.status(404).json({ error: 'Guide not found' });
+
+    const { rating, comment } = req.body;
+    if (!rating || rating < 1 || rating > 5) return res.status(400).json({ error: 'Rating 1-5 required' });
+
+    // Find a completed paid trip for this tourist+guide (most recent)
+    const { GuideTrip } = require('../config/database');
+    const trip = await GuideTrip.findOne({
+      where: { guide_id: guide.id, tourist_id: req.user.id, paid: true },
+      order: [['ended_at', 'DESC']]
+    });
+
+    const existing = await GuideReview.findOne({
+      where: {
+        guide_id: guide.id,
+        tourist_id: req.user.id,
+        ...(trip ? { trip_id: trip.id } : {})
+      }
+    });
+    if (existing) return res.status(400).json({ error: 'You have already reviewed this guide' });
+
+    const review = await GuideReview.create({
+      guide_id: guide.id,
+      tourist_id: req.user.id,
+      trip_id: trip ? trip.id : null,
+      rating,
+      comment
+    });
+
+    const newTotal = (guide.total_reviews || 0) + 1;
+    const newAvg = ((parseFloat(guide.avg_rating || 0) * (newTotal - 1)) + rating) / newTotal;
+    await guide.update({ avg_rating: parseFloat(newAvg.toFixed(2)), total_reviews: newTotal });
+
+    res.status(201).json(review);
+  } catch (err) {
+    console.error('[guide review]', err);
+    res.status(500).json({ error: 'Review failed', details: err.message });
+  }
+});
+
 module.exports = router;
