@@ -319,6 +319,15 @@ async function startServer() {
   } catch {}
 
   await sequelize.authenticate();
+
+  // Add 'rejected' to guide_trips status enum if not present
+  await sequelize.query(
+    `DO $$ BEGIN
+       ALTER TYPE "enum_guide_trips_status" ADD VALUE IF NOT EXISTS 'rejected';
+     EXCEPTION WHEN others THEN NULL;
+     END $$;`
+  ).catch(() => {});
+
   await sequelize.sync({ alter: true });
 
   // 4. Start HTTP server

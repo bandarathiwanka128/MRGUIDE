@@ -341,7 +341,8 @@ export default function GuideDashboard({ user }) {
       setTrips(prev => prev.filter(t => t.id !== activeTrip.id));
       setShowRejectConfirm(false);
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to reject trip');
+      const msg = err.response?.data?.details || err.response?.data?.error || 'Failed to reject trip';
+      alert(msg);
       setShowRejectConfirm(false);
     }
   };

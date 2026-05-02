@@ -426,7 +426,7 @@ const GuideTrip = sequelize.define('GuideTrip', {
   },
   paid: { type: DataTypes.BOOLEAN, defaultValue: false },
   status: {
-    type: DataTypes.ENUM('pending', 'confirmed', 'active', 'completed', 'cancelled'),
+    type: DataTypes.ENUM('pending', 'confirmed', 'active', 'completed', 'cancelled', 'rejected'),
     defaultValue: 'pending'
   },
   stripe_payment_intent_id: DataTypes.STRING(200),

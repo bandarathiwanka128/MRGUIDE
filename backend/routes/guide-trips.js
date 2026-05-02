@@ -196,7 +196,8 @@ router.put('/:id/reject', authenticateToken, async (req, res) => {
 
     res.json(trip);
   } catch (err) {
-    res.status(500).json({ error: 'Reject failed' });
+    console.error('[reject]', err);
+    res.status(500).json({ error: 'Reject failed', details: err.message });
   }
 });
 
