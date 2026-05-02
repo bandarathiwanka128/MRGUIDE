@@ -24,11 +24,12 @@ const MastercardIcon = () => (
   </svg>
 );
 
-function PaymentForm({ trip, clientSecret, tip, setTip, onSuccess, onError }) {
+function PaymentForm({ trip, clientSecret, tip, setTip, onSuccess }) {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
   const [focused, setFocused] = useState(false);
+  const [payError, setPayError] = useState('');
 
   const waitingCharge = parseFloat(trip.waiting_charge_total || 0);
   const baseFare = parseFloat(trip.base_fare || 0);
@@ -38,6 +39,7 @@ function PaymentForm({ trip, clientSecret, tip, setTip, onSuccess, onError }) {
   const handlePay = async (e) => {
     e.preventDefault();
     if (!stripe || !elements) return;
+    setPayError('');
     setLoading(true);
 
     try {
@@ -47,7 +49,7 @@ function PaymentForm({ trip, clientSecret, tip, setTip, onSuccess, onError }) {
 
       if (trip.stripe_payment_intent_id) {
         if (!clientSecret) {
-          onError('Payment details not ready. Please refresh and try again.');
+          setPayError('Payment details not ready. Please refresh and try again.');
           setLoading(false);
           return;
         }
@@ -56,7 +58,7 @@ function PaymentForm({ trip, clientSecret, tip, setTip, onSuccess, onError }) {
           payment_method: { card: cardEl }
         });
         if (result.error) {
-          onError(result.error.message);
+          setPayError(result.error.message);
           setLoading(false);
           return;
         }
@@ -69,7 +71,7 @@ function PaymentForm({ trip, clientSecret, tip, setTip, onSuccess, onError }) {
 
       if (res.data.already_paid || res.data.ok) onSuccess();
     } catch (err) {
-      onError(err.response?.data?.error || 'Payment failed. Please try again.');
+      setPayError(err.response?.data?.error || 'Payment failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -128,6 +130,7 @@ function PaymentForm({ trip, clientSecret, tip, setTip, onSuccess, onError }) {
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             options={{
+              hidePostalCode: true,
               style: {
                 base: {
                   fontSize: '16px',
@@ -145,6 +148,8 @@ function PaymentForm({ trip, clientSecret, tip, setTip, onSuccess, onError }) {
           🧪 Test: <strong>4242 4242 4242 4242</strong> · any future date · any CVC
         </p>
       </div>
+
+      {payError && <div className="tp-error-msg">{payError}</div>}
 
       {/* Pay button */}
       <button type="submit" className="tp-pay-btn" disabled={loading || !stripe || !clientSecret}>
@@ -174,7 +179,7 @@ export default function TripPayment({ user }) {
   const [loading, setLoading] = useState(true);
   const [tip, setTip] = useState(0);
   const [paid, setPaid] = useState(false);
-  const [error, setError] = useState('');
+  const [pageError, setPageError] = useState('');
   const [clientSecret, setClientSecret] = useState(null);
 
   useEffect(() => {
@@ -193,7 +198,7 @@ export default function TripPayment({ user }) {
           else setClientSecret(cs.data.client_secret);
         }).catch(() => {});
       }
-    }).catch(() => setError('Trip not found'))
+    }).catch(() => setPageError('Trip not found'))
     .finally(() => setLoading(false));
   }, [tripId]);
 
@@ -204,10 +209,10 @@ export default function TripPayment({ user }) {
     </div>
   );
 
-  if (error) return (
+  if (pageError) return (
     <div className="tp-fullpage-center">
       <h2>Trip Not Found</h2>
-      <p>{error}</p>
+      <p>{pageError}</p>
       <button className="tp-home-btn" onClick={() => navigate('/')}>Go Home</button>
     </div>
   );
@@ -260,10 +265,8 @@ export default function TripPayment({ user }) {
                 localStorage.removeItem('mrguide_active_trip');
                 setPaid(true);
               }}
-              onError={setError}
             />
           </Elements>
-          {error && <div className="tp-error-msg">{error}</div>}
         </div>
 
       </div>
