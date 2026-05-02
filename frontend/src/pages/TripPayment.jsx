@@ -8,10 +8,27 @@ import './TripPayment.css';
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
+const VisaIcon = () => (
+  <svg width="48" height="30" viewBox="0 0 48 30" fill="none">
+    <rect width="48" height="30" rx="5" fill="#1A1F71"/>
+    <text x="7" y="22" fontFamily="Arial" fontWeight="900" fontSize="16" fontStyle="italic" fill="#FFFFFF" letterSpacing="1">VISA</text>
+  </svg>
+);
+
+const MastercardIcon = () => (
+  <svg width="48" height="30" viewBox="0 0 48 30" fill="none">
+    <rect width="48" height="30" rx="5" fill="#252525"/>
+    <circle cx="18" cy="15" r="10" fill="#EB001B"/>
+    <circle cx="30" cy="15" r="10" fill="#F79E1B"/>
+    <path d="M24 7.5a10 10 0 0 1 0 15 10 10 0 0 1 0-15z" fill="#FF5F00"/>
+  </svg>
+);
+
 function PaymentForm({ trip, clientSecret, tip, setTip, onSuccess, onError }) {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
+  const [focused, setFocused] = useState(false);
 
   const waitingCharge = parseFloat(trip.waiting_charge_total || 0);
   const baseFare = parseFloat(trip.base_fare || 0);
@@ -26,10 +43,8 @@ function PaymentForm({ trip, clientSecret, tip, setTip, onSuccess, onError }) {
     try {
       const token = localStorage.getItem('token');
 
-      // Check if already paid (idempotency)
       if (trip.paid) { onSuccess(); return; }
 
-      // Confirm card payment with Stripe using fetched client_secret
       if (trip.stripe_payment_intent_id) {
         if (!clientSecret) {
           onError('Payment details not ready. Please refresh and try again.');
@@ -47,7 +62,6 @@ function PaymentForm({ trip, clientSecret, tip, setTip, onSuccess, onError }) {
         }
       }
 
-      // Mark trip as paid in our DB
       const res = await axios.put(`${API_BASE_URL}/guide-trips/${trip.id}/pay/qr`, {
         tip_amount: parseFloat(tip) || 0,
         payment_intent_id: trip.stripe_payment_intent_id
@@ -62,37 +76,92 @@ function PaymentForm({ trip, clientSecret, tip, setTip, onSuccess, onError }) {
   };
 
   return (
-    <form onSubmit={handlePay} className="payment-form">
-      <div className="payment-fare-breakdown">
-        <div className="pf-row"><span>Base Fare</span><span>LKR {parseFloat(trip.base_fare || 0).toLocaleString()}</span></div>
-        <div className="pf-row"><span>Waiting Charge</span><span>LKR {waitingCharge.toLocaleString()}</span></div>
-        <div className="pf-row pf-tip-row">
-          <span>Add Tip (optional)</span>
-          <div className="tip-input-wrap">
-            <span>LKR</span>
-            <input type="number" min="0" step="50" value={tip} onChange={e => setTip(e.target.value)} placeholder="0" className="tip-input" />
+    <form onSubmit={handlePay} className="tp-form">
+      {/* Fare summary */}
+      <div className="tp-fare-summary">
+        <div className="tp-fare-row">
+          <span>Base Fare</span>
+          <span>LKR {baseFare.toLocaleString()}</span>
+        </div>
+        {waitingCharge > 0 && (
+          <div className="tp-fare-row">
+            <span>Waiting Charge</span>
+            <span>LKR {waitingCharge.toLocaleString()}</span>
+          </div>
+        )}
+        <div className="tp-fare-row tp-fare-tip">
+          <span>Tip <span className="tp-optional">(optional)</span></span>
+          <div className="tp-tip-wrap">
+            <span className="tp-tip-lkr">LKR</span>
+            <input
+              type="number"
+              min="0"
+              step="50"
+              value={tip}
+              onChange={e => setTip(e.target.value)}
+              placeholder="0"
+              className="tp-tip-input"
+            />
           </div>
         </div>
-        <div className="pf-row pf-total"><span>Total</span><strong>LKR {total.toLocaleString()}</strong></div>
-        <div className="pf-row pf-muted"><span>Platform (5%)</span><span>LKR {((baseFare + waitingCharge) * 0.05).toLocaleString()}</span></div>
-        <div className="pf-row pf-muted"><span>Tip goes 100% to guide</span><span>LKR {tipAmount.toLocaleString()}</span></div>
-      </div>
-
-      <div className="card-element-wrap">
-        <label>Card Details</label>
-        <div className="card-element-box">
-          <CardElement options={{ style: { base: { fontSize: '16px', color: '#ffffff', '::placeholder': { color: '#94a3b8' }, iconColor: '#94a3b8' }, invalid: { color: '#f87171' } } }} />
+        <div className="tp-fare-divider" />
+        <div className="tp-fare-row tp-fare-total">
+          <span>Total</span>
+          <strong>LKR {total.toLocaleString()}</strong>
         </div>
-        <p className="card-test-hint">Test card: 4242 4242 4242 4242 · Any future expiry · Any CVC</p>
+        {tipAmount > 0 && (
+          <div className="tp-tip-note">💛 LKR {tipAmount.toLocaleString()} tip goes 100% to your guide</div>
+        )}
       </div>
 
-      <button type="submit" className="pay-btn" disabled={loading || !stripe}>
+      {/* Card input */}
+      <div className="tp-card-section">
+        <div className="tp-card-header">
+          <span className="tp-card-label">Card Details</span>
+          <div className="tp-card-icons">
+            <VisaIcon />
+            <MastercardIcon />
+          </div>
+        </div>
+        <div className={`tp-card-input-box ${focused ? 'tp-card-input-box--focused' : ''}`}>
+          <CardElement
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            options={{
+              style: {
+                base: {
+                  fontSize: '16px',
+                  color: '#ffffff',
+                  fontFamily: '"Inter", system-ui, sans-serif',
+                  '::placeholder': { color: '#64748b' },
+                  iconColor: '#94a3b8',
+                },
+                invalid: { color: '#f87171', iconColor: '#f87171' }
+              }
+            }}
+          />
+        </div>
+        <p className="tp-test-hint">
+          🧪 Test: <strong>4242 4242 4242 4242</strong> · any future date · any CVC
+        </p>
+      </div>
+
+      {/* Pay button */}
+      <button type="submit" className="tp-pay-btn" disabled={loading || !stripe || !clientSecret}>
         {loading ? (
-          <span className="pay-spinner" />
+          <span className="tp-pay-spinner" />
         ) : (
-          <>Pay LKR {total.toLocaleString()}</>
+          <>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Pay LKR {total.toLocaleString()}
+          </>
         )}
       </button>
+
+      <div className="tp-stripe-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Secured by Stripe · 256-bit SSL encryption
+      </div>
     </form>
   );
 }
@@ -116,7 +185,6 @@ export default function TripPayment({ user }) {
       setTrip(r.data);
       if (r.data.Guide) setGuide(r.data.Guide);
       if (r.data.paid) { setPaid(true); return; }
-      // Fetch Stripe client_secret separately (not stored in DB)
       if (r.data.stripe_payment_intent_id && token) {
         axios.get(`${API_BASE_URL}/guide-trips/${tripId}/client-secret`, {
           headers: { Authorization: `Bearer ${token}` }
@@ -130,28 +198,28 @@ export default function TripPayment({ user }) {
   }, [tripId]);
 
   if (loading) return (
-    <div className="tp-loading">
+    <div className="tp-fullpage-center">
       <div className="tp-spinner" />
       <p>Loading payment...</p>
     </div>
   );
 
   if (error) return (
-    <div className="tp-error">
+    <div className="tp-fullpage-center">
       <h2>Trip Not Found</h2>
       <p>{error}</p>
-      <button onClick={() => navigate('/')}>Go Home</button>
+      <button className="tp-home-btn" onClick={() => navigate('/')}>Go Home</button>
     </div>
   );
 
   if (paid) return (
-    <div className="tp-success-page">
+    <div className="tp-fullpage-center">
       <div className="tp-success-card">
         <div className="tp-success-icon">
           <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
         <h2>Payment Successful!</h2>
-        <p>LKR {(parseFloat(trip?.base_fare || 0) + parseFloat(trip?.waiting_charge_total || 0) + parseFloat(tip || 0)).toLocaleString()} paid.</p>
+        <p className="tp-success-amount">LKR {(parseFloat(trip?.base_fare || 0) + parseFloat(trip?.waiting_charge_total || 0) + parseFloat(tip || 0)).toLocaleString()}</p>
         <p className="tp-success-sub">Your guide has been notified. Thank you for using Mr. Guide!</p>
         {trip && (
           <button onClick={() => navigate(`/guides/${trip.guide_id}`)} className="tp-rate-btn">
@@ -165,24 +233,23 @@ export default function TripPayment({ user }) {
   return (
     <div className="trip-payment-page">
       <div className="tp-container">
+
+        {/* Guide + trip header */}
         <div className="tp-header">
-          <div className="tp-qr-icon">📱</div>
-          <h1>Complete Payment</h1>
-          {guide && <p>Trip with <strong>{guide.display_name}</strong></p>}
+          <div className="tp-guide-avatar">
+            {guide?.photo_url ? <img src={guide.photo_url} alt={guide.display_name} /> : '👤'}
+          </div>
+          <div className="tp-header-info">
+            <h1>Complete Payment</h1>
+            {guide && <p>Trip with <strong>{guide.display_name}</strong></p>}
+          </div>
+          <div className="tp-header-meta">
+            <span className="tp-dist-badge">{parseFloat(trip.distance_km || 0).toFixed(1)} km</span>
+          </div>
         </div>
 
-        <div className="tp-card">
-          <div className="tp-trip-info">
-            <div className="tp-info-row">
-              <span>Distance</span>
-              <span>{parseFloat(trip.distance_km || 0).toFixed(1)} km</span>
-            </div>
-            <div className="tp-info-row">
-              <span>Trip status</span>
-              <span className="tp-status-badge">{trip.status}</span>
-            </div>
-          </div>
-
+        {/* Payment card */}
+        <div className="tp-main-card">
           <Elements stripe={stripePromise}>
             <PaymentForm
               trip={trip}
@@ -196,14 +263,9 @@ export default function TripPayment({ user }) {
               onError={setError}
             />
           </Elements>
-
           {error && <div className="tp-error-msg">{error}</div>}
         </div>
 
-        <div className="tp-security-note">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          Secured by Stripe · 5% platform fee applies
-        </div>
       </div>
     </div>
   );

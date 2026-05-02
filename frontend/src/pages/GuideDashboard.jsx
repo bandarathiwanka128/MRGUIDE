@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
+import { QRCodeSVG } from 'qrcode.react';
 import { API_BASE_URL, GOOGLE_MAPS_API_KEY } from '../config';
 import './GuideDashboard.css';
 
@@ -86,6 +87,7 @@ export default function GuideDashboard({ user }) {
   const [showRejectConfirm, setShowRejectConfirm] = useState(false);
   const [guidePos, setGuidePos] = useState(null);
   const [guideElapsed, setGuideElapsed] = useState(0);
+  const [completedTripQR, setCompletedTripQR] = useState(null);
   const socketRef = useRef(null);
   const watchIdRef = useRef(null);
   const lastCoordsRef = useRef(null);
@@ -165,6 +167,10 @@ export default function GuideDashboard({ user }) {
       const currentTrip = activeTripRef.current;
       if (!currentTrip || String(payload.trip_id) !== String(currentTrip.id)) return;
       setStopPrompt(true);
+    });
+
+    socket.on('trip:payment_confirmed', () => {
+      setCompletedTripQR(null);
     });
 
     socket.on('booking:new', (payload) => {
@@ -377,6 +383,15 @@ export default function GuideDashboard({ user }) {
       setWaitingPreview({ minutes: 0, charge_lkr: 0 });
       setStopPrompt(false);
       setShowEndConfirm(false);
+      // Show QR code for guide to present to tourist
+      const paymentUrl = `${window.location.origin}/pay/${updatedTrip.id}`;
+      setCompletedTripQR({
+        tripId: updatedTrip.id,
+        paymentUrl,
+        baseFare: parseFloat(updatedTrip.base_fare || 0),
+        waitingCharge: parseFloat(updatedTrip.waiting_charge_total || 0),
+        distance: parseFloat(updatedTrip.distance_km || 0)
+      });
     } catch (err) {
       alert(err.response?.data?.error || 'Failed to end trip');
     }
@@ -629,6 +644,37 @@ export default function GuideDashboard({ user }) {
                 End Trip
               </button>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Guide QR panel — shown after trip ends until tourist pays */}
+      {completedTripQR && (
+        <div className="gd-qr-panel">
+          <div className="gd-qr-card">
+            <div className="gd-qr-header">
+              <div>
+                <h3>Trip Completed — Awaiting Payment</h3>
+                <p>Show this QR code to your tourist to scan and pay</p>
+              </div>
+              <button className="gd-qr-dismiss" onClick={() => setCompletedTripQR(null)}>✕</button>
+            </div>
+            <div className="gd-qr-body">
+              <div className="gd-qr-code-wrap">
+                <QRCodeSVG value={completedTripQR.paymentUrl} size={180} level="M" includeMargin />
+              </div>
+              <div className="gd-qr-details">
+                <div className="gd-qr-row"><span>Distance</span><strong>{completedTripQR.distance.toFixed(2)} km</strong></div>
+                <div className="gd-qr-row"><span>Base Fare</span><strong>LKR {completedTripQR.baseFare.toLocaleString()}</strong></div>
+                {completedTripQR.waitingCharge > 0 && (
+                  <div className="gd-qr-row"><span>Waiting</span><strong>LKR {completedTripQR.waitingCharge.toLocaleString()}</strong></div>
+                )}
+                <div className="gd-qr-row gd-qr-total"><span>Total</span><strong>LKR {(completedTripQR.baseFare + completedTripQR.waitingCharge).toLocaleString()}</strong></div>
+                <button className="gd-trip-btn gd-trip-btn--start" style={{width:'100%',marginTop:8}} onClick={() => window.open(completedTripQR.paymentUrl, '_blank')}>
+                  Open Payment Page ↗
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

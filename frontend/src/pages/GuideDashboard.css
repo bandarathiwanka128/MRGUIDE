@@ -574,6 +574,92 @@
   100% { opacity: 0.6; }
 }
 
+/* Guide QR panel after trip ends */
+.gd-qr-panel {
+  max-width: 1100px;
+  margin: 24px auto 0;
+  padding: 0 20px;
+}
+
+.gd-qr-card {
+  background: linear-gradient(135deg, rgba(52,105,154,0.15), rgba(34,197,94,0.08));
+  border: 1px solid rgba(52,105,154,0.35);
+  border-radius: 18px;
+  padding: 20px;
+}
+
+.gd-qr-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 18px;
+  gap: 12px;
+}
+
+.gd-qr-header h3 {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+  color: var(--text-primary, #fff);
+}
+
+.gd-qr-header p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-secondary, #64748b);
+}
+
+.gd-qr-dismiss {
+  background: rgba(255,255,255,0.08);
+  border: none;
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  color: var(--text-secondary, #64748b);
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.gd-qr-body {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.gd-qr-code-wrap {
+  background: white;
+  border-radius: 14px;
+  padding: 12px;
+  flex-shrink: 0;
+}
+
+.gd-qr-details {
+  flex: 1;
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gd-qr-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.88rem;
+  color: var(--text-secondary, #64748b);
+}
+
+.gd-qr-row strong { color: var(--text-primary, #fff); }
+
+.gd-qr-total {
+  font-weight: 700;
+  font-size: 1rem;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.gd-qr-total strong { color: #FFCC00; font-size: 1.1rem; }
+
 /* Active trip section */
 .gd-active-section {
   display: flex;
