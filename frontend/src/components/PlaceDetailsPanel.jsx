@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { API_BASE_URL } from '../config';
 import './PlaceDetailsPanel.css';
@@ -45,14 +45,7 @@ const PlaceDetailsPanel = ({ place, onClose, onAddAuthenticData, user }) => {
   const placeLat = place?.position?.lat ?? place?.lat;
   const placeLng = place?.position?.lng ?? place?.lng;
 
-  useEffect(() => {
-    if (place) {
-      fetchAuthenticDetails();
-      fetchReviews();
-    }
-  }, [place]);
-
-  const fetchAuthenticDetails = async () => {
+  const fetchAuthenticDetails = useCallback(async () => {
     setLoading(true);
     try {
       let users = [];
@@ -86,9 +79,9 @@ const PlaceDetailsPanel = ({ place, onClose, onAddAuthenticData, user }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [googlePlaceId, place?.name, placeLat, placeLng]);
 
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     if (!googlePlaceId) return;
     setReviewLoading(true);
     try {
@@ -103,7 +96,14 @@ const PlaceDetailsPanel = ({ place, onClose, onAddAuthenticData, user }) => {
     } finally {
       setReviewLoading(false);
     }
-  };
+  }, [googlePlaceId]);
+
+  useEffect(() => {
+    if (place) {
+      fetchAuthenticDetails();
+      fetchReviews();
+    }
+  }, [place, fetchAuthenticDetails, fetchReviews]);
 
   const submitReview = async () => {
     if (!user) {
@@ -434,7 +434,7 @@ const PlaceDetailsPanel = ({ place, onClose, onAddAuthenticData, user }) => {
                         <div className="photos-grid">
                           {business.photos.map((photo, i) => (
                             <a key={i} href={photo} target="_blank" rel="noopener noreferrer">
-                              <img src={photo} alt={`Photo ${i + 1}`} className="business-photo"
+                              <img src={photo} alt={`Business view ${i + 1}`} className="business-photo"
                                 onError={e => { e.target.style.display = 'none'; }} />
                             </a>
                           ))}
