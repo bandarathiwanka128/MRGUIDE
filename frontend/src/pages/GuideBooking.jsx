@@ -29,12 +29,10 @@ export default function GuideBooking({ user }) {
   const [guides, setGuides] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedGuide, setSelectedGuide] = useState(null);
-  const [hoveredGuide, setHoveredGuide] = useState(null);
   const [bookingGuide, setBookingGuide] = useState(null);
 
   const [destInput, setDestInput] = useState('');
   const [distanceKm, setDistanceKm] = useState(null);
-  const [destCoords, setDestCoords] = useState(null);
   const [calcLoading, setCalcLoading] = useState(false);
 
   const [sortBy, setSortBy] = useState('rating');
@@ -89,34 +87,12 @@ export default function GuideBooking({ user }) {
   }, []);
 
   // Google Places autocomplete for destination
-  useEffect(() => {
-    if (!isLoaded || !destRef.current) return;
-    autocompleteRef.current = new window.google.maps.places.Autocomplete(destRef.current, {
-      componentRestrictions: { country: 'lk' },
-      fields: ['geometry', 'name']
-    });
-    autocompleteRef.current.addListener('place_changed', handlePlaceSelected);
-  }, [isLoaded]);
-
-  const handlePlaceSelected = () => {
-    const place = autocompleteRef.current?.getPlace();
-    if (!place?.geometry) return;
-    const coords = {
-      lat: place.geometry.location.lat(),
-      lng: place.geometry.location.lng()
-    };
-    setDestCoords(coords);
-    setDestInput(place.name || '');
-    calcDistances(coords);
-  };
-
-  const calcDistances = async (coords) => {
+  const calcDistances = useCallback(async (coords) => {
     if (!window.google || !mapRef.current) return;
     setCalcLoading(true);
     try {
-      // Use Distance Matrix for first guide's origin as approximation; use map center
       const service = new window.google.maps.DistanceMatrixService();
-      const origin = new window.google.maps.LatLng(6.9271, 79.8612); // Colombo default
+      const origin = new window.google.maps.LatLng(6.9271, 79.8612);
       const destination = new window.google.maps.LatLng(coords.lat, coords.lng);
       service.getDistanceMatrix(
         { origins: [origin], destinations: [destination], travelMode: 'DRIVING', unitSystem: 0 },
@@ -131,7 +107,27 @@ export default function GuideBooking({ user }) {
     } catch {
       setCalcLoading(false);
     }
-  };
+  }, []);
+
+  const handlePlaceSelected = useCallback(() => {
+    const place = autocompleteRef.current?.getPlace();
+    if (!place?.geometry) return;
+    const coords = {
+      lat: place.geometry.location.lat(),
+      lng: place.geometry.location.lng()
+    };
+    setDestInput(place.name || '');
+    calcDistances(coords);
+  }, [calcDistances]);
+
+  useEffect(() => {
+    if (!isLoaded || !destRef.current) return;
+    autocompleteRef.current = new window.google.maps.places.Autocomplete(destRef.current, {
+      componentRestrictions: { country: 'lk' },
+      fields: ['geometry', 'name']
+    });
+    autocompleteRef.current.addListener('place_changed', handlePlaceSelected);
+  }, [isLoaded, handlePlaceSelected]);
 
   const onMapLoad = useCallback((map) => { mapRef.current = map; }, []);
 
@@ -272,8 +268,6 @@ export default function GuideBooking({ user }) {
                   className={`guide-card ${selectedGuide?.id === guide.id ? 'guide-card--selected' : ''}`}
                   style={{ '--delay': `${idx * 0.05}s` }}
                   onClick={() => setSelectedGuide(guide)}
-                  onMouseEnter={() => setHoveredGuide(guide)}
-                  onMouseLeave={() => setHoveredGuide(null)}
                 >
                   <div className="guide-card-top">
                     <div className="guide-avatar-wrap">
