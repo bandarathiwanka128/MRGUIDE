@@ -98,6 +98,12 @@ export default function GuideDashboard({ user }) {
   const { isLoaded: mapsLoaded } = useJsApiLoader({ googleMapsApiKey: GOOGLE_MAPS_API_KEY, libraries: LIBRARIES });
 
   useEffect(() => {
+    if (!token) {
+      setLoading(false);
+      navigate('/login');
+      return;
+    }
+
     axios.get(`${API_BASE_URL}/guides/me/profile`, {
       headers: { Authorization: `Bearer ${token}` }
     }).then(r => {
@@ -122,7 +128,7 @@ export default function GuideDashboard({ user }) {
     }).catch(err => {
       if (err.response?.status === 404) setNotGuide(true);
     }).finally(() => setLoading(false));
-  }, []);
+  }, [navigate, token]);
 
   useEffect(() => {
     activeTripRef.current = activeTrip;
@@ -205,7 +211,7 @@ export default function GuideDashboard({ user }) {
     setWaitingStartedAt(activeTrip.waiting_started_at || null);
     setWaitingTotal(parseFloat(activeTrip.waiting_charge_total || 0));
     setStopPrompt(false);
-  }, [activeTrip?.id]);
+  }, [activeTrip]);
 
   // GPS tracking: runs whenever guide is live (is_available), covers both idle and active-trip states
   useEffect(() => {
