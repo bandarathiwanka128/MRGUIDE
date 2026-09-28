@@ -24,7 +24,7 @@ export default function GuideProfile({ user }) {
       .then(r => setGuide(r.data))
       .catch(() => navigate('/guides'))
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, navigate]);
 
   const calcFare = (km) => {
     if (!guide) return 0;
@@ -257,7 +257,7 @@ export default function GuideProfile({ user }) {
       {/* Lightbox */}
       {lightboxImg && (
         <div className="lightbox-overlay" onClick={() => setLightboxImg(null)}>
-          <img src={lightboxImg} alt="Tour photo" className="lightbox-img" />
+          <img src={lightboxImg} alt="Tour view" className="lightbox-img" />
         </div>
       )}
 
