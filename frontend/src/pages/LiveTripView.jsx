@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { GoogleMap, useJsApiLoader, Marker, Polyline } from '@react-google-maps/api';
+import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
 import { io } from 'socket.io-client';
 import { API_BASE_URL, GOOGLE_MAPS_API_KEY } from '../config';
 import { QRCodeSVG } from 'qrcode.react';
@@ -54,7 +54,7 @@ export default function LiveTripView({ user }) {
       }
     }).catch(() => navigate('/guides'))
     .finally(() => setLoading(false));
-  }, [tripId]);
+  }, [tripId, navigate]);
 
   // Socket connection
   useEffect(() => {
@@ -135,7 +135,7 @@ export default function LiveTripView({ user }) {
       socket.disconnect();
       if (bannerTimerRef.current) clearTimeout(bannerTimerRef.current);
     };
-  }, [tripId, user]);
+  }, [tripId, user, navigate, trip?.guide_id]);
 
   // Elapsed timer
   useEffect(() => {
