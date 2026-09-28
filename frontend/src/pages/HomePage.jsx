@@ -487,9 +487,9 @@ const HomePage = () => {
 
               {feature.isDownload ? (
                 <div className="store-buttons">
-                  <a
+                  <button
+                    type="button"
                     className="store-btn"
-                    href="#"
                     onClick={e => { e.stopPropagation(); e.preventDefault(); }}
                     title="Coming Soon on Google Play"
                   >
@@ -500,10 +500,10 @@ const HomePage = () => {
                       <small>GET IT ON</small>
                       <strong>Google Play</strong>
                     </span>
-                  </a>
-                  <a
+                  </button>
+                  <button
+                    type="button"
                     className="store-btn"
-                    href="#"
                     onClick={e => { e.stopPropagation(); e.preventDefault(); }}
                     title="Coming Soon on App Store"
                   >
@@ -514,7 +514,7 @@ const HomePage = () => {
                       <small>DOWNLOAD ON THE</small>
                       <strong>App Store</strong>
                     </span>
-                  </a>
+                  </button>
                   <span className="coming-soon-badge">Coming Soon</span>
                 </div>
               ) : (
