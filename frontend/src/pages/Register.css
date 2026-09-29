@@ -1,28 +1,31 @@
-/* Register Page Styles - Yellow & Dark Blue Theme */
+/* Register Page Styles */
 
 .register-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #0a1929 0%, #1a2942 50%, #0a1929 100%);
+  background: var(--bg);
+  color: var(--text);
   padding: 3rem 1rem;
   display: flex;
   justify-content: center;
   align-items: center;
+  transition: background 0.35s ease, color 0.35s ease;
 }
 
 .register-box {
   max-width: 700px;
   width: 100%;
-  background: rgba(26, 41, 66, 0.8);
+  background: var(--bg-surface);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 215, 0, 0.3);
+  border: 1px solid var(--border);
   border-radius: 20px;
   padding: 3rem;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-card);
+  transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
 }
 
 .register-title {
   font-size: 2.5rem;
-  color: #ffdf2b;
+  color: var(--gold);
   text-align: center;
   margin-bottom: 0.5rem;
   font-weight: 700;
@@ -30,15 +33,15 @@
 
 .register-subtitle {
   text-align: center;
-  color: #e0e0e0;
+  color: var(--text-muted);
   font-size: 1.1rem;
   margin-bottom: 2rem;
 }
 
 .error-message {
-  background: rgba(255, 82, 82, 0.2);
-  border: 1px solid #ff5252;
-  color: #ff5252;
+  background: color-mix(in srgb, var(--error) 12%, transparent);
+  border: 1px solid var(--error);
+  color: var(--error);
   padding: 1rem;
   border-radius: 10px;
   margin-bottom: 1.5rem;
@@ -52,23 +55,23 @@
 }
 
 .form-section {
-  background: rgba(10, 25, 41, 0.5);
-  border: 1px solid rgba(255, 215, 0, 0.2);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
   border-radius: 15px;
   padding: 2rem;
 }
 
 .section-title-small {
-  color: #FFD700;
+  color: var(--gold);
   font-size: 1.5rem;
   margin-bottom: 1.5rem;
   font-weight: 600;
-  border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+  border-bottom: 2px solid var(--border-hover);
   padding-bottom: 0.5rem;
 }
 
 .section-description {
-  color: #b0b0b0;
+  color: var(--text-muted);
   font-size: 0.95rem;
   margin-bottom: 1.5rem;
   font-style: italic;
@@ -80,7 +83,7 @@
 
 .form-group label {
   display: block;
-  color: #FFD700;
+  color: var(--text);
   font-weight: 500;
   margin-bottom: 0.5rem;
   font-size: 1rem;
@@ -90,10 +93,10 @@
 .form-group textarea {
   width: 100%;
   padding: 0.9rem 1.2rem;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 215, 0, 0.3);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
   border-radius: 10px;
-  color: #fff;
+  color: var(--text);
   font-size: 1rem;
   transition: all 0.3s ease;
 }
@@ -101,14 +104,14 @@
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #FFD700;
-  box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
-  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--border-hover);
+  box-shadow: 0 0 15px var(--gold-glow);
+  background: var(--bg-card-hover);
 }
 
 .form-group input::placeholder,
 .form-group textarea::placeholder {
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--text-dim);
 }
 
 /* Mobile Number Input */
@@ -119,9 +122,9 @@
 }
 
 .country-code {
-  background: rgba(255, 215, 0, 0.2);
-  border: 1px solid rgba(255, 215, 0, 0.4);
-  color: #FFD700;
+  background: var(--gold-glow);
+  border: 1px solid var(--border-hover);
+  color: var(--gold);
   padding: 0.9rem 1rem;
   border-radius: 10px;
   font-weight: 600;
@@ -142,8 +145,8 @@
 }
 
 .role-card {
-  background: rgba(255, 255, 255, 0.05);
-  border: 2px solid rgba(255, 215, 0, 0.3);
+  background: var(--bg-surface);
+  border: 2px solid var(--border);
   border-radius: 15px;
   padding: 2rem 1.5rem;
   text-align: center;
@@ -152,15 +155,15 @@
 }
 
 .role-card:hover {
-  background: rgba(255, 215, 0, 0.1);
-  border-color: #FFD700;
+  background: var(--bg-card-hover);
+  border-color: var(--border-hover);
   transform: translateY(-5px);
 }
 
 .role-card.active {
-  background: rgba(255, 215, 0, 0.2);
-  border-color: #FFD700;
-  box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+  background: var(--gold-glow);
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-card);
 }
 
 .role-icon {
@@ -169,22 +172,22 @@
 }
 
 .role-card h4 {
-  color: #FFD700;
+  color: var(--gold);
   font-size: 1.3rem;
   margin-bottom: 0.5rem;
   font-weight: 600;
 }
 
 .role-card p {
-  color: #e0e0e0;
+  color: var(--text-muted);
   font-size: 0.95rem;
   line-height: 1.5;
 }
 
 /* Authentic Section */
 .authentic-section {
-  background: rgba(255, 215, 0, 0.05);
-  border-color: rgba(255, 215, 0, 0.4);
+  background: var(--gold-glow);
+  border-color: var(--border-hover);
 }
 
 /* Checkbox Group */
@@ -197,7 +200,7 @@
   align-items: center;
   gap: 0.8rem;
   cursor: pointer;
-  color: #e0e0e0;
+  color: var(--text);
   font-size: 1rem;
 }
 
@@ -205,7 +208,7 @@
   width: 20px;
   height: 20px;
   cursor: pointer;
-  accent-color: #FFD700;
+  accent-color: var(--primary);
 }
 
 .checkbox-label span {
@@ -216,8 +219,8 @@
 .submit-button {
   width: 100%;
   padding: 1.2rem;
-  background: linear-gradient(135deg, #FFD700, #FFA500);
-  color: #0a1929;
+  background: var(--primary);
+  color: #0D1B2A;
   border: none;
   border-radius: 50px;
   font-size: 1.2rem;
@@ -229,7 +232,7 @@
 
 .submit-button:hover {
   transform: translateY(-3px);
-  box-shadow: 0 15px 35px rgba(255, 215, 0, 0.5);
+  box-shadow: 0 15px 35px rgba(255, 204, 0, 0.5);
 }
 
 .submit-button:active {
@@ -239,20 +242,20 @@
 /* Auth Footer */
 .auth-footer {
   text-align: center;
-  color: #e0e0e0;
+  color: var(--text-muted);
   margin-top: 2rem;
   font-size: 1rem;
 }
 
 .auth-footer a {
-  color: #FFD700;
+  color: var(--gold);
   text-decoration: none;
   font-weight: 600;
   transition: color 0.3s ease;
 }
 
 .auth-footer a:hover {
-  color: #FFA500;
+  color: var(--primary-dark);
   text-decoration: underline;
 }
 

@@ -27,35 +27,35 @@ const countries = [
 const customSelectStyles = {
   control: (provided) => ({
     ...provided,
-    background: 'rgba(255, 255, 255, 0.05)',
-    border: '1px solid rgba(255, 215, 0, 0.3)',
+    background: 'var(--bg-surface)',
+    border: '1px solid var(--border)',
     borderRadius: '10px',
     padding: '0.3rem',
-    color: '#fff',
+    color: 'var(--text)',
     '&:hover': {
-      borderColor: '#FFD700'
+      borderColor: 'var(--border-hover)'
     }
   }),
   menu: (provided) => ({
     ...provided,
-    background: '#1a2942',
-    border: '1px solid rgba(255, 215, 0, 0.3)'
+    background: 'var(--bg-surface)',
+    border: '1px solid var(--border)'
   }),
   option: (provided, state) => ({
     ...provided,
-    background: state.isFocused ? 'rgba(255, 215, 0, 0.2)' : 'transparent',
-    color: '#fff',
+    background: state.isFocused ? 'var(--gold-glow)' : 'var(--bg-surface)',
+    color: 'var(--text)',
     '&:hover': {
-      background: 'rgba(255, 215, 0, 0.3)'
+      background: 'var(--gold-glow)'
     }
   }),
   singleValue: (provided) => ({
     ...provided,
-    color: '#fff'
+    color: 'var(--text)'
   }),
   input: (provided) => ({
     ...provided,
-    color: '#fff'
+    color: 'var(--text)'
   })
 };
 
@@ -217,7 +217,7 @@ const Register = ({ setUser }) => {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <span style={{ fontSize: '1.5rem' }}>{country.flag}</span>
                     <span>{country.label}</span>
-                    <span style={{ color: '#FFD700', marginLeft: 'auto' }}>{country.code}</span>
+                    <span style={{ color: 'var(--gold)', marginLeft: 'auto' }}>{country.code}</span>
                   </div>
                 )}
               />
