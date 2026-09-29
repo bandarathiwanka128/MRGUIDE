@@ -270,23 +270,27 @@ const Register = ({ setUser }) => {
           <div className="form-section">
             <h3 className="section-title-small">Account Type</h3>
             <div className="role-selection">
-              <div
+              <button
                 className={`role-card ${formData.role === 'user' ? 'active' : ''}`}
+                type="button"
+                aria-pressed={formData.role === 'user'}
                 onClick={() => handleRoleChange('user')}
               >
                 <div className="role-icon">👤</div>
                 <h4>Regular User</h4>
                 <p>Explore places, add reviews, and plan your trips</p>
-              </div>
+              </button>
 
-              <div
+              <button
                 className={`role-card ${formData.role === 'authentic_user' ? 'active' : ''}`}
+                type="button"
+                aria-pressed={formData.role === 'authentic_user'}
                 onClick={() => handleRoleChange('authentic_user')}
               >
                 <div className="role-icon">✓</div>
                 <h4>Authentic User</h4>
                 <p>Share expert knowledge and verified business information</p>
-              </div>
+              </button>
             </div>
           </div>
 

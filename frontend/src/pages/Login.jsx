@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { API_BASE_URL } from '../config';
 import './Login.css';
@@ -48,6 +48,7 @@ const Login = ({ setUser }) => {
               name="email"
               value={formData.email}
               onChange={handleChange}
+              autoComplete="email"
               required
             />
           </div>
@@ -60,6 +61,7 @@ const Login = ({ setUser }) => {
               name="password"
               value={formData.password}
               onChange={handleChange}
+              autoComplete="current-password"
               required
             />
           </div>
@@ -68,6 +70,10 @@ const Login = ({ setUser }) => {
             Login
           </button>
         </form>
+
+        <div className="auth-footer">
+          New to Mr. Guide? <Link to="/register">Create an account</Link>
+        </div>
       </div>
     </div>
   );

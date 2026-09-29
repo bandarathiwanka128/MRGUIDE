@@ -2,8 +2,19 @@
 
 .register-container {
   min-height: 100vh;
-  background: var(--bg);
-  color: var(--text);
+  --auth-page-start: #0d1b2a;
+  --auth-page-end: #1a3047;
+  --auth-card: rgba(19, 34, 56, 0.94);
+  --auth-surface: rgba(32, 61, 94, 0.42);
+  --auth-input: rgba(8, 20, 34, 0.58);
+  --auth-input-hover: rgba(32, 61, 94, 0.72);
+  --auth-text: #e7edf3;
+  --auth-muted: #9fb1c2;
+  --auth-border: rgba(255, 255, 255, 0.1);
+  --auth-border-hover: rgba(255, 204, 0, 0.52);
+  --auth-shadow: 0 24px 70px rgba(3, 10, 18, 0.34);
+  background: linear-gradient(135deg, var(--auth-page-start), var(--auth-page-end));
+  color: var(--auth-text);
   padding: 3rem 1rem;
   display: flex;
   justify-content: center;
@@ -11,15 +22,27 @@
   transition: background 0.35s ease, color 0.35s ease;
 }
 
+[data-theme="light"] .register-container {
+  --auth-page-start: #e9eff3;
+  --auth-page-end: #dfe8ee;
+  --auth-card: rgba(248, 250, 251, 0.95);
+  --auth-surface: rgba(231, 238, 242, 0.82);
+  --auth-input: #eef3f5;
+  --auth-input-hover: #e6edf1;
+  --auth-text: #243447;
+  --auth-muted: #5d6d7d;
+  --auth-border: rgba(36, 52, 71, 0.13);
+  --auth-border-hover: rgba(52, 105, 154, 0.62);
+  --auth-shadow: 0 24px 70px rgba(52, 70, 86, 0.16);
+}
+
 .register-box {
   max-width: 700px;
   width: 100%;
-  background: var(--bg-surface);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--border);
-  border-radius: 20px;
+  background: var(--auth-card);
+  border: 1px solid var(--auth-border);
   padding: 3rem;
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--auth-shadow);
   transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
 }
 
@@ -33,7 +56,7 @@
 
 .register-subtitle {
   text-align: center;
-  color: var(--text-muted);
+  color: var(--auth-muted);
   font-size: 1.1rem;
   margin-bottom: 2rem;
 }
@@ -55,8 +78,8 @@
 }
 
 .form-section {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+  background: var(--auth-surface);
+  border: 1px solid var(--auth-border);
   border-radius: 15px;
   padding: 2rem;
 }
@@ -66,12 +89,12 @@
   font-size: 1.5rem;
   margin-bottom: 1.5rem;
   font-weight: 600;
-  border-bottom: 2px solid var(--border-hover);
+  border-bottom: 2px solid var(--auth-border-hover);
   padding-bottom: 0.5rem;
 }
 
 .section-description {
-  color: var(--text-muted);
+  color: var(--auth-muted);
   font-size: 0.95rem;
   margin-bottom: 1.5rem;
   font-style: italic;
@@ -83,7 +106,7 @@
 
 .form-group label {
   display: block;
-  color: var(--text);
+  color: var(--auth-text);
   font-weight: 500;
   margin-bottom: 0.5rem;
   font-size: 1rem;
@@ -93,10 +116,10 @@
 .form-group textarea {
   width: 100%;
   padding: 0.9rem 1.2rem;
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
+  background: var(--auth-input);
+  border: 1px solid var(--auth-border);
   border-radius: 10px;
-  color: var(--text);
+  color: var(--auth-text);
   font-size: 1rem;
   transition: all 0.3s ease;
 }
@@ -104,14 +127,14 @@
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: var(--border-hover);
-  box-shadow: 0 0 15px var(--gold-glow);
-  background: var(--bg-card-hover);
+  border-color: var(--auth-border-hover);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--auth-border-hover) 18%, transparent);
+  background: var(--auth-input-hover);
 }
 
 .form-group input::placeholder,
 .form-group textarea::placeholder {
-  color: var(--text-dim);
+  color: var(--auth-muted);
 }
 
 /* Mobile Number Input */
@@ -122,8 +145,8 @@
 }
 
 .country-code {
-  background: var(--gold-glow);
-  border: 1px solid var(--border-hover);
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
+  border: 1px solid var(--auth-border-hover);
   color: var(--gold);
   padding: 0.9rem 1rem;
   border-radius: 10px;
@@ -145,8 +168,11 @@
 }
 
 .role-card {
-  background: var(--bg-surface);
-  border: 2px solid var(--border);
+  appearance: none;
+  font: inherit;
+  color: inherit;
+  background: var(--auth-surface);
+  border: 2px solid var(--auth-border);
   border-radius: 15px;
   padding: 2rem 1.5rem;
   text-align: center;
@@ -155,15 +181,15 @@
 }
 
 .role-card:hover {
-  background: var(--bg-card-hover);
-  border-color: var(--border-hover);
+  background: var(--auth-input-hover);
+  border-color: var(--auth-border-hover);
   transform: translateY(-5px);
 }
 
 .role-card.active {
-  background: var(--gold-glow);
-  border-color: var(--border-hover);
-  box-shadow: var(--shadow-card);
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  border-color: var(--auth-border-hover);
+  box-shadow: 0 12px 28px rgba(184, 137, 10, 0.14);
 }
 
 .role-icon {
@@ -179,15 +205,15 @@
 }
 
 .role-card p {
-  color: var(--text-muted);
+  color: var(--auth-muted);
   font-size: 0.95rem;
   line-height: 1.5;
 }
 
 /* Authentic Section */
 .authentic-section {
-  background: var(--gold-glow);
-  border-color: var(--border-hover);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+  border-color: var(--auth-border-hover);
 }
 
 /* Checkbox Group */
@@ -200,7 +226,7 @@
   align-items: center;
   gap: 0.8rem;
   cursor: pointer;
-  color: var(--text);
+  color: var(--auth-text);
   font-size: 1rem;
 }
 
@@ -219,20 +245,21 @@
 .submit-button {
   width: 100%;
   padding: 1.2rem;
-  background: var(--primary);
+  background: linear-gradient(135deg, #ffdb38, #e6ad00);
   color: #0D1B2A;
   border: none;
   border-radius: 50px;
   font-size: 1.2rem;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
   margin-top: 1rem;
 }
 
 .submit-button:hover {
   transform: translateY(-3px);
-  box-shadow: 0 15px 35px rgba(255, 204, 0, 0.5);
+  box-shadow: 0 12px 30px rgba(184, 137, 10, 0.3);
+  filter: brightness(1.04);
 }
 
 .submit-button:active {
@@ -242,7 +269,7 @@
 /* Auth Footer */
 .auth-footer {
   text-align: center;
-  color: var(--text-muted);
+  color: var(--auth-muted);
   margin-top: 2rem;
   font-size: 1rem;
 }
