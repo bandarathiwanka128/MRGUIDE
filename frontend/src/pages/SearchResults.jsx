@@ -501,7 +501,7 @@ const SearchResults = ({ user }) => {
   if (loadError) {
     return (
       <div className="search-results-container">
-        <div style={{ padding: '40px', color: '#f44336', textAlign: 'center' }}>
+        <div className="search-results-message error">
           Error loading Google Maps. Please check your API key and try again.
         </div>
       </div>
@@ -511,7 +511,7 @@ const SearchResults = ({ user }) => {
   if (!isLoaded) {
     return (
       <div className="search-results-container">
-        <div style={{ padding: '40px', color: '#FFD700', textAlign: 'center' }}>
+        <div className="search-results-message loading">
           Loading Maps...
         </div>
       </div>
@@ -520,7 +520,7 @@ const SearchResults = ({ user }) => {
 
   return (
     <div className={`search-results-container${showDetailsPanel ? ' detail-panel-open' : ''}`}>
-      {/* Sidebar - Dark Theme */}
+      {/* Search sidebar */}
       <div className="results-sidebar">
         {/* Search Header */}
         <div className="sidebar-header">
@@ -667,36 +667,23 @@ const SearchResults = ({ user }) => {
 
         {/* Sort Controls */}
         {places.length > 0 && (
-          <div className="sort-section" style={{
-            padding: '12px 20px',
-            borderBottom: '1px solid rgba(255, 215, 0, 0.15)',
-          }}>
+          <div className="sort-section">
             <p className="section-label">{'\u2195\uFE0F'} Sort Results</p>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '10px 14px',
-                background: 'rgba(255, 255, 255, 0.08)',
-                border: '1px solid rgba(255, 215, 0, 0.3)',
-                borderRadius: '8px',
-                color: '#ffffff',
-                fontSize: '0.9rem',
-                cursor: 'pointer',
-                outline: 'none',
-              }}
+              className="sort-select"
             >
-              <option value="relevance" style={{ background: '#0d2137' }}>
+              <option value="relevance">
                 Relevance (Default)
               </option>
-              <option value="rating" style={{ background: '#0d2137' }}>
+              <option value="rating">
                 Rating (Highest First)
               </option>
-              <option value="price" style={{ background: '#0d2137' }}>
+              <option value="price">
                 Price Level (Lowest First)
               </option>
-              <option value="distance" style={{ background: '#0d2137' }}>
+              <option value="distance">
                 Distance (Nearest First)
               </option>
             </select>
