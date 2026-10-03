@@ -337,3 +337,77 @@
 .form-section:nth-child(1) { animation-delay: 0.1s; }
 .form-section:nth-child(2) { animation-delay: 0.2s; }
 .form-section:nth-child(3) { animation-delay: 0.3s; }
+
+@media (max-width: 768px) {
+  .register-container {
+    min-height: calc(100dvh - 64px);
+    padding: 24px 16px;
+    align-items: flex-start;
+  }
+
+  .register-box {
+    padding: 2rem 1.25rem;
+    border-radius: 16px;
+  }
+
+  .register-title {
+    font-size: clamp(1.75rem, 7vw, 2.25rem);
+  }
+
+  .register-subtitle {
+    font-size: 0.98rem;
+    line-height: 1.5;
+  }
+
+  .form-section {
+    padding: 1.25rem;
+    border-radius: 12px;
+  }
+
+  .form-group input,
+  .form-group textarea,
+  .country-code,
+  .submit-button {
+    min-height: 48px;
+  }
+
+  .mobile-input-group {
+    align-items: stretch;
+  }
+
+  .country-code {
+    display: flex;
+    align-items: center;
+  }
+
+  .role-card {
+    min-height: 150px;
+    padding: 1.25rem 1rem;
+  }
+
+  .role-card:hover {
+    transform: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .register-container {
+    padding-inline: 10px;
+  }
+
+  .register-box {
+    padding: 1.5rem 0.85rem;
+  }
+
+  .form-section {
+    padding: 1rem;
+  }
+
+  .mobile-input-group {
+    flex-direction: column;
+  }
+
+  .country-code {
+    width: fit-content;
+  }
+}

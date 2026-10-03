@@ -41,6 +41,21 @@ const MoonIcon = () => (
   </svg>
 );
 
+const MenuIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <line x1="3" y1="6" x2="21" y2="6" />
+    <line x1="3" y1="12" x2="21" y2="12" />
+    <line x1="3" y1="18" x2="21" y2="18" />
+  </svg>
+);
+
+const CloseIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <line x1="6" y1="6" x2="18" y2="18" />
+    <line x1="18" y1="6" x2="6" y2="18" />
+  </svg>
+);
+
 const App = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -48,6 +63,7 @@ const App = () => {
     const saved = localStorage.getItem('mrguide-theme');
     return saved ? saved === 'dark' : true;
   });
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
@@ -92,14 +108,46 @@ const App = () => {
             <span className="logo-guide">Guide</span>
           </Link>
 
-          <div className="nav-links">
-            <Link to="/">Home</Link>
-            <Link to="/guides">Find a Guide</Link>
-            <Link to="/about">About Us</Link>
-            {user && <Link to="/guide/dashboard">My Guide</Link>}
+          <button
+            className="mobile-menu-toggle"
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="primary-navigation"
+            aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          >
+            {mobileMenuOpen ? <CloseIcon /> : <MenuIcon />}
+          </button>
+
+          <button
+            className={`mobile-menu-backdrop${mobileMenuOpen ? ' is-visible' : ''}`}
+            type="button"
+            onClick={() => setMobileMenuOpen(false)}
+            aria-label="Close navigation menu"
+          />
+
+          <div id="primary-navigation" className={`nav-links${mobileMenuOpen ? ' is-open' : ''}`}>
+            <Link to="/" onClick={() => setMobileMenuOpen(false)}>Home</Link>
+            <Link to="/guides" onClick={() => setMobileMenuOpen(false)}>Find a Guide</Link>
+            <Link to="/about" onClick={() => setMobileMenuOpen(false)}>About Us</Link>
+            {user && <Link to="/guide/dashboard" onClick={() => setMobileMenuOpen(false)}>My Guide</Link>}
             {user && localStorage.getItem('mrguide_active_trip') && (
-              <Link to="/my-trip" className="nav-active-trip">🗺 My Trip</Link>
+              <Link to="/my-trip" className="nav-active-trip" onClick={() => setMobileMenuOpen(false)}>🗺 My Trip</Link>
             )}
+
+            <div className="mobile-menu-auth">
+              {user ? (
+                <>
+                  <span className="welcome-user">Hi, {user.username}!</span>
+                  <button onClick={handleLogout} className="btn btn-logout">Logout</button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" className="btn btn-login" onClick={() => setMobileMenuOpen(false)}>Login</Link>
+                  <Link to="/register" className="btn btn-register" onClick={() => setMobileMenuOpen(false)}>Register</Link>
+                </>
+              )}
+            </div>
           </div>
 
           <div className="nav-right">

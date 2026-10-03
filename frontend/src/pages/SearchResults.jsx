@@ -88,6 +88,7 @@ const SearchResults = ({ user }) => {
   const [authModalPlace, setAuthModalPlace] = useState(null);
   const [authModalType, setAuthModalType] = useState('user');
   const [authSnackbar, setAuthSnackbar] = useState('');
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(true);
 
   const mapRef = useRef(null);
   const placesServiceRef = useRef(null);
@@ -521,7 +522,21 @@ const SearchResults = ({ user }) => {
   return (
     <div className={`search-results-container${showDetailsPanel ? ' detail-panel-open' : ''}`}>
       {/* Search sidebar */}
-      <div className="results-sidebar">
+      <button
+        className="mobile-sidebar-toggle"
+        type="button"
+        onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
+        aria-expanded={mobileSidebarOpen}
+        aria-controls="search-results-sidebar"
+      >
+        <span>{mobileSidebarOpen ? 'Hide search controls' : 'Show search controls'}</span>
+        <span aria-hidden="true">{mobileSidebarOpen ? '\u2191' : '\u2193'}</span>
+      </button>
+
+      <div
+        id="search-results-sidebar"
+        className={`results-sidebar${mobileSidebarOpen ? ' is-mobile-open' : ' is-mobile-collapsed'}`}
+      >
         {/* Search Header */}
         <div className="sidebar-header">
           <h2>{'\uD83C\uDDF1\uD83C\uDDF0'} Search Sri Lanka</h2>

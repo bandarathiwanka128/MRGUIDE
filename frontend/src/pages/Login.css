@@ -141,3 +141,36 @@
 .auth-footer a:hover {
   text-decoration: underline;
 }
+
+@media (max-width: 600px) {
+  .auth-container {
+    min-height: calc(100dvh - 64px);
+    padding: 24px 16px;
+    align-items: flex-start;
+  }
+
+  .auth-box {
+    max-width: none;
+    margin-top: 8px;
+    padding: 28px 20px;
+    border-radius: 14px;
+  }
+
+  .auth-box h2 {
+    font-size: 1.5rem;
+    margin-bottom: 24px;
+  }
+
+  .auth-form {
+    gap: 16px;
+  }
+
+  .auth-form input,
+  .submit-button {
+    min-height: 48px;
+  }
+
+  .submit-button {
+    margin-top: 6px;
+  }
+}
