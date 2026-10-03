@@ -1,11 +1,10 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { GoogleMap, useLoadScript, Marker, InfoWindow, DirectionsRenderer } from '@react-google-maps/api';
-import axios from 'axios';
 import './SearchResults.css';
 import PlaceDetailsPanel from '../components/PlaceDetailsPanel';
 import AddAuthenticDataModal from '../components/AddAuthenticDataModal';
-import { API_BASE_URL, GOOGLE_MAPS_API_KEY } from '../config';
+import { GOOGLE_MAPS_API_KEY } from '../config';
 
 const libraries = ['places'];
 
@@ -66,7 +65,7 @@ const SearchResults = ({ user }) => {
   const [searchStatus, setSearchStatus] = useState('');
   const [travelMode, setTravelMode] = useState('DRIVING');
   const [mapCenter, setMapCenter] = useState(SRI_LANKA_CENTER);
-  const [mapZoom, setMapZoom] = useState(8);
+  const [mapZoom] = useState(8);
 
   // Sort state
   const [sortBy, setSortBy] = useState('relevance');
@@ -92,7 +91,6 @@ const SearchResults = ({ user }) => {
 
   const mapRef = useRef(null);
   const placesServiceRef = useRef(null);
-  const startAutocompleteRef = useRef(null);
   const geocoderRef = useRef(null);
   const directionsServiceRef = useRef(null);
 
@@ -144,21 +142,6 @@ const SearchResults = ({ user }) => {
       setGettingLocation(false);
     }
   };
-
-  // Reverse geocode a lat/lng to get address name
-  const reverseGeocode = useCallback((lat, lng, callback) => {
-    if (!geocoderRef.current) return;
-    geocoderRef.current.geocode(
-      { location: { lat, lng } },
-      (results, status) => {
-        if (status === 'OK' && results[0]) {
-          callback(results[0].formatted_address);
-        } else {
-          callback(`${lat.toFixed(4)}, ${lng.toFixed(4)}`);
-        }
-      }
-    );
-  }, []);
 
   // Search places using Google Places textSearch
   const searchPlaces = useCallback((query) => {
@@ -506,32 +489,6 @@ const SearchResults = ({ user }) => {
   }, [places, sortBy, startLocation]);
 
   const sortedPlaces = getSortedPlaces();
-
-  // Render star rating
-  const renderStars = (rating) => {
-    if (!rating) return null;
-    const fullStars = Math.floor(rating);
-    const hasHalf = rating - fullStars >= 0.5;
-    const stars = [];
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(<span key={`full-${i}`} style={{ color: '#FFD700' }}>&#9733;</span>);
-    }
-    if (hasHalf) {
-      stars.push(<span key="half" style={{ color: '#FFD700' }}>&#9734;</span>);
-    }
-    return (
-      <span className="place-rating-stars">
-        {stars} <span style={{ color: '#b0b8c4', fontSize: '0.85rem' }}>{rating.toFixed(1)}</span>
-      </span>
-    );
-  };
-
-  // Render price level
-  const renderPriceLevel = (priceLevel) => {
-    if (priceLevel === null || priceLevel === undefined) return null;
-    const dollars = '$'.repeat(priceLevel + 1);
-    return <span className="place-price-level" style={{ color: '#69F0AE', fontSize: '0.85rem' }}>{dollars}</span>;
-  };
 
   // Travel modes
   const travelModes = [

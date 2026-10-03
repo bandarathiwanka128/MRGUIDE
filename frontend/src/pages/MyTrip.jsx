@@ -5,7 +5,6 @@ import { API_BASE_URL } from '../config';
 
 export default function MyTrip({ user }) {
   const navigate = useNavigate();
-  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
     const stored = localStorage.getItem('mrguide_active_trip');
@@ -24,9 +23,8 @@ export default function MyTrip({ user }) {
       } else {
         navigate('/guides', { replace: true });
       }
-    }).catch(() => navigate('/guides', { replace: true }))
-    .finally(() => setChecking(false));
-  }, []);
+    }).catch(() => navigate('/guides', { replace: true }));
+  }, [navigate]);
 
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, color: 'var(--text-secondary, #64748b)' }}>
