@@ -1,13 +1,13 @@
 .trip-payment-page {
-  min-height: 100vh;
+  min-height: calc(100dvh - var(--nav-height));
   padding: 80px 20px 60px;
-  background: var(--bg, #0D1B2A);
+  background: var(--bg);
   display: flex;
   align-items: flex-start;
   justify-content: center;
 }
 
-.tp-container {
+.tpay-container {
   width: 100%;
   max-width: 480px;
 }
@@ -24,14 +24,14 @@
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #34699A, #FFCC00);
+  background: linear-gradient(135deg, var(--blue), var(--accent));
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
   overflow: hidden;
   flex-shrink: 0;
-  border: 2px solid rgba(255,255,255,0.1);
+  border: 2px solid rgba(var(--fg-rgb), 0.1);
 }
 
 .tp-guide-avatar img { width: 100%; height: 100%; object-fit: cover; }
@@ -41,33 +41,33 @@
 .tp-header-info h1 {
   font-size: 1.3rem;
   font-weight: 800;
-  color: var(--text-primary, #fff);
+  color: var(--text-1);
   margin: 0 0 3px;
 }
 
 .tp-header-info p {
-  color: var(--text-secondary, #94a3b8);
+  color: var(--text-2);
   font-size: 0.88rem;
   margin: 0;
 }
 
-.tp-header-info p strong { color: var(--text-primary, #fff); }
+.tp-header-info p strong { color: var(--text-1); }
 
 .tp-dist-badge {
-  background: rgba(52,105,154,0.2);
-  color: #34699A;
+  background: rgba(var(--blue-rgb), 0.2);
+  color: var(--blue-ink);
   padding: 4px 10px;
   border-radius: 20px;
   font-size: 0.8rem;
   font-weight: 700;
-  border: 1px solid rgba(52,105,154,0.3);
+  border: 1px solid rgba(var(--blue-rgb), 0.3);
   white-space: nowrap;
 }
 
 /* Main card */
 .tp-main-card {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.09);
+  background: rgba(var(--fg-rgb), 0.04);
+  border: 1px solid rgba(var(--fg-rgb), 0.09);
   border-radius: 20px;
   padding: 28px;
   backdrop-filter: blur(12px);
@@ -81,7 +81,7 @@
   display: flex;
   flex-direction: column;
   gap: 0;
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid rgba(var(--fg-rgb), 0.08);
   border-radius: 14px;
   overflow: hidden;
 }
@@ -92,8 +92,8 @@
   align-items: center;
   padding: 12px 16px;
   font-size: 0.92rem;
-  color: var(--text-secondary, #94a3b8);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  color: var(--text-2);
+  border-bottom: 1px solid rgba(var(--fg-rgb), 0.06);
 }
 
 .tp-fare-row:last-of-type { border-bottom: none; }
@@ -102,15 +102,15 @@
 
 .tp-optional {
   font-size: 0.78rem;
-  color: var(--text-secondary, #64748b);
+  color: var(--text-2);
   font-weight: 400;
 }
 
 .tp-tip-wrap {
   display: flex;
   align-items: center;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(var(--fg-rgb), 0.06);
+  border: 1px solid rgba(var(--fg-rgb), 0.12);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -118,8 +118,8 @@
 .tp-tip-lkr {
   padding: 6px 10px;
   font-size: 0.8rem;
-  color: var(--text-secondary, #64748b);
-  border-right: 1px solid rgba(255,255,255,0.1);
+  color: var(--text-2);
+  border-right: 1px solid rgba(var(--fg-rgb), 0.1);
 }
 
 .tp-tip-input {
@@ -128,20 +128,20 @@
   padding: 6px 10px;
   width: 80px;
   font-size: 0.9rem;
-  color: #fff;
+  color: var(--text-1);
   outline: none;
 }
 
 .tp-fare-divider {
   height: 1px;
-  background: rgba(255,255,255,0.1);
+  background: rgba(var(--fg-rgb), 0.1);
   margin: 0;
 }
 
 .tp-fare-total {
-  background: rgba(52,105,154,0.1);
+  background: rgba(var(--blue-rgb), 0.1);
   border-bottom: none !important;
-  color: var(--text-primary, #fff) !important;
+  color: var(--text-1) !important;
   font-weight: 600;
   font-size: 1rem !important;
 }
@@ -149,15 +149,15 @@
 .tp-fare-total strong {
   font-size: 1.2rem;
   font-weight: 800;
-  color: #FFCC00;
+  color: var(--accent-ink);
 }
 
 .tp-tip-note {
   padding: 8px 16px;
   font-size: 0.78rem;
-  color: #FFCC00;
-  background: rgba(255,204,0,0.06);
-  border-top: 1px solid rgba(255,204,0,0.15);
+  color: var(--accent-ink);
+  background: rgba(var(--accent-rgb), 0.06);
+  border-top: 1px solid rgba(var(--accent-rgb), 0.15);
 }
 
 /* Card input section */
@@ -176,7 +176,7 @@
 .tp-card-label {
   font-size: 0.85rem;
   font-weight: 700;
-  color: var(--text-secondary, #94a3b8);
+  color: var(--text-2);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -188,30 +188,30 @@
 }
 
 .tp-card-input-box {
-  background: rgba(255,255,255,0.06);
-  border: 1.5px solid rgba(255,255,255,0.12);
+  background: rgba(var(--fg-rgb), 0.06);
+  border: 1.5px solid rgba(var(--fg-rgb), 0.12);
   border-radius: 12px;
   padding: 16px;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .tp-card-input-box--focused {
-  border-color: #34699A;
-  box-shadow: 0 0 0 3px rgba(52,105,154,0.2);
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(var(--blue-rgb), 0.2);
 }
 
 .tp-test-hint {
   font-size: 0.78rem;
-  color: var(--text-secondary, #64748b);
+  color: var(--text-2);
   margin: 0;
 }
 
-.tp-test-hint strong { color: #94a3b8; }
+.tp-test-hint strong { color: var(--text-2); }
 
 /* Pay button */
 .tp-pay-btn {
   padding: 16px;
-  background: linear-gradient(135deg, #34699A, #1e4a75);
+  background: linear-gradient(135deg, var(--blue), var(--blue-hover));
   color: white;
   border: none;
   border-radius: 14px;
@@ -229,14 +229,14 @@
 
 .tp-pay-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(52,105,154,0.5);
+  box-shadow: 0 8px 24px rgba(var(--blue-rgb), 0.5);
 }
 
 .tp-pay-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .tp-pay-spinner {
   width: 22px; height: 22px;
-  border: 2px solid rgba(255,255,255,0.3);
+  border: 2px solid rgba(var(--fg-rgb), 0.3);
   border-top-color: white;
   border-radius: 50%;
   animation: tp-spin 0.6s linear infinite;
@@ -250,13 +250,13 @@
   justify-content: center;
   gap: 6px;
   font-size: 0.75rem;
-  color: var(--text-secondary, #475569);
+  color: var(--text-2);
 }
 
 .tp-error-msg {
-  background: rgba(239,68,68,0.1);
-  border: 1px solid rgba(239,68,68,0.3);
-  color: #f87171;
+  background: rgba(var(--danger-rgb), 0.1);
+  border: 1px solid rgba(var(--danger-rgb), 0.3);
+  color: var(--danger);
   border-radius: 10px;
   padding: 12px 16px;
   font-size: 0.85rem;
@@ -265,28 +265,28 @@
 
 /* Loading / Error / Success full-page */
 .tp-fullpage-center {
-  min-height: 100vh;
+  min-height: calc(100dvh - var(--nav-height));
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 16px;
-  color: var(--text-secondary, #64748b);
+  color: var(--text-2);
   padding: 20px;
-  background: var(--bg, #0D1B2A);
+  background: var(--bg);
 }
 
 .tp-spinner {
   width: 44px; height: 44px;
-  border: 3px solid rgba(255,255,255,0.1);
-  border-top-color: #34699A;
+  border: 3px solid rgba(var(--fg-rgb), 0.1);
+  border-top-color: var(--blue);
   border-radius: 50%;
   animation: tp-spin 0.8s linear infinite;
 }
 
 .tp-home-btn {
   padding: 12px 28px;
-  background: #34699A;
+  background: var(--blue);
   color: white;
   border: none;
   border-radius: 10px;
@@ -297,8 +297,8 @@
 
 /* Success */
 .tp-success-card {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.09);
+  background: rgba(var(--fg-rgb), 0.04);
+  border: 1px solid rgba(var(--fg-rgb), 0.09);
   border-radius: 24px;
   padding: 48px 40px;
   text-align: center;
@@ -308,7 +308,7 @@
 
 .tp-success-icon {
   width: 80px; height: 80px;
-  background: linear-gradient(135deg, #22c55e, #16a34a);
+  background: linear-gradient(135deg, var(--success), var(--success));
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -322,33 +322,33 @@
 .tp-success-card h2 {
   font-size: 1.5rem;
   font-weight: 800;
-  color: var(--text-primary, #fff);
+  color: var(--text-1);
   margin: 0 0 8px;
 }
 
 .tp-success-amount {
   font-size: 2rem;
   font-weight: 800;
-  color: #22c55e;
+  color: var(--success);
   margin: 0 0 8px;
 }
 
 .tp-success-sub {
   font-size: 0.88rem;
-  color: var(--text-secondary, #64748b);
+  color: var(--text-2);
   margin: 0 0 28px !important;
 }
 
 .tp-rate-btn {
   padding: 13px 32px;
-  background: linear-gradient(135deg, #FFCC00, #e6a800);
+  background: linear-gradient(135deg, var(--accent), var(--accent));
   border: none;
   border-radius: 12px;
-  color: #1a1a1a;
+  color: var(--on-accent);
   font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
 }
 
-.tp-rate-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(255,204,0,0.4); }
+.tp-rate-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(var(--accent-rgb), 0.4); }

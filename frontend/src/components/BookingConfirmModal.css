@@ -1,7 +1,7 @@
-.modal-overlay {
+.bcm-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(var(--fg-rgb), 0.55);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -14,7 +14,7 @@
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 .booking-modal {
-  background: var(--bg-card, #fff);
+  background: var(--surface-2);
   border-radius: 20px;
   padding: 28px;
   width: 100%;
@@ -30,13 +30,13 @@
   position: absolute;
   top: 16px;
   right: 16px;
-  background: var(--bg, #f0f5fb);
+  background: var(--bg);
   border: none;
   border-radius: 50%;
   width: 32px;
   height: 32px;
   cursor: pointer;
-  color: var(--text-secondary, #64748b);
+  color: var(--text-2);
   font-size: 0.9rem;
   display: flex;
   align-items: center;
@@ -44,7 +44,7 @@
   transition: all 0.2s;
 }
 
-.modal-close:hover { background: #fee2e2; color: #ef4444; }
+.modal-close:hover { background: var(--danger-soft); color: var(--danger); }
 
 .modal-guide-header {
   display: flex;
@@ -52,7 +52,7 @@
   align-items: center;
   margin-bottom: 20px;
   padding-bottom: 16px;
-  border-bottom: 1px solid var(--border-subtle, #e2e8f0);
+  border-bottom: 1px solid var(--border);
 }
 
 .modal-guide-avatar {
@@ -65,14 +65,14 @@
   height: 60px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid var(--border-subtle, #e2e8f0);
+  border: 2px solid var(--border);
 }
 
 .modal-avatar-placeholder {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #34699A, #FFCC00);
+  background: linear-gradient(135deg, var(--blue), var(--accent));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -85,7 +85,7 @@
   right: 2px;
   width: 14px;
   height: 14px;
-  background: #22c55e;
+  background: var(--success);
   border-radius: 50%;
   border: 2px solid white;
 }
@@ -93,14 +93,14 @@
 .modal-guide-info h3 {
   font-size: 1.1rem;
   font-weight: 700;
-  color: var(--text-primary, #1a202c);
+  color: var(--text-1);
   margin: 0 0 4px;
 }
 
-.modal-rating { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--text-secondary, #64748b); margin-bottom: 6px; }
-.modal-stars { color: #FFCC00; }
+.modal-rating { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--text-2); margin-bottom: 6px; }
+.modal-stars { color: var(--accent-ink); }
 .modal-langs { display: flex; gap: 5px; flex-wrap: wrap; }
-.modal-lang { font-size: 0.75rem; padding: 2px 8px; background: rgba(52,105,154,0.1); color: #34699A; border-radius: 20px; font-weight: 500; }
+.modal-lang { font-size: 0.75rem; padding: 2px 8px; background: rgba(var(--blue-rgb), 0.1); color: var(--blue-ink); border-radius: 20px; font-weight: 500; }
 
 /* Fare */
 .modal-fare-section { margin-bottom: 18px; }
@@ -108,21 +108,21 @@
 .modal-payment-section h4 {
   font-size: 0.85rem;
   font-weight: 700;
-  color: var(--text-secondary, #64748b);
+  color: var(--text-2);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin: 0 0 10px;
 }
 
-.fare-table { border: 1px solid var(--border-subtle, #e2e8f0); border-radius: 10px; overflow: hidden; }
-.fare-row { display: flex; justify-content: space-between; padding: 8px 12px; font-size: 0.9rem; border-bottom: 1px solid var(--border-subtle, #e2e8f0); }
+.fare-table { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.fare-row { display: flex; justify-content: space-between; padding: 8px 12px; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
 .fare-row:last-child { border-bottom: none; }
-.fare-row--muted { color: var(--text-secondary, #64748b); font-size: 0.82rem; background: var(--bg, #f8fafc); }
-.fare-total { font-weight: 700; background: linear-gradient(135deg, rgba(255,204,0,0.1), rgba(52,105,154,0.05)); }
-.fare-amount { font-weight: 600; color: var(--text-primary, #1a202c); }
+.fare-row--muted { color: var(--text-2); font-size: 0.82rem; background: var(--bg); }
+.fare-total { font-weight: 700; background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.1), rgba(var(--blue-rgb), 0.05)); }
+.fare-amount { font-weight: 600; color: var(--text-1); }
 
-.fare-no-dest { background: var(--bg, #f8fafc); border-radius: 10px; padding: 12px; text-align: center; color: var(--text-secondary, #64748b); font-size: 0.85rem; }
-.fare-tiers { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 8px; font-size: 0.8rem; font-weight: 600; color: var(--text-primary, #1a202c); }
+.fare-no-dest { background: var(--bg); border-radius: 10px; padding: 12px; text-align: center; color: var(--text-2); font-size: 0.85rem; }
+.fare-tiers { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 8px; font-size: 0.8rem; font-weight: 600; color: var(--text-1); }
 
 /* Payment options */
 .modal-payment-section { margin-bottom: 18px; }
@@ -134,7 +134,7 @@
   align-items: center;
   gap: 8px;
   padding: 12px;
-  border: 2px solid var(--border-subtle, #e2e8f0);
+  border: 2px solid var(--border);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s;
@@ -143,13 +143,13 @@
 .pay-option input { display: none; }
 
 .pay-option--active {
-  border-color: var(--gold, #FFCC00);
-  background: rgba(255,204,0,0.06);
+  border-color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.06);
 }
 
 .pay-icon { font-size: 1.3rem; }
-.pay-option strong { display: block; font-size: 0.88rem; color: var(--text-primary, #1a202c); }
-.pay-option small { display: block; font-size: 0.73rem; color: var(--text-secondary, #64748b); }
+.pay-option strong { display: block; font-size: 0.88rem; color: var(--text-1); }
+.pay-option small { display: block; font-size: 0.73rem; color: var(--text-2); }
 
 /* Confirm button */
 .modal-confirm-btn {
@@ -157,8 +157,8 @@
   padding: 14px;
   border: none;
   border-radius: 12px;
-  background: linear-gradient(135deg, #FFCC00, #e6a800);
-  color: #1a1a1a;
+  background: linear-gradient(135deg, var(--accent), var(--accent));
+  color: var(--on-accent);
   font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
@@ -170,11 +170,11 @@
 
 .modal-confirm-btn:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(255,204,0,0.4);
+  box-shadow: 0 6px 20px rgba(var(--accent-rgb), 0.4);
 }
 
 .modal-confirm-btn--success {
-  background: linear-gradient(135deg, #22c55e, #16a34a);
+  background: linear-gradient(135deg, var(--success), var(--success));
   color: white;
 }
 
@@ -188,8 +188,8 @@
 .confirm-spinner {
   width: 18px;
   height: 18px;
-  border: 2px solid rgba(26,26,26,0.2);
-  border-top-color: #1a1a1a;
+  border: 2px solid rgba(var(--fg-rgb), 0.2);
+  border-top-color: var(--border-strong);
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
 }
@@ -197,8 +197,8 @@
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .modal-error {
-  background: #fee2e2;
-  color: #b91c1c;
+  background: var(--danger-soft);
+  color: var(--danger);
   border-radius: 8px;
   padding: 10px 14px;
   font-size: 0.85rem;
@@ -209,7 +209,7 @@
   text-align: center;
   margin-top: 10px;
   font-size: 0.85rem;
-  color: var(--text-secondary, #64748b);
+  color: var(--text-2);
 }
 
-.modal-login-hint a { color: #34699A; text-decoration: none; font-weight: 600; }
+.modal-login-hint a { color: var(--blue-ink); text-decoration: none; font-weight: 600; }

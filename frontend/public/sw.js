@@ -15,7 +15,7 @@
  *   - Navigate requests              → serve cached index.html (SPA fallback)
  */
 
-const CACHE_VERSION  = 'mrguide-v1';
+const CACHE_VERSION  = 'mrguide-v2';
 const API_CACHE      = 'mrguide-api-v1';
 const MAPS_CACHE     = 'mrguide-maps-v1';
 
@@ -27,7 +27,8 @@ const APP_SHELL = [
   '/static/js/bundle.js',
   '/manifest.json',
   '/logo192.png',
-  '/favicon.ico'
+  '/favicon.ico',
+  '/brand/mrguide-mark.svg'
 ];
 
 // ─── Install: pre-cache app shell ─────────────────────────────────────────────

@@ -5,6 +5,8 @@ import './SearchResults.css';
 import PlaceDetailsPanel from '../components/PlaceDetailsPanel';
 import AddAuthenticDataModal from '../components/AddAuthenticDataModal';
 import { GOOGLE_MAPS_API_KEY } from '../config';
+import { useMapTheme } from '../utils/mapTheme';
+import { Car, Bus, Footprints, Bike, Search as SearchIcon, MapPin, ArrowUpDown, Route as RouteIcon, ListOrdered, X, LocateFixed, ChevronUp, ChevronDown } from 'lucide-react';
 
 const libraries = ['places'];
 
@@ -49,6 +51,8 @@ const createRedMarkerIcon = (label) => ({
 });
 
 const SearchResults = ({ user }) => {
+  const mapTheme = useMapTheme();
+  const themedMapOptions = React.useMemo(() => ({ ...mapOptions, styles: mapTheme.styles }), [mapTheme]);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const initialQuery = searchParams.get('q') || '';
@@ -493,10 +497,10 @@ const SearchResults = ({ user }) => {
 
   // Travel modes
   const travelModes = [
-    { id: 'DRIVING', icon: '\uD83D\uDE97', label: 'Car' },
-    { id: 'TRANSIT', icon: '\uD83D\uDE8C', label: 'Transit' },
-    { id: 'WALKING', icon: '\uD83D\uDEB6', label: 'Walk' },
-    { id: 'BICYCLING', icon: '\uD83D\uDEB2', label: 'Bike' },
+    { id: 'DRIVING', icon: <Car size={20} aria-hidden="true" />, label: 'Car' },
+    { id: 'TRANSIT', icon: <Bus size={20} aria-hidden="true" />, label: 'Transit' },
+    { id: 'WALKING', icon: <Footprints size={20} aria-hidden="true" />, label: 'Walk' },
+    { id: 'BICYCLING', icon: <Bike size={20} aria-hidden="true" />, label: 'Bike' },
   ];
 
   if (loadError) {
@@ -530,7 +534,7 @@ const SearchResults = ({ user }) => {
         aria-controls="search-results-sidebar"
       >
         <span>{mobileSidebarOpen ? 'Hide search controls' : 'Show search controls'}</span>
-        <span aria-hidden="true">{mobileSidebarOpen ? '\u2191' : '\u2193'}</span>
+        <span aria-hidden="true">{mobileSidebarOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}</span>
       </button>
 
       <div
@@ -539,7 +543,7 @@ const SearchResults = ({ user }) => {
       >
         {/* Search Header */}
         <div className="sidebar-header">
-          <h2>{'\uD83C\uDDF1\uD83C\uDDF0'} Search Sri Lanka</h2>
+          <h2>Search Sri Lanka</h2>
           <form onSubmit={handleSearch} className="sidebar-search-form">
             <input
               type="text"
@@ -549,14 +553,14 @@ const SearchResults = ({ user }) => {
               className="sidebar-search-input"
             />
             <button type="submit" className="sidebar-search-btn" disabled={searchLoading}>
-              {searchLoading ? '...' : '\uD83D\uDD0D'}
+              {searchLoading ? <span className="ui-spinner" aria-hidden="true" /> : <SearchIcon size={20} aria-hidden="true" />}
             </button>
           </form>
         </div>
 
         {/* Start Location Section */}
         <div className="start-location-section">
-          <p className="section-label">{'\uD83D\uDCCD'} Your Starting Point</p>
+          <p className="section-label"><MapPin size={15} aria-hidden="true" /> Your starting point</p>
           <div className="start-location-box">
             {startLocation ? (
               <div className="current-start">
@@ -592,7 +596,7 @@ const SearchResults = ({ user }) => {
                   className="use-gps-btn"
                   disabled={gettingLocation}
                 >
-                  {gettingLocation ? 'Getting...' : '\uD83D\uDCCD Use My Location'}
+                  {gettingLocation ? 'Finding you…' : <><LocateFixed size={17} aria-hidden="true" /> Use my location</>}
                 </button>
 
                 {startSearchResults.length > 0 && (
@@ -616,7 +620,7 @@ const SearchResults = ({ user }) => {
 
         {/* Travel Mode Selector */}
         <div className="travel-mode-section">
-          <p className="section-label">{'\uD83D\uDE97'} Travel Mode</p>
+          <p className="section-label"><Car size={15} aria-hidden="true" /> Travel mode</p>
           <div className="travel-mode-buttons">
             {travelModes.map((mode) => (
               <button
@@ -683,7 +687,7 @@ const SearchResults = ({ user }) => {
         {/* Sort Controls */}
         {places.length > 0 && (
           <div className="sort-section">
-            <p className="section-label">{'\u2195\uFE0F'} Sort Results</p>
+            <p className="section-label"><ArrowUpDown size={15} aria-hidden="true" /> Sort results</p>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
@@ -716,7 +720,7 @@ const SearchResults = ({ user }) => {
         <div className="places-list-container">
           {places.length === 0 && !searchLoading && (
             <div className="empty-state">
-              <p>{'\uD83D\uDD0D'} Search for places in Sri Lanka</p>
+              <p><SearchIcon size={16} aria-hidden="true" /> Search for places in Sri Lanka</p>
               <p className="hint">Try: "Colombo Unity Plaza", "Sigiriya", "Galle Fort"</p>
             </div>
           )}
@@ -839,9 +843,9 @@ const SearchResults = ({ user }) => {
         {routeInfo && (
           <div className="route-info-panel">
             <div className="route-header">
-              <h3>{'\uD83D\uDDFA\uFE0F'} Route Details</h3>
-              <button onClick={clearRoute} className="clear-route-btn">
-                {'\u00D7'}
+              <h3><RouteIcon size={18} aria-hidden="true" /> Route details</h3>
+              <button onClick={clearRoute} className="clear-route-btn" aria-label="Clear route">
+                <X size={18} aria-hidden="true" />
               </button>
             </div>
 
@@ -877,7 +881,7 @@ const SearchResults = ({ user }) => {
 
             {directions.length > 0 && (
               <div className="directions-list">
-                <h4>{'\uD83D\uDCDD'} Turn-by-turn</h4>
+                <h4><ListOrdered size={16} aria-hidden="true" /> Turn-by-turn</h4>
                 <ol className="directions-steps">
                   {directions.map((step) => (
                     <li key={step.id} className="direction-step">
@@ -898,7 +902,7 @@ const SearchResults = ({ user }) => {
           mapContainerStyle={mapContainerStyle}
           center={mapCenter}
           zoom={mapZoom}
-          options={mapOptions}
+          options={themedMapOptions}
           onLoad={onMapLoad}
           onClick={() => setActiveInfoWindow(null)}
         >
@@ -1028,7 +1032,7 @@ const SearchResults = ({ user }) => {
                                 {infoWindowDetails[place.id].reviews.map((review, i) => (
                                   <div key={i} style={{ borderBottom: '1px solid #f0f0f0', padding: '4px 0' }}>
                                     <div style={{ fontWeight: 600, fontSize: '0.8rem' }}>{review.author_name}</div>
-                                    <div style={{ color: '#FFD700', fontSize: '0.75rem' }}>{'★'.repeat(review.rating)}</div>
+                                    <div style={{ color: 'var(--accent-ink)', fontSize: '0.75rem' }}>{'★'.repeat(review.rating)}</div>
                                     <div style={{ color: '#555', fontSize: '0.75rem', lineHeight: 1.4 }}>
                                       {review.text?.substring(0, 120)}{review.text?.length > 120 ? '...' : ''}
                                     </div>
@@ -1084,7 +1088,7 @@ const SearchResults = ({ user }) => {
               directions={directionsResponse}
               options={{
                 polylineOptions: {
-                  strokeColor: '#4285F4',
+                  strokeColor: mapTheme.route,
                   strokeWeight: 6,
                   strokeOpacity: 0.9,
                 },

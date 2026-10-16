@@ -6,6 +6,9 @@ import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
 import { QRCodeSVG } from 'qrcode.react';
 import { API_BASE_URL, GOOGLE_MAPS_API_KEY } from '../config';
 import './GuideDashboard.css';
+import { useMapTheme } from '../utils/mapTheme';
+import { X, User, BadgeCheck, Clock3, Star, MapPin, Car } from 'lucide-react';
+import { AlertTriangle, RotateCcw, Compass } from 'lucide-react';
 
 const TABS = ['Earnings', 'Trips', 'Payouts', 'Profile'];
 const LIBRARIES = ['places'];
@@ -60,6 +63,7 @@ function calculateWaitingCharge(minutes, guide) {
 }
 
 export default function GuideDashboard({ user }) {
+  const mapTheme = useMapTheme();
   const navigate = useNavigate();
   const [guide, setGuide] = useState(null);
   const [earnings, setEarnings] = useState(null);
@@ -68,6 +72,7 @@ export default function GuideDashboard({ user }) {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('Earnings');
   const [notGuide, setNotGuide] = useState(false);
+  const [loadError, setLoadError] = useState('');
   const [liveToggling, setLiveToggling] = useState(false);
   const [activeTrip, setActiveTrip] = useState(null);
   const [liveFare, setLiveFare] = useState({
@@ -127,6 +132,7 @@ export default function GuideDashboard({ user }) {
       setPayouts(p.data || []);
     }).catch(err => {
       if (err.response?.status === 404) setNotGuide(true);
+      else setLoadError('We couldn’t load your guide dashboard. Check your connection and try again.');
     }).finally(() => setLoading(false));
   }, [navigate, token]);
 
@@ -440,12 +446,24 @@ export default function GuideDashboard({ user }) {
     <div className="gd-loading"><div className="gd-spinner" /></div>
   );
 
+  if (loadError) return (
+    <div className="gd-not-guide">
+      <div className="gd-not-guide-card ui-empty" role="alert">
+        <span className="ui-empty__icon"><AlertTriangle size={24} aria-hidden="true" /></span>
+        <h2 className="ui-empty__title">Dashboard unavailable</h2>
+        <p>{loadError}</p>
+        <button onClick={() => window.location.reload()} className="ui-btn ui-btn--primary"><RotateCcw size={16} aria-hidden="true" /> Try again</button>
+      </div>
+    </div>
+  );
+
   if (notGuide) return (
     <div className="gd-not-guide">
-      <div className="gd-not-guide-card">
-        <h2>You're not registered as a guide</h2>
+      <div className="gd-not-guide-card ui-empty">
+        <span className="ui-empty__icon"><Compass size={24} aria-hidden="true" /></span>
+        <h2 className="ui-empty__title">You're not registered as a guide</h2>
         <p>Join Mr. Guide as a local guide and start earning!</p>
-        <button onClick={() => navigate('/guides/register')} className="gd-register-btn">Register as Guide</button>
+        <button onClick={() => navigate('/guides/register')} className="ui-btn ui-btn--primary">Register as a guide</button>
       </div>
     </div>
   );
@@ -472,13 +490,13 @@ export default function GuideDashboard({ user }) {
                       mapContainerStyle={BOOKING_MAP_STYLE}
                       center={guidePos || { lat: 6.9271, lng: 79.8612 }}
                       zoom={15}
-                      options={{ disableDefaultUI: true, zoomControl: true }}
+                      options={{ disableDefaultUI: true, zoomControl: true, styles: mapTheme.styles }}
                     >
                       {guidePos && (
                         <Marker
                           position={guidePos}
                           icon={{
-                            url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="#34699A" stroke="white" stroke-width="3"/><text x="20" y="27" font-size="18" text-anchor="middle">🚗</text></svg>')}`,
+                            url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="#34699A" stroke="white" stroke-width="3"/><g transform="translate(12 12) scale(0.6667)" fill="none" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13l2-5.5A2 2 0 0 1 6.9 6h10.2a2 2 0 0 1 1.9 1.5L21 13v4H3z"/><path d="M6 17v2M18 17v2"/><circle cx="7.5" cy="13.5" r="1"/><circle cx="16.5" cy="13.5" r="1"/></g></svg>')}`,
                             scaledSize: new window.google.maps.Size(40, 40),
                             anchor: new window.google.maps.Point(20, 20)
                           }}
@@ -523,12 +541,12 @@ export default function GuideDashboard({ user }) {
                       mapContainerStyle={BOOKING_MAP_STYLE}
                       center={{ lat: parseFloat(activeTrip.origin_lat), lng: parseFloat(activeTrip.origin_lng) }}
                       zoom={14}
-                      options={{ disableDefaultUI: true, zoomControl: true }}
+                      options={{ disableDefaultUI: true, zoomControl: true, styles: mapTheme.styles }}
                     >
                       <Marker
                         position={{ lat: parseFloat(activeTrip.origin_lat), lng: parseFloat(activeTrip.origin_lng) }}
                         icon={{
-                          url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="#FFCC00" stroke="white" stroke-width="2.5"/><text x="18" y="24" font-size="16" text-anchor="middle">👤</text></svg>')}`,
+                          url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="#FFCC00" stroke="white" stroke-width="2.5"/><g transform="translate(10 10) scale(0.6667)" fill="none" stroke="#0B1622" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></g></svg>')}`,
                           scaledSize: new window.google.maps.Size(36, 36),
                           anchor: new window.google.maps.Point(18, 18)
                         }}
@@ -561,13 +579,13 @@ export default function GuideDashboard({ user }) {
                           : { lat: 6.9271, lng: 79.8612 })
                       }
                       zoom={13}
-                      options={{ disableDefaultUI: true, zoomControl: true }}
+                      options={{ disableDefaultUI: true, zoomControl: true, styles: mapTheme.styles }}
                     >
                       {activeTrip.origin_lat && (
                         <Marker
                           position={{ lat: parseFloat(activeTrip.origin_lat), lng: parseFloat(activeTrip.origin_lng) }}
                           icon={{
-                            url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="#FFCC00" stroke="white" stroke-width="2.5"/><text x="18" y="24" font-size="16" text-anchor="middle">📍</text></svg>')}`,
+                            url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="#FFCC00" stroke="white" stroke-width="2.5"/><g transform="translate(10 10) scale(0.6667)" fill="none" stroke="#0B1622" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6-5.6-6-10a6 6 0 0 1 12 0c0 4.4-6 10-6 10z"/><circle cx="12" cy="11" r="2"/></g></svg>')}`,
                             scaledSize: new window.google.maps.Size(36, 36),
                             anchor: new window.google.maps.Point(18, 18)
                           }}
@@ -577,14 +595,14 @@ export default function GuideDashboard({ user }) {
                         <Marker
                           position={guidePos}
                           icon={{
-                            url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="#34699A" stroke="white" stroke-width="2.5"/><text x="18" y="24" font-size="16" text-anchor="middle">🚗</text></svg>')}`,
+                            url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="#34699A" stroke="white" stroke-width="2.5"/><g transform="translate(10 10) scale(0.6667)" fill="none" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13l2-5.5A2 2 0 0 1 6.9 6h10.2a2 2 0 0 1 1.9 1.5L21 13v4H3z"/><path d="M6 17v2M18 17v2"/><circle cx="7.5" cy="13.5" r="1"/><circle cx="16.5" cy="13.5" r="1"/></g></svg>')}`,
                             scaledSize: new window.google.maps.Size(36, 36),
                             anchor: new window.google.maps.Point(18, 18)
                           }}
                         />
                       )}
                     </GoogleMap>
-                    <p className="gd-booking-map-label">Head to tourist · 📍 = pickup point · 🚗 = you</p>
+                    <p className="gd-booking-map-label">Head to the tourist · <MapPin size={14} aria-hidden="true" className="ui-inline-icon" /> pickup point · <Car size={14} aria-hidden="true" className="ui-inline-icon" /> you</p>
                   </div>
                 )}
                 <button className="gd-trip-btn gd-trip-btn--start gd-trip-btn--full" onClick={() => setShowStartConfirm(true)}>
@@ -665,7 +683,7 @@ export default function GuideDashboard({ user }) {
                 <h3>Trip Completed — Awaiting Payment</h3>
                 <p>Show this QR code to your tourist to scan and pay</p>
               </div>
-              <button className="gd-qr-dismiss" onClick={() => setCompletedTripQR(null)}>✕</button>
+              <button className="gd-qr-dismiss" onClick={() => setCompletedTripQR(null)} aria-label="Dismiss"><X size={18} aria-hidden="true" className="ui-inline-icon" /></button>
             </div>
             <div className="gd-qr-body">
               <div className="gd-qr-code-wrap">
@@ -692,15 +710,15 @@ export default function GuideDashboard({ user }) {
         <div className="gd-header-inner">
           <div className="gd-hero-info">
             <div className="gd-avatar">
-              {guide?.photo_url ? <img src={guide.photo_url} alt="" /> : '👤'}
+              {guide?.photo_url ? <img src={guide.photo_url} alt="" /> : <User size={28} aria-hidden="true" className="ui-inline-icon" />}
             </div>
             <div>
               <h1>{guide?.display_name}</h1>
               <div className="gd-status-row">
                 {guide?.is_verified ? (
-                  <span className="gd-badge gd-badge--verified">✓ Verified Guide</span>
+                  <span className="gd-badge gd-badge--verified"><BadgeCheck size={14} aria-hidden="true" className="ui-inline-icon" /> Verified guide</span>
                 ) : (
-                  <span className="gd-badge gd-badge--pending">⏳ Pending Verification</span>
+                  <span className="gd-badge gd-badge--pending"><Clock3 size={14} aria-hidden="true" className="ui-inline-icon" /> Pending verification</span>
                 )}
                 <span className={`gd-badge ${guide?.is_available ? 'gd-badge--live' : 'gd-badge--offline'}`}>
                   {guide?.is_available ? '● Live' : '○ Offline'}
@@ -847,7 +865,7 @@ export default function GuideDashboard({ user }) {
               <div className="gd-profile-field"><label>20km Fare</label><span>LKR {parseFloat(guide.tier_20km || 0).toLocaleString()}</span></div>
               <div className="gd-profile-field"><label>Extra /km over 20</label><span>LKR {parseFloat(guide.tier_per_km_over20 || 0).toLocaleString()}</span></div>
               <div className="gd-profile-field"><label>Bank</label><span>{guide.bank_name || '—'}</span></div>
-              <div className="gd-profile-field"><label>Rating</label><span>⭐ {parseFloat(guide.avg_rating || 0).toFixed(1)} ({guide.total_reviews || 0} reviews)</span></div>
+              <div className="gd-profile-field"><label>Rating</label><span><Star size={14} aria-hidden="true" className="ui-inline-icon" /> {parseFloat(guide.avg_rating || 0).toFixed(1)} ({guide.total_reviews || 0} reviews)</span></div>
             </div>
             <button className="gd-edit-profile-btn" onClick={() => navigate(`/guides/${guide.id}`)}>
               View Public Profile →

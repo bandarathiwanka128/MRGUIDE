@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { API_BASE_URL } from '../config';
 import './GuideRegister.css';
+import { Check, ClipboardList, FlaskConical } from 'lucide-react';
 
 const STEPS = ['Personal', 'Pricing', 'Bank & Card', 'Media'];
 const LANGUAGE_OPTIONS = ['Sinhala', 'Tamil', 'English', 'Japanese', 'Chinese', 'German', 'French', 'Spanish', 'Italian'];
@@ -135,7 +136,7 @@ export default function GuideRegister({ user }) {
   if (success) return (
     <div className="gr-success-page">
       <div className="gr-success-card">
-        <div className="gr-success-icon">✓</div>
+        <div className="gr-success-icon"><Check size={36} aria-hidden="true" className="ui-inline-icon" /></div>
         <h2>Registration Submitted!</h2>
         <p>Your guide profile has been submitted for admin review. You'll be notified once approved (usually within 24 hours).</p>
         <button onClick={() => navigate('/')} className="gr-success-btn">Back to Home</button>
@@ -155,7 +156,7 @@ export default function GuideRegister({ user }) {
         <div className="gr-steps">
           {STEPS.map((s, i) => (
             <div key={i} className={`gr-step ${i === step ? 'gr-step--active' : ''} ${i < step ? 'gr-step--done' : ''}`}>
-              <div className="gr-step-circle">{i < step ? '✓' : i + 1}</div>
+              <div className="gr-step-circle">{i < step ? <Check size={16} aria-hidden="true" className="ui-inline-icon" /> : i + 1}</div>
               <span className="gr-step-label">{s}</span>
               {i < 3 && <div className="gr-step-line" />}
             </div>
@@ -290,7 +291,7 @@ export default function GuideRegister({ user }) {
             <div className="gr-form-section">
               <h2>Bank & Payment Details</h2>
               <div className="gr-commission-notice">
-                <strong>📋 Commission Notice:</strong> Mr. Guide charges 5% of every trip fare as a platform commission. This is deducted automatically from your weekly payouts for QR payments, or from your next payout for cash trips.
+                <strong><ClipboardList size={15} aria-hidden="true" className="ui-inline-icon" /> Commission notice:</strong> Mr. Guide charges 5% of every trip fare as a platform commission. This is deducted automatically from your weekly payouts for QR payments, or from your next payout for cash trips.
               </div>
               <h3>Bank Details (for weekly payouts)</h3>
               <div className="gr-field">
@@ -311,7 +312,7 @@ export default function GuideRegister({ user }) {
               </div>
               <h3>Card Details (Test Mode)</h3>
               <div className="gr-test-card-notice">
-                🧪 <strong>Test mode:</strong> Use test card <code>4242 4242 4242 4242</code>, any expiry, any CVC.
+                <FlaskConical size={15} aria-hidden="true" className="ui-inline-icon" /> <strong>Test mode:</strong> Use test card <code>4242 4242 4242 4242</code>, any expiry, any CVC.
               </div>
               <div className="gr-field">
                 <label>Card Last 4 Digits</label>

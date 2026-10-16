@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { API_BASE_URL } from '../config';
 import './AddAuthenticDataModal.css';
+import { MAP_THEMES } from '../utils/mapTheme';
+import { Building2, UserPlus, MapPin, Search, Map, Camera, Eye } from 'lucide-react';
 
 const AddAuthenticDataModal = ({ place, type, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
@@ -96,14 +98,7 @@ const AddAuthenticDataModal = ({ place, type, onClose, onSuccess }) => {
       fullscreenControl: false,
       zoomControl: true,
       gestureHandling: 'greedy',
-      styles: [
-        { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#193341' }] },
-        { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#1a2942' }] },
-        { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#2c3e50' }] },
-        { featureType: 'poi', elementType: 'geometry', stylers: [{ color: '#1a2942' }] },
-        { featureType: 'all', elementType: 'labels.text.fill', stylers: [{ color: '#8a929d' }] },
-        { featureType: 'all', elementType: 'labels.text.stroke', stylers: [{ color: '#0a1929' }] }
-      ]
+      styles: MAP_THEMES[document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark'].styles
     });
 
     mapInstanceRef.current = map;
@@ -270,7 +265,7 @@ const AddAuthenticDataModal = ({ place, type, onClose, onSuccess }) => {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-container" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>{type === 'business' ? '🏢 Register Business' : '👤 Add Authentic Data'}</h2>
+          <h2>{type === 'business' ? <><Building2 size={22} aria-hidden="true" className="ui-inline-icon" /> Register a business</> : <><UserPlus size={22} aria-hidden="true" className="ui-inline-icon" /> Add authentic data</>}</h2>
           <button className="modal-close-btn" onClick={onClose}>×</button>
         </div>
 
@@ -372,7 +367,7 @@ const AddAuthenticDataModal = ({ place, type, onClose, onSuccess }) => {
 
               {/* Business Location Picker */}
               <div className="form-section">
-                <h3>📍 Business Location on Map</h3>
+                <h3><MapPin size={18} aria-hidden="true" className="ui-inline-icon" /> Business location on map</h3>
                 <p className="section-description">
                   Search your address or click/drag the pin on the map to set your exact location.
                 </p>
@@ -387,13 +382,13 @@ const AddAuthenticDataModal = ({ place, type, onClose, onSuccess }) => {
                   />
                   <button type="button" className="map-picker-search-btn"
                     onClick={handleLocationSearch} disabled={locationSearchLoading}>
-                    {locationSearchLoading ? <span className="mp-spinner" /> : '🔍'}
+                    {locationSearchLoading ? <span className="mp-spinner" /> : <Search size={18} aria-hidden="true" className="ui-inline-icon" />}
                   </button>
                 </div>
                 <div ref={mapPickerRef} className="map-picker-container" />
                 {businessLocation.lat ? (
                   <div className="map-picker-selected">
-                    <span className="map-picker-pin-icon">📍</span>
+                    <span className="map-picker-pin-icon"><MapPin size={18} aria-hidden="true" className="ui-inline-icon" /></span>
                     <div>
                       <div className="map-picker-address">{businessLocation.address}</div>
                       <div className="map-picker-coords">{businessLocation.lat.toFixed(5)}, {businessLocation.lng.toFixed(5)}</div>
@@ -424,7 +419,7 @@ const AddAuthenticDataModal = ({ place, type, onClose, onSuccess }) => {
                 </div>
                 <div className="form-group">
                   <label>
-                    <span className="maps-link-label-icon">🗺️</span> Google Maps Link
+                    <span className="maps-link-label-icon"><Map size={16} aria-hidden="true" className="ui-inline-icon" /></span> Google Maps link
                     <span className="label-optional"> (optional)</span>
                   </label>
                   <input type="url" name="maps_link" value={formData.maps_link}
@@ -473,7 +468,7 @@ const AddAuthenticDataModal = ({ place, type, onClose, onSuccess }) => {
 
           {/* Photos — both types */}
           <div className="form-section">
-            <h3>📷 {type === 'business' ? 'Business' : 'Place'} Photos</h3>
+            <h3><Camera size={18} aria-hidden="true" className="ui-inline-icon" /> {type === 'business' ? 'Business' : 'Place'} photos</h3>
             <p className="section-description">
               Paste image URLs to showcase {type === 'business' ? 'your business' : 'this place'} (optional, up to 5)
             </p>
@@ -489,8 +484,8 @@ const AddAuthenticDataModal = ({ place, type, onClose, onSuccess }) => {
                   />
                   {link.trim() !== '' && (
                     <a href={link} target="_blank" rel="noopener noreferrer"
-                      className="image-link-preview-btn" title="Preview image">
-                      👁
+                      className="image-link-preview-btn" title="Preview image" aria-label="Preview image">
+                      <Eye size={16} aria-hidden="true" className="ui-inline-icon" />
                     </a>
                   )}
                   <button type="button" className="image-link-remove-btn"

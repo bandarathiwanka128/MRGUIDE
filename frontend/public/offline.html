@@ -3,110 +3,118 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0B1622" />
   <title>Offline — Mr. Guide</title>
+  <link rel="icon" href="/favicon.ico" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #0D1B2A;
-      color: #e0eaf5;
+      font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: radial-gradient(120% 80% at 50% 0%, #1C3249 0%, #0B1622 60%);
+      color: #F3EEE6;
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: grid;
+      place-items: center;
       text-align: center;
-      padding: 2rem;
+      padding: 1.5rem;
     }
 
     .card {
-      background: #1a2d42;
-      border: 1px solid rgba(52, 105, 154, 0.3);
-      border-radius: 16px;
-      padding: 3rem 2.5rem;
+      background: #101E2D;
+      border: 1px solid rgba(246, 241, 233, 0.09);
+      border-radius: 28px;
+      padding: 2.5rem 2rem;
       max-width: 420px;
       width: 100%;
+      box-shadow: 0 32px 80px -20px rgba(0, 0, 0, 0.7);
     }
 
-    .icon { font-size: 4rem; margin-bottom: 1rem; }
+    .mark { width: 64px; height: 64px; margin: 0 auto 1.25rem; }
 
-    .logo {
-      font-size: 1.6rem;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      margin-bottom: 1.5rem;
+    .wordmark {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-bottom: 1.75rem;
     }
-    .logo-mr    { color: #FFCC00; }
-    .logo-guide { color: #34699A; }
+    .wordmark em { color: #FFCC00; }
 
     h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 1.6rem;
+      font-weight: 600;
       margin-bottom: 0.75rem;
-      color: #fff;
     }
 
     p {
-      color: #8ca8c5;
+      color: #B3BFCC;
       line-height: 1.6;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.75rem;
       font-size: 0.95rem;
     }
 
     .btn {
-      display: inline-block;
-      background: #34699A;
-      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0 2rem;
+      background: #FFCC00;
+      color: #0B1622;
       border: none;
-      border-radius: 8px;
-      padding: 0.75rem 2rem;
+      border-radius: 999px;
+      font: inherit;
       font-size: 0.95rem;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
-      text-decoration: none;
-      transition: background 0.2s;
     }
-    .btn:hover { background: #2a5580; }
+    .btn:hover { background: #FFD94D; }
+    .btn:focus-visible { outline: 2px solid #FFCC00; outline-offset: 3px; }
 
     .tips {
       margin-top: 2rem;
       text-align: left;
-      background: rgba(52, 105, 154, 0.1);
-      border-radius: 8px;
+      background: rgba(52, 105, 154, 0.16);
+      border-radius: 14px;
       padding: 1rem 1.25rem;
     }
-    .tips h3 { font-size: 0.85rem; color: #FFCC00; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px; }
-    .tips ul  { list-style: none; }
-    .tips li  { color: #8ca8c5; font-size: 0.85rem; padding: 0.25rem 0; }
-    .tips li::before { content: '→ '; color: #34699A; }
+    .tips h2 { font-size: 0.72rem; color: #FFD43B; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.14em; }
+    .tips ul { list-style: none; }
+    .tips li { color: #B3BFCC; font-size: 0.875rem; padding: 0.25rem 0; }
+    .tips li::before { content: '— '; color: #8CB8E2; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <div class="logo"><span class="logo-mr">Mr.</span><span class="logo-guide">Guide</span></div>
-    <div class="icon">📡</div>
-    <h1>You're Offline</h1>
+  <main class="card">
+    <svg class="mark" viewBox="0 0 48 48" aria-hidden="true">
+      <path d="M24 3C13.6 3 6.2 10.7 6.2 20.4 6.2 32.6 24 45 24 45s17.8-12.4 17.8-24.6C41.8 10.7 34.4 3 24 3Z" fill="#FFCC00"/>
+      <circle cx="24" cy="20" r="10.6" fill="#0B1622"/>
+      <path d="M30.2 13.8 25.9 21.9 22.1 18.1Z" fill="#FFCC00"/>
+      <path d="M17.8 26.2 22.1 18.1 25.9 21.9Z" fill="#F6F1E9"/>
+    </svg>
+    <div class="wordmark"><em>Mr.</em> Guide</div>
+    <h1>You're offline</h1>
     <p>
-      It looks like you've lost your internet connection.
-      Some features may not be available, but your saved trips
-      and recently viewed guides are still accessible.
+      Your connection dropped. Pages and guide profiles you opened recently
+      may still load from this device. We'll reconnect automatically.
     </p>
-    <button class="btn" onclick="location.reload()">Try Again</button>
+    <button class="btn" type="button" onclick="location.reload()">Try again</button>
 
     <div class="tips">
-      <h3>Available Offline</h3>
+      <h2>May work offline</h2>
       <ul>
         <li>Recently viewed guide profiles</li>
-        <li>Saved trip itineraries</li>
-        <li>Cached map tiles</li>
-        <li>App settings</li>
+        <li>Saved trip itineraries you opened before</li>
+        <li>Map tiles already cached</li>
+        <li>Your theme setting</li>
       </ul>
     </div>
-  </div>
+  </main>
 
   <script>
-    // Auto-retry when connection is restored
-    window.addEventListener('online', () => location.reload());
+    // Reload as soon as the connection returns
+    window.addEventListener('online', function () { location.reload(); });
   </script>
 </body>
 </html>

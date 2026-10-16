@@ -5,8 +5,12 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { API_BASE_URL } from '../config';
 import './TripPayment.css';
+import { Heart, FlaskConical, User } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 
-const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
+// Only initialise Stripe when a publishable key is configured; loadStripe throws otherwise.
+const STRIPE_KEY = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY;
+const stripePromise = STRIPE_KEY ? loadStripe(STRIPE_KEY) : null;
 
 const VisaIcon = () => (
   <svg width="48" height="30" viewBox="0 0 48 30" fill="none">
@@ -112,7 +116,7 @@ function PaymentForm({ trip, clientSecret, tip, setTip, onSuccess }) {
           <strong>LKR {total.toLocaleString()}</strong>
         </div>
         {tipAmount > 0 && (
-          <div className="tp-tip-note">💛 LKR {tipAmount.toLocaleString()} tip goes 100% to your guide</div>
+          <div className="tp-tip-note"><Heart size={14} aria-hidden="true" className="ui-inline-icon" /> LKR {tipAmount.toLocaleString()} tip goes 100% to your guide</div>
         )}
       </div>
 
@@ -145,7 +149,7 @@ function PaymentForm({ trip, clientSecret, tip, setTip, onSuccess }) {
           />
         </div>
         <p className="tp-test-hint">
-          🧪 Test: <strong>4242 4242 4242 4242</strong> · any future date · any CVC
+          <FlaskConical size={14} aria-hidden="true" className="ui-inline-icon" /> Test: <strong>4242 4242 4242 4242</strong> · any future date · any CVC
         </p>
       </div>
 
@@ -237,12 +241,12 @@ export default function TripPayment({ user }) {
 
   return (
     <div className="trip-payment-page">
-      <div className="tp-container">
+      <div className="tpay-container">
 
         {/* Guide + trip header */}
         <div className="tp-header">
           <div className="tp-guide-avatar">
-            {guide?.photo_url ? <img src={guide.photo_url} alt={guide.display_name} /> : '👤'}
+            {guide?.photo_url ? <img src={guide.photo_url} alt={guide.display_name} /> : <User size={26} aria-hidden="true" className="ui-inline-icon" />}
           </div>
           <div className="tp-header-info">
             <h1>Complete Payment</h1>
@@ -255,6 +259,12 @@ export default function TripPayment({ user }) {
 
         {/* Payment card */}
         <div className="tp-main-card">
+          {!STRIPE_KEY && (
+            <div className="ui-alert ui-alert--warning" role="note">
+              <AlertTriangle size={18} aria-hidden="true" />
+              <span>Card payments aren&rsquo;t configured on this server yet. Please pay your guide by QR code or cash.</span>
+            </div>
+          )}
           <Elements stripe={stripePromise}>
             <PaymentForm
               trip={trip}
