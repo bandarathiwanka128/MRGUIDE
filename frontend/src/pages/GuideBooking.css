@@ -1,7 +1,7 @@
 .guide-booking-page {
   display: flex;
-  height: calc(100vh - 64px);
-  margin-top: 64px;
+  height: calc(100dvh - var(--nav-height));
+  margin-top: 0;
   overflow: hidden;
 }
 
@@ -9,8 +9,8 @@
 .guide-sidebar {
   width: 360px;
   min-width: 320px;
-  background: var(--bg-card, #fff);
-  border-right: 1px solid var(--border-subtle, #e2e8f0);
+  background: var(--surface-2);
+  border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -21,13 +21,13 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 20px 12px;
-  border-bottom: 1px solid var(--border-subtle, #e2e8f0);
+  border-bottom: 1px solid var(--border);
 }
 
 .guide-sidebar-header h2 {
   font-size: 1.2rem;
   font-weight: 700;
-  color: var(--text-primary, #1a202c);
+  color: var(--text-1);
   margin: 0;
 }
 
@@ -40,8 +40,8 @@
 
 .guide-count {
   font-size: 0.8rem;
-  background: var(--gold, #FFCC00);
-  color: #1a1a1a;
+  background: var(--accent);
+  color: var(--on-accent);
   padding: 2px 10px;
   border-radius: 20px;
   font-weight: 600;
@@ -52,7 +52,7 @@
   align-items: center;
   gap: 5px;
   font-size: 0.75rem;
-  color: #22c55e;
+  color: var(--success);
   font-weight: 600;
 }
 
@@ -60,14 +60,14 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #22c55e;
-  box-shadow: 0 0 0 2px rgba(34,197,94,0.3);
+  background: var(--success);
+  box-shadow: 0 0 0 2px rgba(var(--success-rgb), 0.3);
   animation: pulse-live 1.5s ease-in-out infinite;
 }
 
 @keyframes pulse-live {
-  0%, 100% { box-shadow: 0 0 0 2px rgba(34,197,94,0.3); }
-  50% { box-shadow: 0 0 0 5px rgba(34,197,94,0.1); }
+  0%, 100% { box-shadow: 0 0 0 2px rgba(var(--success-rgb), 0.3); }
+  50% { box-shadow: 0 0 0 5px rgba(var(--success-rgb), 0.1); }
 }
 
 /* Destination search */
@@ -81,17 +81,17 @@
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--text-secondary, #64748b);
+  color: var(--text-2);
   pointer-events: none;
 }
 
 .dest-search-input {
   width: 100%;
   padding: 10px 12px 10px 36px;
-  border: 1.5px solid var(--border-subtle, #e2e8f0);
+  border: 1.5px solid var(--border);
   border-radius: 10px;
-  background: var(--bg, #f8fafc);
-  color: var(--text-primary, #1a202c);
+  background: var(--bg);
+  color: var(--text-1);
   font-size: 0.9rem;
   outline: none;
   box-sizing: border-box;
@@ -99,7 +99,7 @@
 }
 
 .dest-search-input:focus {
-  border-color: var(--gold, #FFCC00);
+  border-color: var(--accent);
 }
 
 .dest-spinner {
@@ -109,22 +109,22 @@
   transform: translateY(-50%);
   width: 16px;
   height: 16px;
-  border: 2px solid var(--border-subtle, #e2e8f0);
-  border-top-color: var(--gold, #FFCC00);
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
 }
 
 @keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
 
-.dist-badge {
+.guide-booking-page .dist-badge {
   display: flex;
   align-items: center;
   gap: 6px;
   margin: 8px 16px 0;
   font-size: 0.8rem;
-  color: var(--text-secondary, #64748b);
-  background: var(--bg, #f0f5fb);
+  color: var(--text-2);
+  background: var(--bg);
   border-radius: 8px;
   padding: 5px 10px;
 }
@@ -139,43 +139,43 @@
 
 .sort-label {
   font-size: 0.8rem;
-  color: var(--text-secondary, #64748b);
+  color: var(--text-2);
   white-space: nowrap;
 }
 
-.sort-select {
+.guide-booking-page .sort-select {
   flex: 1;
   padding: 6px 10px;
-  border: 1.5px solid var(--border-subtle, #e2e8f0);
+  border: 1.5px solid var(--border);
   border-radius: 8px;
-  background: var(--bg-card, #fff);
-  color: var(--text-primary, #1a202c);
+  background: var(--surface-2);
+  color: var(--text-1);
   font-size: 0.85rem;
   cursor: pointer;
 }
 
 .filter-toggle-btn {
   padding: 6px 10px;
-  border: 1.5px solid var(--border-subtle, #e2e8f0);
+  border: 1.5px solid var(--border);
   border-radius: 8px;
-  background: var(--bg-card, #fff);
-  color: var(--text-secondary, #64748b);
+  background: var(--surface-2);
+  color: var(--text-2);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .filter-toggle-btn:hover {
-  border-color: var(--gold, #FFCC00);
-  color: var(--gold, #FFCC00);
+  border-color: var(--accent);
+  color: var(--accent-ink);
 }
 
 /* Filter panel */
 .filter-panel {
   margin: 10px 16px 0;
   padding: 14px;
-  background: var(--bg, #f8fafc);
+  background: var(--bg);
   border-radius: 12px;
-  border: 1px solid var(--border-subtle, #e2e8f0);
+  border: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -190,7 +190,7 @@
 .filter-group-label {
   font-size: 0.78rem;
   font-weight: 600;
-  color: var(--text-secondary, #64748b);
+  color: var(--text-2);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -206,13 +206,13 @@
 .toggle-slider {
   width: 38px;
   height: 20px;
-  background: var(--border-subtle, #e2e8f0);
+  background: var(--border);
   border-radius: 10px;
   position: relative;
   transition: background 0.25s;
 }
 
-.toggle-label input:checked + .toggle-slider { background: var(--gold, #FFCC00); }
+.toggle-label input:checked + .toggle-slider { background: var(--accent); }
 
 .toggle-slider::after {
   content: '';
@@ -233,7 +233,7 @@
   width: 100%;
   height: 4px;
   border-radius: 2px;
-  background: var(--border-subtle, #e2e8f0);
+  background: var(--border);
   outline: none;
   cursor: pointer;
 }
@@ -243,7 +243,7 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: var(--gold, #FFCC00);
+  background: var(--accent);
   cursor: pointer;
   border: 2px solid white;
   box-shadow: 0 1px 4px rgba(0,0,0,0.2);
@@ -253,19 +253,19 @@
 
 .chip {
   padding: 3px 10px;
-  border: 1.5px solid var(--border-subtle, #e2e8f0);
+  border: 1.5px solid var(--border);
   border-radius: 20px;
   font-size: 0.78rem;
   cursor: pointer;
   background: transparent;
-  color: var(--text-secondary, #64748b);
+  color: var(--text-2);
   transition: all 0.15s;
 }
 
 .chip--active {
-  background: var(--gold, #FFCC00);
-  border-color: var(--gold, #FFCC00);
-  color: #1a1a1a;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
   font-weight: 600;
 }
 
@@ -281,12 +281,12 @@
 
 .guide-list::-webkit-scrollbar { width: 4px; }
 .guide-list::-webkit-scrollbar-track { background: transparent; }
-.guide-list::-webkit-scrollbar-thumb { background: var(--border-subtle, #e2e8f0); border-radius: 2px; }
+.guide-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
 .guide-card-skeleton {
   height: 140px;
   border-radius: 14px;
-  background: linear-gradient(90deg, var(--bg, #f0f5fb) 25%, var(--bg-card, #e8eef5) 50%, var(--bg, #f0f5fb) 75%);
+  background: linear-gradient(90deg, var(--bg) 25%, var(--surface-2) 50%, var(--bg) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.3s infinite;
 }
@@ -296,24 +296,24 @@
 .guide-list-empty {
   text-align: center;
   padding: 40px 20px;
-  color: var(--text-secondary, #64748b);
+  color: var(--text-2);
 }
 
 .guide-list-empty button {
   margin-top: 10px;
   padding: 8px 16px;
-  border: 1.5px solid var(--gold, #FFCC00);
+  border: 1.5px solid var(--accent);
   border-radius: 8px;
   background: transparent;
-  color: var(--gold, #FFCC00);
+  color: var(--accent-ink);
   cursor: pointer;
   font-size: 0.85rem;
 }
 
 /* Guide card */
 .guide-card {
-  background: var(--bg-card, #fff);
-  border: 1.5px solid var(--border-subtle, #e2e8f0);
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
   border-radius: 14px;
   padding: 14px;
   cursor: pointer;
@@ -329,8 +329,8 @@
 
 .guide-card:hover,
 .guide-card--selected {
-  border-color: var(--gold, #FFCC00);
-  box-shadow: 0 4px 20px rgba(255, 204, 0, 0.15);
+  border-color: var(--accent);
+  box-shadow: 0 4px 20px rgba(var(--accent-rgb), 0.15);
   transform: translateY(-1px);
 }
 
@@ -350,14 +350,14 @@
   height: 52px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid var(--border-subtle, #e2e8f0);
+  border: 2px solid var(--border);
 }
 
 .guide-avatar-placeholder {
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #34699A, #FFCC00);
+  background: linear-gradient(135deg, var(--blue), var(--accent));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -370,15 +370,15 @@
   right: 2px;
   width: 12px;
   height: 12px;
-  background: #22c55e;
+  background: var(--success);
   border-radius: 50%;
   border: 2px solid white;
   animation: pulse-live 2s infinite;
 }
 
 @keyframes pulse-live {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
-  50% { box-shadow: 0 0 0 5px rgba(34,197,94,0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(var(--success-rgb), 0.4); }
+  50% { box-shadow: 0 0 0 5px rgba(var(--success-rgb), 0); }
 }
 
 .guide-card-info { flex: 1; min-width: 0; }
@@ -386,7 +386,7 @@
 .guide-card-name {
   font-size: 0.95rem;
   font-weight: 700;
-  color: var(--text-primary, #1a202c);
+  color: var(--text-1);
   margin: 0 0 4px;
   white-space: nowrap;
   overflow: hidden;
@@ -401,9 +401,9 @@
   margin-bottom: 4px;
 }
 
-.stars { color: #FFCC00; letter-spacing: -1px; }
-.rating-val { font-weight: 700; color: var(--text-primary, #1a202c); }
-.rating-count { color: var(--text-secondary, #64748b); }
+.stars { color: var(--accent-ink); letter-spacing: -1px; }
+.rating-val { font-weight: 700; color: var(--text-1); }
+.guide-booking-page .rating-count { color: var(--text-2); }
 
 .guide-card-langs { display: flex; flex-wrap: wrap; gap: 4px; }
 
@@ -411,8 +411,8 @@
   font-size: 0.7rem;
   padding: 2px 7px;
   border-radius: 20px;
-  background: rgba(52, 105, 154, 0.12);
-  color: #34699A;
+  background: rgba(var(--blue-rgb), 0.12);
+  color: var(--blue-ink);
   font-weight: 500;
 }
 
@@ -428,9 +428,9 @@
   font-weight: 600;
   padding: 3px 10px;
   border-radius: 20px;
-  background: var(--bg, #f0f5fb);
-  color: var(--text-primary, #1a202c);
-  border: 1px solid var(--border-subtle, #e2e8f0);
+  background: var(--bg);
+  color: var(--text-1);
+  border: 1px solid var(--border);
 }
 
 .guide-card-estimate {
@@ -439,13 +439,13 @@
   align-items: center;
   gap: 6px;
   font-size: 0.85rem;
-  color: var(--text-secondary, #64748b);
-  background: linear-gradient(90deg, rgba(255,204,0,0.1), rgba(52,105,154,0.05));
+  color: var(--text-2);
+  background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.1), rgba(var(--blue-rgb), 0.05));
   padding: 6px 10px;
   border-radius: 8px;
 }
 
-.guide-card-estimate strong { color: var(--gold, #FFCC00); }
+.guide-card-estimate strong { color: var(--accent-ink); }
 
 .guide-card-regions { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
 
@@ -453,9 +453,9 @@
   font-size: 0.72rem;
   padding: 2px 8px;
   border-radius: 20px;
-  background: rgba(255,204,0,0.1);
-  color: #9a7a00;
-  border: 1px solid rgba(255,204,0,0.3);
+  background: rgba(var(--accent-rgb), 0.1);
+  color: var(--accent-ink);
+  border: 1px solid rgba(var(--accent-rgb), 0.3);
 }
 
 .guide-card-actions {
@@ -467,10 +467,10 @@
 .btn-view-profile {
   flex: 1;
   padding: 8px;
-  border: 1.5px solid var(--border-subtle, #e2e8f0);
+  border: 1.5px solid var(--border);
   border-radius: 8px;
   background: transparent;
-  color: var(--text-primary, #1a202c);
+  color: var(--text-1);
   font-size: 0.83rem;
   font-weight: 600;
   cursor: pointer;
@@ -478,8 +478,8 @@
 }
 
 .btn-view-profile:hover {
-  border-color: #34699A;
-  color: #34699A;
+  border-color: var(--blue);
+  color: var(--blue-ink);
 }
 
 .btn-book-now {
@@ -487,8 +487,8 @@
   padding: 8px;
   border: none;
   border-radius: 8px;
-  background: linear-gradient(135deg, #FFCC00, #e6a800);
-  color: #1a1a1a;
+  background: linear-gradient(135deg, var(--accent), var(--accent));
+  color: var(--on-accent);
   font-size: 0.83rem;
   font-weight: 700;
   cursor: pointer;
@@ -497,30 +497,30 @@
 
 .btn-book-now:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(255,204,0,0.4);
+  box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.4);
 }
 
 /* Register CTA */
 .sidebar-register-cta {
   padding: 14px 16px;
-  border-top: 1px solid var(--border-subtle, #e2e8f0);
+  border-top: 1px solid var(--border);
   text-align: center;
-  background: var(--bg, #f8fafc);
+  background: var(--bg);
 }
 
 .sidebar-register-cta p {
   font-size: 0.83rem;
-  color: var(--text-secondary, #64748b);
+  color: var(--text-2);
   margin: 0 0 8px;
 }
 
 .btn-become-guide {
   width: 100%;
   padding: 10px;
-  border: 2px solid var(--gold, #FFCC00);
+  border: 2px solid var(--accent);
   border-radius: 10px;
   background: transparent;
-  color: var(--gold, #FFCC00);
+  color: var(--accent-ink);
   font-size: 0.88rem;
   font-weight: 700;
   cursor: pointer;
@@ -528,8 +528,8 @@
 }
 
 .btn-become-guide:hover {
-  background: var(--gold, #FFCC00);
-  color: #1a1a1a;
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 /* Map area */
@@ -547,23 +547,24 @@
   align-items: center;
   justify-content: center;
   gap: 16px;
-  color: var(--text-secondary, #64748b);
-  background: var(--bg, #f0f5fb);
+  color: var(--text-2);
+  background: var(--bg);
 }
 
 .map-loading-spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid var(--border-subtle, #e2e8f0);
-  border-top-color: #34699A;
+  border: 3px solid var(--border);
+  border-top-color: var(--blue);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
 
+/* Top-left keeps it clear of the zoom, fullscreen and attribution controls */
 .map-register-overlay {
   position: absolute;
-  bottom: 24px;
-  right: 24px;
+  top: var(--space-4);
+  left: var(--space-4);
   z-index: 10;
 }
 
@@ -571,22 +572,23 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 20px;
-  background: linear-gradient(135deg, #FFCC00, #e6a800);
-  color: #1a1a1a;
-  border: none;
-  border-radius: 30px;
-  font-size: 0.88rem;
+  min-height: 44px;
+  padding: 0 var(--space-5);
+  background: var(--glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--text-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-sm);
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 20px rgba(255,204,0,0.4);
-  transition: all 0.25s;
+  box-shadow: var(--shadow-2);
+  transition: background-color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
 }
-
-.map-register-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 28px rgba(255,204,0,0.5);
-}
+.map-register-btn svg { color: var(--accent-ink); }
+.map-register-btn:hover { background: var(--surface-1); }
+.map-register-btn:active { transform: scale(0.97); }
 
 /* Map info window */
 .map-info-window {

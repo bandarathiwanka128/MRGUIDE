@@ -6,7 +6,9 @@ import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-map
 import { API_BASE_URL, GOOGLE_MAPS_API_KEY } from '../config';
 import { calculateFare } from '../utils/fareCalculator';
 import BookingConfirmModal from '../components/BookingConfirmModal';
+import { useMapTheme } from '../utils/mapTheme';
 import './GuideBooking.css';
+import { Star } from 'lucide-react';
 
 const LIBRARIES = ['places'];
 const MAP_CONTAINER = { width: '100%', height: '100%' };
@@ -25,6 +27,7 @@ const REGION_OPTIONS = ['Colombo', 'Kandy', 'Galle', 'Ella', 'Sigiriya', 'Jaffna
 export default function GuideBooking({ user }) {
   const navigate = useNavigate();
   const { isLoaded } = useJsApiLoader({ googleMapsApiKey: GOOGLE_MAPS_API_KEY, libraries: LIBRARIES });
+  const mapTheme = useMapTheme();
 
   const [guides, setGuides] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -156,7 +159,7 @@ export default function GuideBooking({ user }) {
       <svg xmlns="http://www.w3.org/2000/svg" width="38" height="48" viewBox="0 0 38 48">
         <ellipse cx="19" cy="45" rx="8" ry="3" fill="rgba(0,0,0,0.2)"/>
         <circle cx="19" cy="19" r="${isSelected ? 18 : 15}" fill="${isSelected ? '#FFCC00' : '#34699A'}" stroke="white" stroke-width="3"/>
-        <text x="19" y="24" font-size="16" text-anchor="middle" fill="white">👤</text>
+        <g transform="translate(11 11) scale(0.6667)" fill="none" stroke="${isSelected ? '#0B1622' : 'white'}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></g>
         ${guide.is_available ? '<circle cx="30" cy="8" r="6" fill="#22c55e" stroke="white" stroke-width="2"/>' : ''}
       </svg>
     `)}`,
@@ -338,7 +341,7 @@ export default function GuideBooking({ user }) {
       </aside>
 
       {/* Map area */}
-      <main className="guide-map-area">
+      <section className="guide-map-area" aria-label="Guides map">
         {isLoaded ? (
           <GoogleMap
             mapContainerStyle={MAP_CONTAINER}
@@ -346,7 +349,7 @@ export default function GuideBooking({ user }) {
             zoom={8}
             onLoad={onMapLoad}
             options={{
-              styles: [{ featureType: 'all', elementType: 'labels.text.fill', stylers: [{ color: '#ffffff' }] }],
+              styles: mapTheme.styles,
               disableDefaultUI: false,
               zoomControl: true,
               mapTypeControl: false,
@@ -373,7 +376,7 @@ export default function GuideBooking({ user }) {
               >
                 <div className="map-info-window">
                   <strong>{selectedGuide.display_name}</strong>
-                  <div>⭐ {parseFloat(selectedGuide.avg_rating || 0).toFixed(1)} · {selectedGuide.total_reviews || 0} reviews</div>
+                  <div><Star size={13} aria-hidden="true" className="ui-inline-icon" /> {parseFloat(selectedGuide.avg_rating || 0).toFixed(1)} · {selectedGuide.total_reviews || 0} reviews</div>
                   <div>LKR {parseFloat(selectedGuide.tier_1km).toLocaleString()} / 1km</div>
                   {distanceKm && <div>Est: LKR {calculateFare(distanceKm, selectedGuide).toLocaleString()}</div>}
                   <button onClick={() => setBookingGuide(selectedGuide)} style={{ marginTop: 6, background: '#FFCC00', border: 'none', borderRadius: 4, padding: '4px 10px', cursor: 'pointer', fontWeight: 600 }}>
@@ -397,7 +400,7 @@ export default function GuideBooking({ user }) {
             Become a Guide
           </button>
         </div>
-      </main>
+      </section>
 
       {/* Booking modal */}
       {bookingGuide && (

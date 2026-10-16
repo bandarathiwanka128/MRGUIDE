@@ -3,9 +3,11 @@ import { useParams } from 'react-router-dom';
 import { GoogleMap, useLoadScript, Marker, InfoWindow } from '@react-google-maps/api';
 import axios from 'axios';
 import { API_BASE_URL, GOOGLE_MAPS_API_KEY } from '../config';
-import AddAuthenticDataModal from '../components/AddAuthenticDataModal';
 import PlaceDetailsPanel from '../components/PlaceDetailsPanel';
+import AddAuthenticDataModal from '../components/AddAuthenticDataModal';
 import './AuthenticSection.css';
+import { useMapTheme } from '../utils/mapTheme';
+import { Phone, Building2 } from 'lucide-react';
 
 const libraries = ['places'];
 const SRI_LANKA_CENTER = { lat: 7.8731, lng: 80.7718 };
@@ -110,6 +112,8 @@ const LoginIcon = () => (
 );
 
 const AuthenticSection = ({ user }) => {
+  const mapTheme = useMapTheme();
+  const themedMapOptions = React.useMemo(() => ({ ...mapOptions, styles: mapTheme.styles }), [mapTheme]);
   const { placeName: urlPlaceName } = useParams();
 
   const { isLoaded } = useLoadScript({
@@ -619,7 +623,7 @@ const AuthenticSection = ({ user }) => {
                     {biz.description.length > 80 ? biz.description.substring(0, 80) + '...' : biz.description}
                   </div>
                 )}
-                {biz.phone && <div className="as-nearby-biz-phone">📞 {biz.phone}</div>}
+                {biz.phone && <div className="as-nearby-biz-phone"><Phone size={13} aria-hidden="true" className="ui-inline-icon" /> {biz.phone}</div>}
               </div>
             ))}
           </div>
@@ -790,7 +794,7 @@ const AuthenticSection = ({ user }) => {
           mapContainerStyle={mapContainerStyle}
           center={SRI_LANKA_CENTER}
           zoom={8}
-          options={mapOptions}
+          options={themedMapOptions}
           onLoad={onMapLoad}
           onClick={handleMapClick}
         >
@@ -845,7 +849,7 @@ const AuthenticSection = ({ user }) => {
                   >
                     <div style={{ minWidth: '200px' }}>
                       <strong style={{ fontSize: '1rem', color: '#1565C0' }}>
-                        🏢 {biz.business_name || biz.Place.name}
+                        <Building2 size={15} aria-hidden="true" className="ui-inline-icon" /> {biz.business_name || biz.Place.name}
                       </strong>
                       <br />
                       {biz.title && (
@@ -855,7 +859,7 @@ const AuthenticSection = ({ user }) => {
                       <small style={{ color: '#666' }}>{biz.Place.address || ''}</small>
                       {biz.phone && (
                         <div style={{ marginTop: '4px', fontSize: '0.85rem' }}>
-                          📞 {biz.phone}
+                          <Phone size={13} aria-hidden="true" className="ui-inline-icon" /> {biz.phone}
                         </div>
                       )}
                       <div style={{ marginTop: '6px' }}>
@@ -901,7 +905,7 @@ const AuthenticSection = ({ user }) => {
                       {/* Rating */}
                       {(details?.rating || place.rating) && (
                         <div style={{ margin: '6px 0', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <span style={{ color: '#FFD700' }}>{'★'.repeat(Math.floor(details?.rating || place.rating))}</span>
+                          <span style={{ color: 'var(--accent-ink)' }}>{'★'.repeat(Math.floor(details?.rating || place.rating))}</span>
                           <span style={{ color: '#666', fontSize: '0.85rem' }}>
                             {Number(details?.rating || place.rating).toFixed(1)}
                             {details?.userRatingsTotal ? ` (${details.userRatingsTotal} reviews)` : ''}
@@ -958,7 +962,7 @@ const AuthenticSection = ({ user }) => {
                                 {details.reviews.map((review, i) => (
                                   <div key={i} style={{ borderBottom: '1px solid #f0f0f0', padding: '4px 0' }}>
                                     <div style={{ fontWeight: 600, fontSize: '0.8rem' }}>{review.author_name}</div>
-                                    <div style={{ color: '#FFD700', fontSize: '0.75rem' }}>{'★'.repeat(review.rating)}</div>
+                                    <div style={{ color: 'var(--accent-ink)', fontSize: '0.75rem' }}>{'★'.repeat(review.rating)}</div>
                                     <div style={{ color: '#555', fontSize: '0.75rem', lineHeight: 1.4 }}>
                                       {review.text?.substring(0, 120)}{review.text?.length > 120 ? '...' : ''}
                                     </div>

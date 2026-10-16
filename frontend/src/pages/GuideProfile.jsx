@@ -4,6 +4,7 @@ import axios from 'axios';
 import { API_BASE_URL } from '../config';
 import BookingConfirmModal from '../components/BookingConfirmModal';
 import './GuideProfile.css';
+import { User } from 'lucide-react';
 
 const TABS = ['Profile', 'Pricing', 'Gallery', 'Reviews'];
 
@@ -76,7 +77,7 @@ export default function GuideProfile({ user }) {
             {guide.photo_url ? (
               <img src={guide.photo_url} alt={guide.display_name} />
             ) : (
-              <div className="gp-avatar-placeholder">👤</div>
+              <div className="gp-avatar-placeholder"><User size={40} aria-hidden="true" className="ui-inline-icon" /></div>
             )}
             {guide.is_available && <span className="gp-live-badge">● Live</span>}
           </div>

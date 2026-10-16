@@ -3,6 +3,7 @@ import axios from 'axios';
 import { API_BASE_URL } from '../config';
 import { fareBreakdown } from '../utils/fareCalculator';
 import './BookingConfirmModal.css';
+import { X, User, Smartphone, Banknote } from 'lucide-react';
 
 export default function BookingConfirmModal({ guide, user, distanceKm, destInput, onClose, onBooked }) {
   const [loading, setLoading] = useState(false);
@@ -35,16 +36,16 @@ export default function BookingConfirmModal({ guide, user, distanceKm, destInput
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="bcm-overlay" onClick={onClose}>
       <div className="booking-modal" onClick={e => e.stopPropagation()}>
-        <button className="modal-close" onClick={onClose}>✕</button>
+        <button className="modal-close" onClick={onClose} aria-label="Close"><X size={18} aria-hidden="true" className="ui-inline-icon" /></button>
 
         <div className="modal-guide-header">
           <div className="modal-guide-avatar">
             {guide.photo_url ? (
               <img src={guide.photo_url} alt={guide.display_name} />
             ) : (
-              <div className="modal-avatar-placeholder">👤</div>
+              <div className="modal-avatar-placeholder"><User size={26} aria-hidden="true" className="ui-inline-icon" /></div>
             )}
             {guide.is_available && <span className="modal-live-dot" />}
           </div>
@@ -89,7 +90,7 @@ export default function BookingConfirmModal({ guide, user, distanceKm, destInput
           <div className="payment-method-options">
             <label className={`pay-option ${payMethod === 'qr' ? 'pay-option--active' : ''}`}>
               <input type="radio" name="pay" value="qr" checked={payMethod === 'qr'} onChange={() => setPayMethod('qr')} />
-              <span className="pay-icon">📱</span>
+              <span className="pay-icon"><Smartphone size={20} aria-hidden="true" className="ui-inline-icon" /></span>
               <div>
                 <strong>QR Code</strong>
                 <small>Scan and pay at trip end via platform</small>
@@ -97,7 +98,7 @@ export default function BookingConfirmModal({ guide, user, distanceKm, destInput
             </label>
             <label className={`pay-option ${payMethod === 'cash' ? 'pay-option--active' : ''}`}>
               <input type="radio" name="pay" value="cash" checked={payMethod === 'cash'} onChange={() => setPayMethod('cash')} />
-              <span className="pay-icon">💵</span>
+              <span className="pay-icon"><Banknote size={20} aria-hidden="true" className="ui-inline-icon" /></span>
               <div>
                 <strong>Cash</strong>
                 <small>Pay guide directly at trip end</small>

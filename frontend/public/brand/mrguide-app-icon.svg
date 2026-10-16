@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Mr. Guide">
+  <title>Mr. Guide</title>
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="38%" r="62%">
+      <stop offset="0" stop-color="#1C3249"/>
+      <stop offset="1" stop-color="#0B1622"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#glow)"/>
+  <path d="M108 440C150 398 196 414 226 392s26-30 30-40" fill="none" stroke="#5B8FC2" stroke-width="10" stroke-linecap="round" stroke-dasharray="2 22"/>
+  <g transform="translate(112 64) scale(6)">
+    <path d="M24 3C13.6 3 6.2 10.7 6.2 20.4 6.2 32.6 24 45 24 45s17.8-12.4 17.8-24.6C41.8 10.7 34.4 3 24 3Z" fill="#FFCC00"/>
+    <circle cx="24" cy="20" r="10.6" fill="#0B1622"/>
+    <circle cx="24" cy="20" r="8.4" fill="none" stroke="#F6F1E9" stroke-opacity=".22" stroke-width=".9"/>
+    <path d="M30.2 13.8 25.9 21.9 22.1 18.1Z" fill="#FFCC00"/>
+    <path d="M17.8 26.2 22.1 18.1 25.9 21.9Z" fill="#F6F1E9"/>
+    <circle cx="24" cy="20" r="1.3" fill="#0B1622"/>
+  </g>
+</svg>

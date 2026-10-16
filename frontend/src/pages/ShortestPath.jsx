@@ -2,6 +2,8 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { GoogleMap, useLoadScript, Marker, InfoWindow, DirectionsRenderer } from '@react-google-maps/api';
 import { GOOGLE_MAPS_API_KEY } from '../config';
 import './ShortestPath.css';
+import { useMapTheme } from '../utils/mapTheme';
+import { Zap, CheckCircle2, XCircle } from 'lucide-react';
 
 const LIBRARIES = ['places'];
 const SRI_LANKA_BOUNDS = { south: 5.916, north: 9.835, west: 79.652, east: 81.879 };
@@ -79,6 +81,7 @@ const StarRating = ({ rating }) => {
 };
 
 const ShortestPath = () => {
+  const mapTheme = useMapTheme();
   const { isLoaded } = useLoadScript({ googleMapsApiKey: GOOGLE_MAPS_API_KEY, libraries: LIBRARIES });
 
   const [locations, setLocations] = useState([]);
@@ -564,7 +567,7 @@ const ShortestPath = () => {
             </div>
             {sortMode === 'shortest' && locations.length >= 2 && (
               <div className="sp-sort-hint">
-                ⚡ Stops reordered for minimum travel distance using nearest-neighbor algorithm
+                <Zap size={14} aria-hidden="true" className="ui-inline-icon" /> Stops reordered for the shortest total distance (nearest-neighbour order)
               </div>
             )}
             {sortMode === 'rating' && (
@@ -609,7 +612,7 @@ const ShortestPath = () => {
                 )}
               </span>
               {sortMode === 'shortest' && sortedLocations.length >= 2 && (
-                <span className="sp-optimized-badge">⚡ Optimized</span>
+                <span className="sp-optimized-badge"><Zap size={12} aria-hidden="true" className="ui-inline-icon" /> Optimized</span>
               )}
               {sortMode === 'rating' && sortedLocations.length >= 2 && (
                 <span className="sp-rating-badge">★ By Rating</span>
@@ -770,10 +773,7 @@ const ShortestPath = () => {
             streetViewControl: false,
             fullscreenControl: true,
             zoomControl: true,
-            styles: [
-              { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#193341' }] },
-              { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#2c5a71' }] }
-            ]
+            styles: mapTheme.styles
           }}
           onClick={handleMapClick}
           onLoad={(map) => { mapRef.current = map; }}
@@ -784,7 +784,7 @@ const ShortestPath = () => {
               directions={directionsResult}
               options={{
                 suppressMarkers: true,
-                polylineOptions: { strokeColor: '#FFCC00', strokeWeight: 5, strokeOpacity: 0.9 }
+                polylineOptions: { strokeColor: mapTheme.route, strokeWeight: 5, strokeOpacity: 0.95 }
               }}
             />
           )}
@@ -795,7 +795,7 @@ const ShortestPath = () => {
               position={{ lat: startLocation.lat, lng: startLocation.lng }}
               icon={{
                 path: window.google.maps.SymbolPath.CIRCLE,
-                fillColor: '#00C853', fillOpacity: 1,
+                fillColor: '#2E9E6A', fillOpacity: 1,
                 strokeColor: '#ffffff', strokeWeight: 3, scale: 16,
                 labelOrigin: new window.google.maps.Point(0, 0)
               }}
@@ -812,7 +812,7 @@ const ShortestPath = () => {
               position={{ lat: loc.lat, lng: loc.lng }}
               icon={{
                 path: window.google.maps.SymbolPath.CIRCLE,
-                fillColor: index === 0 && !startLocation ? '#00C853' : '#2979FF',
+                fillColor: index === 0 && !startLocation ? '#2E9E6A' : '#34699A',
                 fillOpacity: 1, strokeColor: '#ffffff', strokeWeight: 3, scale: 14,
                 labelOrigin: new window.google.maps.Point(0, 0)
               }}
@@ -848,8 +848,8 @@ const ShortestPath = () => {
                       {details.phone && <div style={{ margin: '3px 0', fontSize: '0.85rem' }}><a href={`tel:${details.phone}`} style={{ color: '#1976D2' }}>&#128222; {details.phone}</a></div>}
                       {details.website && <div style={{ margin: '3px 0', fontSize: '0.85rem' }}><a href={details.website} target="_blank" rel="noopener noreferrer" style={{ color: '#1976D2' }}>&#127760; Website</a></div>}
                       {details.openNow !== null && details.openNow !== undefined && (
-                        <div style={{ color: details.openNow ? '#4CAF50' : '#f44336', fontWeight: 600, fontSize: '0.85rem' }}>
-                          {details.openNow ? '✓ Open Now' : '✗ Closed'}
+                        <div style={{ color: details.openNow ? 'var(--success)' : 'var(--danger)', fontWeight: 600, fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                          {details.openNow ? <><CheckCircle2 size={15} aria-hidden="true" className="ui-inline-icon" /> Open now</> : <><XCircle size={15} aria-hidden="true" className="ui-inline-icon" /> Closed</>}
                         </div>
                       )}
                     </div>

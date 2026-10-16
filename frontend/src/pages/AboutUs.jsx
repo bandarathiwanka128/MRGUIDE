@@ -1,181 +1,173 @@
-import React from 'react';
-
+import React, { useRef } from 'react';
+import { Link } from 'react-router-dom';
+import {
+  Route, MapPin, ShieldCheck, Star, Globe2, ListOrdered, GraduationCap, Mail, Navigation, ArrowRight,
+} from 'lucide-react';
+import { BrandMark } from '../components/brand/Logo';
+import useReveal from '../hooks/useReveal';
 import './AboutUs.css';
 
 const keyFeatures = [
   {
-    icon: '🗺️',
-    title: 'Smart Route Planning',
-    desc: 'Navigate Sri Lanka like a pro. Our TSP algorithm calculates the most efficient path through all your chosen destinations — saving time, fuel, and effort on every journey.',
-    accent: 'blue'
+    icon: Route,
+    title: 'Smart route planning',
+    desc: 'Choose your stops and we work out an efficient order through all of them, saving time, fuel and effort on every journey.',
   },
   {
-    icon: '📍',
-    title: 'Location Search',
-    desc: 'Discover the perfect hotel, hidden restaurant, or iconic attraction near you. Search by type, rating, and distance with Google Maps-powered results in real time.',
-    accent: 'yellow'
+    icon: MapPin,
+    title: 'Location search',
+    desc: 'Find hotels, restaurants and attractions near you. Filter by type, rating and distance with live Google Maps results.',
   },
   {
-    icon: '✅',
-    title: 'Authentic Local Insights',
-    desc: 'Go beyond the guidebook. Get verified tips and detailed information directly from local experts, business owners, and experienced Sri Lanka travelers you can trust.',
-    accent: 'blue'
+    icon: ShieldCheck,
+    title: 'Authentic local insights',
+    desc: 'Go beyond the guidebook with tips and details shared by local experts, business owners and experienced travellers.',
   },
   {
-    icon: '⭐',
-    title: 'Community Reviews',
-    desc: 'Real places, real opinions. Browse honest star ratings, personal stories, and practical tips from fellow travelers who have actually been to each destination.',
-    accent: 'yellow'
+    icon: Star,
+    title: 'Community reviews',
+    desc: 'Honest star ratings, stories and practical tips from travellers who have actually been to each place.',
   },
   {
-    icon: '🌍',
-    title: 'Multi-Country Support',
-    desc: 'Plan your Sri Lanka adventure from anywhere in the world. The platform supports international phone numbers, localized formats, and country-specific information.',
-    accent: 'blue'
+    icon: Globe2,
+    title: 'For travellers everywhere',
+    desc: 'Plan from anywhere in the world, with international phone numbers and country-specific details built in.',
   },
   {
-    icon: '🎯',
-    title: 'Route Optimization',
-    desc: 'Turn a scattered itinerary into a masterpiece. Compare your original route against the smart-optimized version with detailed segment-by-segment time and distance analysis.',
-    accent: 'yellow'
+    icon: ListOrdered,
+    title: 'Route optimisation',
+    desc: 'Turn a scattered list of places into a sensible order, with total distance, travel time and turn-by-turn directions.',
   },
 ];
 
 const team = [
-  { initials: 'HT', name: 'Herath H.M.T.B', reg: 'EG/2022/5067', role: 'Backend & Database Design' },
-  { initials: 'JT', name: 'Jayasekara T.H.D.P.U', reg: 'EG/2022/5098', role: 'Frontend & UI/UX Design' },
-  { initials: 'HA', name: 'Hapuarachchi H.A.C.R', reg: 'EG/2022/5058', role: 'Google Maps & API Development' },
-  { initials: 'HG', name: 'Hettiarachchi H.A.K.G', reg: 'EG/2022/5073', role: 'Algorithms & Route Optimization' },
+  { initials: 'HT', name: 'Herath H.M.T.B', reg: 'EG/2022/5067', role: 'Backend & database design' },
+  { initials: 'JT', name: 'Jayasekara T.H.D.P.U', reg: 'EG/2022/5098', role: 'Frontend & UI/UX design' },
+  { initials: 'HA', name: 'Hapuarachchi H.A.C.R', reg: 'EG/2022/5058', role: 'Google Maps & API development' },
+  { initials: 'HG', name: 'Hettiarachchi H.A.K.G', reg: 'EG/2022/5073', role: 'Algorithms & route optimisation' },
+];
+
+const stats = [
+  { number: '6+', label: 'Travel tools' },
+  { number: '100+', label: 'Places' },
+  { number: '4', label: 'Engineers' },
 ];
 
 const AboutUs = () => {
+  const pageRef = useRef(null);
+  useReveal(pageRef);
+
   return (
-    <div className="about-page">
-
-      {/* ── HEADER ── */}
-      <div className="about-header">
-        <div className="about-header-inner">
-          <span className="about-badge">Est. 2024</span>
+    <div className="about" ref={pageRef}>
+      {/* ── HERO ── */}
+      <header className="about-hero">
+        <div className="container about-hero__inner">
+          <p className="eyebrow">About us · Est. 2024</p>
           <h1>
-            About&nbsp;
-            <span className="hdr-yellow">Mr.</span>
-            <span className="hdr-blue">Guide</span>
+            We&rsquo;re building the travel companion we wished we had in <em>Sri Lanka</em>.
           </h1>
-          <p>Your intelligent travel companion for discovering Sri Lanka's best experiences</p>
+          <p className="about-hero__lead">
+            Mr. Guide brings route planning, local knowledge and trusted guides together, so exploring the island feels effortless.
+          </p>
         </div>
-        <div className="header-wave">
-          <svg viewBox="0 0 1440 70" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M0 70L60 58C120 46 240 22 360 22C480 22 600 46 720 52C840 58 960 46 1080 36C1200 26 1320 18 1380 14L1440 10V0H0Z" fill="var(--bg)" />
-          </svg>
+      </header>
+
+      {/* ── MISSION ── */}
+      <section className="about-section" aria-labelledby="mission-title">
+        <div className="container about-mission">
+          <div className="about-mission__visual reveal">
+            <div className="about-mission__emblem" aria-hidden="true">
+              <BrandMark />
+              <span className="about-mission__ring" />
+            </div>
+            <dl className="about-stats">
+              {stats.map((s) => (
+                <div key={s.label}>
+                  <dt>{s.label}</dt>
+                  <dd>{s.number}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+
+          <div className="about-mission__copy reveal" style={{ '--reveal-index': 1 }}>
+            <p className="eyebrow">Our purpose</p>
+            <h2 id="mission-title">Our mission</h2>
+            <p>
+              At Mr. Guide, we make travel planning simpler by combining intelligent route
+              optimisation with authentic local knowledge. Our platform helps travellers discover
+              hidden gems, plan efficient routes and make informed decisions based on information
+              from local experts and fellow travellers.
+            </p>
+            <p>
+              We are a team of four undergraduate engineers from the University of Ruhuna,
+              passionate about making Sri Lanka&rsquo;s beautiful destinations more accessible
+              to travellers from around the world.
+            </p>
+            <Link to="/search" className="about-link">Start exploring <ArrowRight size={16} aria-hidden="true" /></Link>
+          </div>
         </div>
-      </div>
+      </section>
 
-      <div className="about-body">
-
-        {/* ── MISSION ── */}
-        <section className="mission-section">
-          <div className="mission-card">
-            <div className="mission-left">
-              <div className="mission-emblem">🧭</div>
-              <div className="mission-divider" />
-              <div className="mission-stats">
-                <div className="stat-item">
-                  <span className="stat-number">6+</span>
-                  <span className="stat-label">Features</span>
-                </div>
-                <div className="stat-item">
-                  <span className="stat-number">100+</span>
-                  <span className="stat-label">Places</span>
-                </div>
-                <div className="stat-item">
-                  <span className="stat-number">4</span>
-                  <span className="stat-label">Engineers</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="mission-right">
-              <span className="eyebrow">Our Purpose</span>
-              <h2>Our Mission</h2>
-              <p>
-                At Mr. Guide, we revolutionize travel planning by combining intelligent route
-                optimization with authentic local knowledge. Our platform helps travelers discover
-                hidden gems, plan efficient routes, and make informed decisions based on verified
-                information from local experts and fellow travelers.
-              </p>
-              <p>
-                We are a team of four undergraduate engineers from the University of Ruhuna,
-                passionate about making Sri Lanka's beautiful destinations more accessible
-                to travelers from around the world.
-              </p>
-            </div>
+      {/* ── FEATURES ── */}
+      <section className="about-section about-section--tint" aria-labelledby="features-title">
+        <div className="container">
+          <div className="about-head reveal">
+            <p className="eyebrow">What we offer</p>
+            <h2 id="features-title">Everything you need between the first idea and the final stop</h2>
           </div>
-        </section>
-
-        {/* ── KEY FEATURES (horizontal 3×2 grid) ── */}
-        <section className="features-section">
-          <div className="section-header">
-            <span className="eyebrow">What We Offer</span>
-            <h2 className="section-title">Key Features</h2>
-          </div>
-          <div className="features-grid">
-            {keyFeatures.map((f, i) => (
-              <div className={`feature-card fc-${f.accent}`} key={i}>
-                <div className="feature-card-top">
-                  <div className="feature-icon-box">
-                    <span className="feature-emoji">{f.icon}</span>
-                  </div>
-                  <div className="feature-text">
-                    <h3>{f.title}</h3>
-                  </div>
-                </div>
-                <p className="feature-desc">{f.desc}</p>
-              </div>
+          <ul className="about-features">
+            {keyFeatures.map(({ icon: Icon, title, desc }, i) => (
+              <li key={title} className="about-feature reveal" style={{ '--reveal-index': i }}>
+                <span className="about-feature__icon" aria-hidden="true"><Icon size={22} /></span>
+                <h3>{title}</h3>
+                <p>{desc}</p>
+              </li>
             ))}
-          </div>
-        </section>
+          </ul>
+        </div>
+      </section>
 
-        {/* ── TEAM ── */}
-        <section className="team-section">
-          <div className="section-header">
-            <span className="eyebrow">The People</span>
-            <h2 className="section-title">Development Team</h2>
-            <div className="university-tag">
-              🎓 Faculty of Engineering, University of Ruhuna — Computer Engineering
-            </div>
+      {/* ── TEAM ── */}
+      <section className="about-section" aria-labelledby="team-title">
+        <div className="container">
+          <div className="about-head reveal">
+            <p className="eyebrow">The people</p>
+            <h2 id="team-title">Development team</h2>
+            <p className="about-uni"><GraduationCap size={18} aria-hidden="true" /> Faculty of Engineering, University of Ruhuna — Computer Engineering</p>
           </div>
-          <div className="team-grid">
+          <ul className="about-team">
             {team.map((m, i) => (
-              <div className="team-card" key={i}>
-                <div className="team-avatar">{m.initials}</div>
-                <h3 className="team-name">{m.name}</h3>
-                <p className="team-role">{m.role}</p>
-                <span className="team-reg">{m.reg}</span>
-              </div>
+              <li key={m.reg} className="about-member reveal" style={{ '--reveal-index': i }}>
+                <span className="about-member__avatar" aria-hidden="true">{m.initials}</span>
+                <h3>{m.name}</h3>
+                <p>{m.role}</p>
+                <span className="about-member__reg">{m.reg}</span>
+              </li>
             ))}
-          </div>
-        </section>
+          </ul>
+        </div>
+      </section>
 
-        {/* ── CONTACT ── */}
-        <section className="contact-section">
-          <div className="contact-card">
-            <div className="contact-icon">✉️</div>
-            <h2>Get In Touch</h2>
-            <p>Have questions or suggestions? We'd love to hear from you!</p>
-            <div className="contact-items">
-              <a href="mailto:mrguide@eng.ruh.ac.lk" className="contact-item">
-                <span className="contact-item-icon">📧</span>
-                <span>mrguide@eng.ruh.ac.lk</span>
-              </a>
-              <div className="contact-item">
-                <span className="contact-item-icon">📍</span>
-                <span>Faculty of Engineering, University of Ruhuna, Hapugala, Galle, Sri Lanka</span>
-              </div>
+      {/* ── CONTACT ── */}
+      <section className="about-section" aria-labelledby="contact-title">
+        <div className="container">
+          <div className="about-contact reveal">
+            <div>
+              <p className="eyebrow">Get in touch</p>
+              <h2 id="contact-title">Questions or ideas? We&rsquo;d love to hear them.</h2>
             </div>
+            <ul className="about-contact__items">
+              <li>
+                <a href="mailto:mrguide@eng.ruh.ac.lk"><Mail size={18} aria-hidden="true" /> mrguide@eng.ruh.ac.lk</a>
+              </li>
+              <li>
+                <span><Navigation size={18} aria-hidden="true" /> Faculty of Engineering, University of Ruhuna, Hapugala, Galle, Sri Lanka</span>
+              </li>
+            </ul>
           </div>
-        </section>
-
-      </div>
+        </div>
+      </section>
     </div>
   );
 };

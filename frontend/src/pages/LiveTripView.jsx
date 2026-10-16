@@ -6,11 +6,14 @@ import { io } from 'socket.io-client';
 import { API_BASE_URL, GOOGLE_MAPS_API_KEY } from '../config';
 import { QRCodeSVG } from 'qrcode.react';
 import './LiveTripView.css';
+import { useMapTheme } from '../utils/mapTheme';
+import { User, CheckCircle2, Car, Clock3 } from 'lucide-react';
 
 const LIBRARIES = ['places'];
 const MAP_CONTAINER = { width: '100%', height: '100%' };
 
 export default function LiveTripView({ user }) {
+  const mapTheme = useMapTheme();
   const { tripId } = useParams();
   const navigate = useNavigate();
   const { isLoaded } = useJsApiLoader({ googleMapsApiKey: GOOGLE_MAPS_API_KEY, libraries: LIBRARIES });
@@ -198,13 +201,13 @@ export default function LiveTripView({ user }) {
             }
             zoom={14}
             onLoad={map => { mapRef.current = map; }}
-            options={{ disableDefaultUI: true, zoomControl: true }}
+            options={{ disableDefaultUI: true, zoomControl: true, styles: mapTheme.styles }}
           >
             {guidePos && (
               <Marker
                 position={guidePos}
                 icon={{
-                  url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="#34699A" stroke="white" stroke-width="3"/><text x="20" y="27" font-size="18" text-anchor="middle" fill="white">🚗</text></svg>')}`,
+                  url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="#34699A" stroke="white" stroke-width="3"/><g transform="translate(12 12) scale(0.6667)" fill="none" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13l2-5.5A2 2 0 0 1 6.9 6h10.2a2 2 0 0 1 1.9 1.5L21 13v4H3z"/><path d="M6 17v2M18 17v2"/><circle cx="7.5" cy="13.5" r="1"/><circle cx="16.5" cy="13.5" r="1"/></g></svg>')}`,
                   scaledSize: new window.google.maps.Size(40, 40),
                   anchor: new window.google.maps.Point(20, 20)
                 }}
@@ -214,7 +217,7 @@ export default function LiveTripView({ user }) {
               <Marker
                 position={{ lat: parseFloat(trip.origin_lat), lng: parseFloat(trip.origin_lng) }}
                 icon={{
-                  url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="#FFCC00" stroke="white" stroke-width="3"/><text x="20" y="27" font-size="18" text-anchor="middle">📍</text></svg>')}`,
+                  url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="#FFCC00" stroke="white" stroke-width="3"/><g transform="translate(12 12) scale(0.6667)" fill="none" stroke="#0B1622" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6-5.6-6-10a6 6 0 0 1 12 0c0 4.4-6 10-6 10z"/><circle cx="12" cy="11" r="2"/></g></svg>')}`,
                   scaledSize: new window.google.maps.Size(40, 40),
                   anchor: new window.google.maps.Point(20, 20)
                 }}
@@ -234,15 +237,15 @@ export default function LiveTripView({ user }) {
           {/* Guide info */}
           <div className="ltv-guide-row">
             <div className="ltv-guide-avatar">
-              {guide?.photo_url ? <img src={guide.photo_url} alt={guide.display_name} /> : '👤'}
+              {guide?.photo_url ? <img src={guide.photo_url} alt={guide.display_name} /> : <User size={26} aria-hidden="true" className="ui-inline-icon" />}
             </div>
             <div className="ltv-guide-details">
               <span className="ltv-guide-name">{guide?.display_name || 'Your Guide'}</span>
               <span className={`ltv-trip-status ltv-status-${trip?.status}`}>
                 {trip?.status === 'active' ? '● Trip in Progress' :
-                 trip?.status === 'completed' ? '✓ Trip Completed' :
-                 trip?.status === 'confirmed' ? '🚗 Guide on the way to you' :
-                 '⏳ Waiting for guide to accept'}
+                 trip?.status === 'completed' ? <><CheckCircle2 size={16} aria-hidden="true" className="ui-inline-icon" /> Trip completed</> :
+                 trip?.status === 'confirmed' ? <><Car size={16} aria-hidden="true" className="ui-inline-icon" /> Guide on the way to you</> :
+                 <><Clock3 size={16} aria-hidden="true" className="ui-inline-icon" /> Waiting for the guide to accept</>}
               </span>
             </div>
           </div>
@@ -299,7 +302,7 @@ export default function LiveTripView({ user }) {
           {/* Confirmed state — guide accepted, heading to tourist */}
           {trip?.status === 'confirmed' && (
             <div className="ltv-confirmed-banner">
-              <div className="ltv-confirmed-icon">🚗</div>
+              <div className="ltv-confirmed-icon"><Car size={32} aria-hidden="true" className="ui-inline-icon" /></div>
               <div>
                 <strong>Guide accepted! On the way to you.</strong>
                 <p>Watch the map — your guide is heading to your pickup point.</p>

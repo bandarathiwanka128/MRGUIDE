@@ -3,6 +3,7 @@ import { GoogleMap, useLoadScript, Marker, InfoWindow, DirectionsRenderer } from
 import axios from 'axios';
 import { API_BASE_URL, GOOGLE_MAPS_API_KEY } from '../config';
 import './TripPlanner.css';
+import { useMapTheme } from '../utils/mapTheme';
 
 const libraries = ['places'];
 const SRI_LANKA_CENTER = { lat: 7.8731, lng: 80.7718 };
@@ -34,6 +35,7 @@ const createMarkerIconUrl = (color) => {
 };
 
 const TripPlanner = ({ user }) => {
+  const mapTheme = useMapTheme();
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: GOOGLE_MAPS_API_KEY,
     libraries
@@ -1066,6 +1068,7 @@ const TripPlanner = ({ user }) => {
           onLoad={onMapLoad}
           onClick={handleMapClick}
           options={{
+            styles: mapTheme.styles,
             streetViewControl: false,
             mapTypeControl: true,
             fullscreenControl: true,
@@ -1079,7 +1082,7 @@ const TripPlanner = ({ user }) => {
               options={{
                 suppressMarkers: true,
                 polylineOptions: {
-                  strokeColor: '#4285F4',
+                  strokeColor: mapTheme.route,
                   strokeWeight: 6,
                   strokeOpacity: 0.9
                 }
@@ -1134,7 +1137,7 @@ const TripPlanner = ({ user }) => {
                 {/* Rating & Reviews */}
                 {selectedMarker.rating && (
                   <div style={{ margin: '6px 0', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <span style={{ color: '#FFD700' }}>{'★'.repeat(Math.floor(selectedMarker.rating))}</span>
+                    <span style={{ color: 'var(--accent-ink)' }}>{'★'.repeat(Math.floor(selectedMarker.rating))}</span>
                     <span style={{ color: '#666', fontSize: '0.85rem' }}>
                       {selectedMarker.rating.toFixed(1)} {selectedMarker.userRatingsTotal ? `(${selectedMarker.userRatingsTotal} reviews)` : ''}
                     </span>
@@ -1199,7 +1202,7 @@ const TripPlanner = ({ user }) => {
                           {details.reviews.map((review, i) => (
                             <div key={i} style={{ borderBottom: '1px solid #f0f0f0', padding: '4px 0' }}>
                               <div style={{ fontWeight: 600, fontSize: '0.8rem' }}>{review.author_name}</div>
-                              <div style={{ color: '#FFD700', fontSize: '0.75rem' }}>{'★'.repeat(review.rating)}</div>
+                              <div style={{ color: 'var(--accent-ink)', fontSize: '0.75rem' }}>{'★'.repeat(review.rating)}</div>
                               <div style={{ color: '#555', fontSize: '0.75rem', lineHeight: 1.4 }}>
                                 {review.text?.substring(0, 120)}{review.text?.length > 120 ? '...' : ''}
                               </div>

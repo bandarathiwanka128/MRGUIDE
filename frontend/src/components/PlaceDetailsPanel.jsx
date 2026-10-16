@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { API_BASE_URL } from '../config';
 import './PlaceDetailsPanel.css';
+import { Star, Lock, BadgeCheck, Phone, Mail, Globe, Map } from 'lucide-react';
 
 const StarRating = ({ rating, max = 5, interactive = false, onSelect }) => {
   const [hovered, setHovered] = React.useState(0);
@@ -160,9 +161,9 @@ const PlaceDetailsPanel = ({ place, onClose, onAddAuthenticData, user }) => {
           {(reviewStats.totalCount > 0 || place.rating) && (
             <div className="place-rating-header">
               {reviewStats.totalCount > 0 ? (
-                <>⭐ {reviewStats.avgRating} / 5.0 <span className="rating-count">({reviewStats.totalCount} reviews)</span></>
+                <><Star size={15} aria-hidden="true" className="ui-inline-icon" /> {reviewStats.avgRating} / 5.0 <span className="rating-count">({reviewStats.totalCount} reviews)</span></>
               ) : (
-                <>⭐ {place.rating?.toFixed(1)} / 5.0 <span className="rating-count">(Google)</span></>
+                <><Star size={15} aria-hidden="true" className="ui-inline-icon" /> {place.rating?.toFixed(1)} / 5.0 <span className="rating-count">(Google)</span></>
               )}
             </div>
           )}
@@ -220,7 +221,7 @@ const PlaceDetailsPanel = ({ place, onClose, onAddAuthenticData, user }) => {
               {place.rating && (
                 <div className="info-item">
                   <strong>Google Rating:</strong>
-                  <p>⭐ {place.rating.toFixed(1)} / 5.0</p>
+                  <p><Star size={15} aria-hidden="true" className="ui-inline-icon" /> {place.rating.toFixed(1)} / 5.0</p>
                 </div>
               )}
             </div>
@@ -277,7 +278,7 @@ const PlaceDetailsPanel = ({ place, onClose, onAddAuthenticData, user }) => {
                 </>
               ) : (
                 <p className="review-login-prompt">
-                  <span>🔒</span> Please log in to rate and review this place.
+                  <Lock size={15} aria-hidden="true" className="ui-inline-icon" /> Please log in to rate and review this place.
                 </p>
               )}
             </div>
@@ -287,7 +288,7 @@ const PlaceDetailsPanel = ({ place, onClose, onAddAuthenticData, user }) => {
               <h3>
                 Community Reviews
                 {reviewStats.totalCount > 0 && (
-                  <span className="reviews-avg-badge">⭐ {reviewStats.avgRating}</span>
+                  <span className="reviews-avg-badge"><Star size={13} aria-hidden="true" className="ui-inline-icon" /> {reviewStats.avgRating}</span>
                 )}
               </h3>
 
@@ -351,7 +352,7 @@ const PlaceDetailsPanel = ({ place, onClose, onAddAuthenticData, user }) => {
                         {au.organization && <p className="user-org">{au.organization}</p>}
                         {displayJobTitle && <p className="user-job">{displayJobTitle}</p>}
                       </div>
-                      {au.verified && <span className="verified-badge">✓ Verified</span>}
+                      {au.verified && <span className="verified-badge"><BadgeCheck size={13} aria-hidden="true" className="ui-inline-icon" /> Verified</span>}
                     </div>
                     {au.expertise && (
                       <div className="expertise-section">
@@ -367,13 +368,13 @@ const PlaceDetailsPanel = ({ place, onClose, onAddAuthenticData, user }) => {
                     )}
                     <div className="contact-actions">
                       {displayPhone && (
-                        <button className="contact-btn call" onClick={() => handleCall(displayPhone)}>📞 Call</button>
+                        <button className="contact-btn call" onClick={() => handleCall(displayPhone)}><Phone size={15} aria-hidden="true" className="ui-inline-icon" /> Call</button>
                       )}
                       {displayEmail && (
-                        <button className="contact-btn email" onClick={() => handleEmail(displayEmail)}>✉️ Email</button>
+                        <button className="contact-btn email" onClick={() => handleEmail(displayEmail)}><Mail size={15} aria-hidden="true" className="ui-inline-icon" /> Email</button>
                       )}
                       {au.website && (
-                        <button className="contact-btn website" onClick={() => handleWebsite(au.website)}>🌐 Website</button>
+                        <button className="contact-btn website" onClick={() => handleWebsite(au.website)}><Globe size={15} aria-hidden="true" className="ui-inline-icon" /> Website</button>
                       )}
                     </div>
                   </div>
@@ -407,7 +408,7 @@ const PlaceDetailsPanel = ({ place, onClose, onAddAuthenticData, user }) => {
                         {business.organization && <p className="business-org">{business.organization}</p>}
                         {business.title && <p className="business-type">{business.title}</p>}
                       </div>
-                      {business.verified && <span className="verified-badge business">✓ Verified</span>}
+                      {business.verified && <span className="verified-badge business"><BadgeCheck size={13} aria-hidden="true" className="ui-inline-icon" /> Verified</span>}
                     </div>
                     {business.description && (
                       <div className="description-section"><p>{business.description}</p></div>
@@ -443,18 +444,18 @@ const PlaceDetailsPanel = ({ place, onClose, onAddAuthenticData, user }) => {
                     )}
                     <div className="contact-actions">
                       {business.phone && (
-                        <button className="contact-btn call" onClick={() => handleCall(business.phone)}>📞 Call Now</button>
+                        <button className="contact-btn call" onClick={() => handleCall(business.phone)}><Phone size={15} aria-hidden="true" className="ui-inline-icon" /> Call now</button>
                       )}
                       {business.email && (
-                        <button className="contact-btn email" onClick={() => handleEmail(business.email)}>✉️ Email</button>
+                        <button className="contact-btn email" onClick={() => handleEmail(business.email)}><Mail size={15} aria-hidden="true" className="ui-inline-icon" /> Email</button>
                       )}
                       {business.website && (
-                        <button className="contact-btn website" onClick={() => handleWebsite(business.website)}>🌐 Website</button>
+                        <button className="contact-btn website" onClick={() => handleWebsite(business.website)}><Globe size={15} aria-hidden="true" className="ui-inline-icon" /> Website</button>
                       )}
                       {business.maps_link && (
                         <button className="contact-btn maps"
                           onClick={() => window.open(business.maps_link, '_blank', 'noopener,noreferrer')}>
-                          🗺️ View on Map
+                          <Map size={15} aria-hidden="true" className="ui-inline-icon" /> View on map
                         </button>
                       )}
                     </div>
