@@ -1,106 +1,23 @@
 const express = require('express');
-const axios = require('axios');
 const authenticateToken = require('../middleware/auth');
 const { Place, AuthenticDetail, User, AuthenticProfile } = require('../config/database');
 const { Op } = require('sequelize');
-const { createGeminiBreaker } = require('../utils/circuitBreaker');
+const ai = require('../utils/aiClient');
+const { createAiBreaker } = require('../utils/circuitBreaker');
 
 const router = express.Router();
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+// Shared persona for every endpoint — the provider chain lives in utils/aiClient.js
+const SYSTEM_PROMPT = 'You are Mr. Guide, an expert Sri Lanka travel assistant. Give specific, practical advice with real place names, realistic prices in LKR and current local knowledge. Never invent businesses or phone numbers.';
 
-if (!GEMINI_API_KEY) {
-  console.error('❌ GEMINI_API_KEY is not configured');
-} else {
-  console.log('✅ GEMINI_API_KEY loaded:', GEMINI_API_KEY.slice(0, 8) + '...');
-}
+// Circuit breaker wraps the whole provider chain — it only trips when every provider is down
+const aiBreaker = createAiBreaker(ai.generateText);
 
-// Models to try in order (fallback chain)
-const GEMINI_MODELS = [
-  'gemini-2.5-flash',
-  'gemini-2.0-flash',
-  'gemini-1.5-flash',
-];
-const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
+const breakerState = () => aiBreaker.opened ? 'OPEN' : aiBreaker.halfOpen ? 'HALF_OPEN' : 'CLOSED';
 
-// Simple in-memory cache: key = prompt hash, value = { text, expiresAt }
-const cache = new Map();
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
-
-function getCacheKey(prompt) {
-  // Simple hash — good enough for caching identical prompts
-  let hash = 0;
-  for (let i = 0; i < prompt.length; i++) {
-    hash = (Math.imul(31, hash) + prompt.charCodeAt(i)) | 0;
-  }
-  return String(hash);
-}
-
-async function callGemini(prompt, retries = 3) {
-  // Return cached result if still fresh
-  const cacheKey = getCacheKey(prompt);
-  const cached = cache.get(cacheKey);
-  if (cached && cached.expiresAt > Date.now()) {
-    console.log('[Gemini] Cache hit');
-    return cached.text;
-  }
-
-  let lastError;
-  for (const model of GEMINI_MODELS) {
-    const url = `${GEMINI_BASE}/${model}:generateContent?key=${GEMINI_API_KEY}`;
-    for (let attempt = 1; attempt <= retries; attempt++) {
-      try {
-        const response = await axios.post(
-          url,
-          { contents: [{ parts: [{ text: prompt }] }] },
-          { timeout: 30000 }
-        );
-        const text = response.data.candidates?.[0]?.content?.parts?.[0]?.text;
-        const result = text || 'No response generated.';
-        console.log(`[Gemini] Success with model: ${model}`);
-        cache.set(cacheKey, { text: result, expiresAt: Date.now() + CACHE_TTL_MS });
-        return result;
-      } catch (error) {
-        const status = error.response?.status;
-        lastError = error;
-
-        // 429 = per-minute quota exhausted — skip to next model immediately (waiting within same minute doesn't help)
-        if (status === 429) {
-          console.warn(`[Gemini] ${model} quota exhausted (429), trying next model`);
-          break;
-        }
-
-        // 503 = overloaded — short backoff then retry same model
-        if (status === 503 && attempt < retries) {
-          const waitMs = Math.pow(2, attempt) * 1000;
-          console.warn(`[Gemini] ${model} overloaded (503), retry ${attempt}/${retries} in ${waitMs}ms`);
-          await new Promise(resolve => setTimeout(resolve, waitMs));
-          continue;
-        }
-
-        // Permanent error (403, 400, 404) — skip to next model immediately
-        if (status === 403 || status === 400 || status === 404) {
-          console.warn(`[Gemini] ${model} failed with ${status}, trying next model`);
-          break;
-        }
-
-        // Exhausted retries for this model — try next
-        if (attempt === retries) {
-          console.warn(`[Gemini] ${model} exhausted retries, trying next model`);
-        }
-      }
-    }
-  }
-
-  throw lastError;
-}
-
-// Circuit breaker wraps callGemini — opens after 50% failure rate in 10s window
-const geminiBreaker = createGeminiBreaker(callGemini);
-
-// Mock fallback data when API fails
+// Mock fallback data when every provider fails
 const FALLBACK_TRIP_SUGGESTIONS = `## 🗺️ Best Route & Itinerary
-**DEMO MODE - Using sample data (Gemini API unavailable)**
+**DEMO MODE - Using sample data (AI service unavailable)**
 
 We recommend visiting destinations in this order based on geographical proximity:
 - Start in Colombo (Western coast)
@@ -164,7 +81,7 @@ const FALLBACK_PLACE_INFO = {
   "Nuwara Eliya": "Hill station town at 1,868m elevation known as 'Little England'. Cool climate with terraced tea plantations surrounding the area. Visit tea factories to see traditional production. Best Nov-Mar. Scenic train rides available. Lakes, golf course, and colonial architecture. Temperature: 10-20°C. Nearby: Horton Plains National Park, Hakgala Botanical Garden."
 };
 
-const FALLBACK_ROUTE_TIPS = `**DEMO MODE - Using sample data (Gemini API unavailable)**
+const FALLBACK_ROUTE_TIPS = `**DEMO MODE - Using sample data (AI service unavailable)**
 
 ## 1. Best Time to Travel
 - Depart early morning (6-7 AM) to maximize daylight
@@ -206,14 +123,22 @@ const FALLBACK_ROUTE_TIPS = `**DEMO MODE - Using sample data (Gemini API unavail
 
 *This is demo data. For real-time route optimization, please try again later.*`;
 
-  // AI trip suggestions
-  router.post('/trip-suggestions', authenticateToken, async (req, res) => {
-    try {
-      const { destinations, travel_mode, start_date, end_date, weather_data } = req.body;
-  
-      if (!destinations || destinations.length === 0) {
-        return res.status(400).json({ error: 'At least one destination is required' });
-      }
+const FALLBACK_SUGGESTIONS = [
+  { name: 'Sigiriya', reason: 'UNESCO World Heritage site with stunning views of an ancient fortress.', best_months: 'Nov-Mar', search_query: 'Sigiriya Sri Lanka', category: 'culture', source: 'ai' },
+  { name: 'Mirissa Beach', reason: 'Perfect for whale watching and relaxing by the ocean.', best_months: 'Nov-Apr', search_query: 'Mirissa Beach Sri Lanka', category: 'beach', source: 'ai' },
+  { name: 'Kandy Temple of the Tooth', reason: 'Sacred Buddhist temple in the heart of Sri Lanka\'s cultural triangle.', best_months: 'Year-round', search_query: 'Temple of the Tooth Kandy', category: 'temple', source: 'ai' }
+];
+
+const FALLBACK_NOTE = 'Using demo data - AI providers currently unavailable';
+
+// AI trip suggestions
+router.post('/trip-suggestions', authenticateToken, async (req, res) => {
+  try {
+    const { destinations, travel_mode, start_date, end_date, weather_data } = req.body;
+
+    if (!destinations || destinations.length === 0) {
+      return res.status(400).json({ error: 'At least one destination is required' });
+    }
 
     const destNames = destinations.map(d => d.name).join(' → ');
     const dateInfo = start_date && end_date
@@ -229,7 +154,7 @@ const FALLBACK_ROUTE_TIPS = `**DEMO MODE - Using sample data (Gemini API unavail
       weatherContext = `\n\nCurrent weather at destinations:\n${weatherLines}`;
     }
 
-    const prompt = `You are an expert Sri Lanka travel planner. A traveler wants to visit: ${destNames}
+    const prompt = `A traveler wants to visit: ${destNames}
 Travel mode: ${travel_mode || 'car'}. ${dateInfo}${weatherContext}
 
 Provide a detailed, practical travel plan with the following sections:
@@ -270,15 +195,11 @@ For EACH destination, list 2-3 specific hotels:
 
 Be specific with real hotel names, real attractions, and realistic Sri Lanka prices. Use markdown formatting.`;
 
-    const suggestions = await geminiBreaker.fire(prompt);
-    res.json({ suggestions });
+    const { text, provider, model } = await aiBreaker.fire({ system: SYSTEM_PROMPT, prompt });
+    res.json({ suggestions: text, ai: { provider, model } });
   } catch (error) {
-    console.error('AI trip suggestions error:', error.response?.data || error.message);
-    return res.json({
-      suggestions: FALLBACK_TRIP_SUGGESTIONS,
-      fallback: true,
-      note: 'Using demo data - Gemini API currently unavailable'
-    });
+    console.error('AI trip suggestions error:', error.message);
+    return res.json({ suggestions: FALLBACK_TRIP_SUGGESTIONS, fallback: true, note: FALLBACK_NOTE });
   }
 });
 
@@ -293,13 +214,14 @@ router.post('/place-info', async (req, res) => {
 
     const prompt = `Tell me about "${name}" in Sri Lanka${lat && lng ? ` (located at ${lat}, ${lng})` : ''}. Include: brief description, history, best time to visit, entry fees if any, nearby attractions, and travel tips. Keep it under 300 words.`;
 
-    const info = await geminiBreaker.fire(prompt);
-    res.json({ info });
+    const { text, provider, model } = await aiBreaker.fire({ system: SYSTEM_PROMPT, prompt });
+    res.json({ info: text, ai: { provider, model } });
   } catch (error) {
-    console.error('AI place info error:', error.response?.data || error.message);
+    console.error('AI place info error:', error.message);
     const placeName = req.body.name || 'Unknown';
-    const fallbackInfo = FALLBACK_PLACE_INFO[placeName] || FALLBACK_PLACE_INFO['Sigiriya'];
-    return res.json({ info: fallbackInfo, fallback: true });
+    const fallbackInfo = FALLBACK_PLACE_INFO[placeName]
+      || `Detailed information about ${placeName} is unavailable right now because the AI service is offline. Please try again in a few minutes.`;
+    return res.json({ info: fallbackInfo, fallback: true, note: FALLBACK_NOTE });
   }
 });
 
@@ -313,7 +235,7 @@ router.post('/route-tips', async (req, res) => {
     }
 
     const stopNames = stops.map((s, i) => `${i + 1}. ${s.name}`).join('\n');
-    const prompt = `You are a Sri Lanka travel expert. A traveler has planned this route:
+    const prompt = `A traveler has planned this route:
 
 Stops (in order):
 ${stopNames}
@@ -332,15 +254,16 @@ Please provide smart travel tips for this route:
 
 Keep it practical and specific to Sri Lanka. Format with markdown headers.`;
 
-    const tips = await geminiBreaker.fire(prompt);
-    res.json({ tips });
+    const { text, provider, model } = await aiBreaker.fire({ system: SYSTEM_PROMPT, prompt });
+    res.json({ tips: text, ai: { provider, model } });
   } catch (error) {
-    console.error('AI route tips error:', error.response?.data || error.message);
-    return res.json({ tips: FALLBACK_ROUTE_TIPS, fallback: true });
+    console.error('AI route tips error:', error.message);
+    return res.json({ tips: FALLBACK_ROUTE_TIPS, fallback: true, note: FALLBACK_NOTE });
   }
 });
 
 // Helper: search DB for places/businesses matching query words
+// Only admin-approved (verified) authentic data is surfaced — same gate as routes/places.js
 async function searchDatabase(question) {
   const results = [];
   try {
@@ -354,6 +277,7 @@ async function searchDatabase(question) {
     const businesses = await AuthenticDetail.findAll({
       where: {
         is_active: true,
+        verified: true,
         detail_type: 'business',
         [Op.or]: [
           { business_name: { [Op.or]: wordConditions } },
@@ -392,6 +316,7 @@ async function searchDatabase(question) {
     const users = await AuthenticDetail.findAll({
       where: {
         is_active: true,
+        verified: true,
         detail_type: 'user',
         [Op.or]: [
           { description: { [Op.or]: wordConditions } },
@@ -479,6 +404,8 @@ function mapPlaceCategory(category) {
   return 'culture';
 }
 
+const SUGGESTION_CATEGORIES = ['beach', 'temple', 'nature', 'city', 'adventure', 'culture', 'wildlife'];
+
 // AI travel suggestion - public endpoint for homepage
 router.post('/travel-suggest', async (req, res) => {
   try {
@@ -491,90 +418,90 @@ router.post('/travel-suggest', async (req, res) => {
     // Step 1: Search our own database first
     const dbResults = await searchDatabase(question);
 
-    // Step 2: Ask Gemini to fill remaining slots (max 6 total, DB results have priority)
+    // Step 2: Ask the AI to fill remaining slots (DB results have priority)
     const remaining = Math.max(1, 3 - dbResults.length);
     const dbNames = dbResults.map(r => r.name).join(', ');
     const avoidClause = dbNames
       ? ` Do NOT suggest these places (already listed): ${dbNames}.`
       : '';
 
-    const prompt = `You are a Sri Lanka travel expert assistant. A user asked: "${question}"
-${avoidClause}
+    // Object wrapper (not a bare array) so every provider's JSON mode accepts it
+    const prompt = `A user asked: "${question}"${avoidClause}
 
-Respond with ONLY a valid JSON array (no markdown, no code blocks) of exactly ${remaining} place suggestion(s) in Sri Lanka. Each object must have:
+Respond with ONLY valid JSON (no markdown, no code fences) in exactly this shape:
+{"suggestions": [{"name": "...", "reason": "...", "best_months": "...", "search_query": "...", "category": "..."}]}
+
+Include exactly ${remaining} suggestion(s), all real places in Sri Lanka. Field rules:
 - "name": place name
 - "reason": 1-2 sentence explanation relevant to the user's question
 - "best_months": short text like "Dec-Mar" or "Year-round"
 - "search_query": a Google Maps search query for this place in Sri Lanka
-- "category": one of "beach", "temple", "nature", "city", "adventure", "culture", "wildlife"
+- "category": one of ${SUGGESTION_CATEGORIES.map(c => `"${c}"`).join(', ')}`;
 
-Return ONLY the JSON array, nothing else.`;
-
-    let geminiResults = [];
+    let aiResults = [];
+    let aiMeta;
     try {
-      const text = await geminiBreaker.fire(prompt);
-      const cleaned = text.replace(/```json?\n?/g, '').replace(/```/g, '').trim();
-      const parsed = JSON.parse(cleaned);
-      geminiResults = (Array.isArray(parsed) ? parsed : []).map(r => ({ ...r, source: 'ai' }));
+      const { text, provider, model } = await aiBreaker.fire({ system: SYSTEM_PROMPT, prompt, json: true, temperature: 0.5 });
+      aiMeta = { provider, model };
+      const parsed = ai.parseJson(text);
+      const items = Array.isArray(parsed) ? parsed : Array.isArray(parsed?.suggestions) ? parsed.suggestions : [];
+      aiResults = items
+        .filter(r => r && typeof r.name === 'string')
+        .map(r => ({
+          name: r.name,
+          reason: r.reason || '',
+          best_months: r.best_months || 'Year-round',
+          search_query: r.search_query || `${r.name} Sri Lanka`,
+          category: SUGGESTION_CATEGORIES.includes(r.category) ? r.category : 'culture',
+          source: 'ai'
+        }));
     } catch (err) {
-      console.warn('[travel-suggest] Gemini parse failed:', err.message);
+      console.warn('[travel-suggest] AI step failed:', err.message);
     }
 
-    // Step 3: Combine — DB results first, then Gemini
-    const combined = [...dbResults, ...geminiResults].slice(0, 6);
+    // Step 3: Combine — DB results first, then AI
+    const combined = [...dbResults, ...aiResults].slice(0, 6);
 
     // If nothing at all, use hardcoded fallback
     if (combined.length === 0) {
-      return res.json({
-        suggestions: [
-          { name: 'Sigiriya', reason: 'UNESCO World Heritage site with stunning views of an ancient fortress.', best_months: 'Nov-Mar', search_query: 'Sigiriya Sri Lanka', category: 'culture', source: 'ai' },
-          { name: 'Mirissa Beach', reason: 'Perfect for whale watching and relaxing by the ocean.', best_months: 'Nov-Apr', search_query: 'Mirissa Beach Sri Lanka', category: 'beach', source: 'ai' },
-          { name: 'Kandy Temple of the Tooth', reason: 'Sacred Buddhist temple in the heart of Sri Lanka\'s cultural triangle.', best_months: 'Year-round', search_query: 'Temple of the Tooth Kandy', category: 'temple', source: 'ai' }
-        ],
-        fallback: true
-      });
+      return res.json({ suggestions: FALLBACK_SUGGESTIONS, fallback: true, note: FALLBACK_NOTE });
     }
 
-    res.json({ suggestions: combined });
+    res.json({ suggestions: combined, ai: aiMeta, fallback: aiResults.length === 0 && dbResults.length === 0 });
   } catch (error) {
-    console.error('AI travel suggest error:', error.response?.data || error.message);
-    res.json({
-      suggestions: [
-        { name: 'Sigiriya', reason: 'UNESCO World Heritage site with stunning views of an ancient fortress.', best_months: 'Nov-Mar', search_query: 'Sigiriya Sri Lanka', category: 'culture', source: 'ai' },
-        { name: 'Mirissa Beach', reason: 'Perfect for whale watching and relaxing by the ocean.', best_months: 'Nov-Apr', search_query: 'Mirissa Beach Sri Lanka', category: 'beach', source: 'ai' },
-        { name: 'Kandy Temple of the Tooth', reason: 'Sacred Buddhist temple in the heart of Sri Lanka\'s cultural triangle.', best_months: 'Year-round', search_query: 'Temple of the Tooth Kandy', category: 'temple', source: 'ai' }
-      ],
-      fallback: true
-    });
+    console.error('AI travel suggest error:', error.message);
+    res.json({ suggestions: FALLBACK_SUGGESTIONS, fallback: true, note: FALLBACK_NOTE });
   }
 });
 
-// Circuit-breaker stats — useful for dashboards / Prometheus scrape
+// Circuit-breaker + provider stats — useful for dashboards / Prometheus scrape
 router.get('/breaker-stats', (_req, res) => {
   res.json({
-    state:    geminiBreaker.opened ? 'OPEN' : geminiBreaker.halfOpen ? 'HALF_OPEN' : 'CLOSED',
-    enabled:  Boolean(GEMINI_API_KEY),
-    stats:    {
-      fires:    geminiBreaker.stats.fires,
-      failures: geminiBreaker.stats.failures,
-      successes:geminiBreaker.stats.successes,
-      timeouts: geminiBreaker.stats.timeouts,
-      rejects:  geminiBreaker.stats.rejects,
-      fallbacks:geminiBreaker.stats.fallbacks
+    state:     breakerState(),
+    enabled:   ai.configuredProviders().length > 0,
+    providers: ai.getStatus(),
+    stats:     {
+      fires:    aiBreaker.stats.fires,
+      failures: aiBreaker.stats.failures,
+      successes:aiBreaker.stats.successes,
+      timeouts: aiBreaker.stats.timeouts,
+      rejects:  aiBreaker.stats.rejects,
+      fallbacks:aiBreaker.stats.fallbacks
     }
   });
 });
 
-// Health check — confirms key is loaded and Gemini is reachable
+// Health check — confirms at least one provider is configured and answering
 router.get('/health', async (_req, res) => {
-  if (!GEMINI_API_KEY) {
-    return res.status(500).json({ ok: false, error: 'GEMINI_API_KEY not set' });
+  const providers = ai.getStatus();
+  if (ai.configuredProviders().length === 0) {
+    return res.status(500).json({ ok: false, error: 'No AI provider configured', providers });
   }
   try {
-    await geminiBreaker.fire('Reply with the single word: OK');
-    res.json({ ok: true, key: GEMINI_API_KEY.slice(0, 8) + '...', breaker: 'CLOSED' });
+    const { provider, model, cached } = await aiBreaker.fire({ prompt: 'Reply with the single word: OK', temperature: 0 });
+    res.json({ ok: true, answeredBy: { provider, model, cached }, breaker: breakerState(), providers });
   } catch (e) {
-    res.status(500).json({ ok: false, error: e.response?.data?.error?.message || e.message });
+    res.status(500).json({ ok: false, error: e.message, breaker: breakerState(), providers });
   }
 });
 

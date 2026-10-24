@@ -19,7 +19,9 @@ console.log('PORT:              ', process.env.PORT             ? 'SET' : 'NOT S
 console.log('DATABASE_URL:      ', process.env.DATABASE_URL     ? 'SET' : 'NOT SET');
 console.log('JWT_SECRET:        ', process.env.JWT_SECRET       ? 'SET' : 'NOT SET');
 console.log('STRIPE_SECRET_KEY: ', process.env.STRIPE_SECRET_KEY? 'SET' : 'NOT SET');
-console.log('GEMINI_API_KEY:    ', process.env.GEMINI_API_KEY   ? 'SET' : 'NOT SET');
+console.log('GROQ_API_KEY:      ', process.env.GROQ_API_KEY     ? 'SET' : 'NOT SET');
+console.log('GEMINI_API_KEY:    ', (process.env.GEMINI_API_KEY || process.env.GIMINI_API)          ? 'SET' : 'NOT SET');
+console.log('OPENROUTER_API_KEY:', (process.env.OPENROUTER_API_KEY || process.env.OPEN_ROUTE_API)  ? 'SET' : 'NOT SET');
 console.log('RABBITMQ_URL:      ', process.env.RABBITMQ_URL     ? 'SET' : 'NOT SET (in-process fallback)');
 console.log('GOOGLE_CLIENT_ID:  ', process.env.GOOGLE_CLIENT_ID ? 'SET' : 'NOT SET (OAuth disabled)');
 console.log('========================');

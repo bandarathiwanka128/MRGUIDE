@@ -46,6 +46,7 @@ const RouteOptimize = () => {
   const [selectedMarker, setSelectedMarker] = useState(null);
   const [placeDetails, setPlaceDetails] = useState({});
   const [aiTips, setAiTips] = useState('');
+  const [aiTipsFallback, setAiTipsFallback] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
 
   const mapRef = useRef(null);
@@ -452,8 +453,10 @@ const RouteOptimize = () => {
         totalDuration: routeInfo?.duration
       });
       setAiTips(res.data.tips || '');
+      setAiTipsFallback(Boolean(res.data.fallback));
     } catch (err) {
       setAiTips('Failed to get AI tips. Please try again.');
+      setAiTipsFallback(false);
     } finally {
       setAiLoading(false);
     }
@@ -671,6 +674,11 @@ const RouteOptimize = () => {
                   <button className="ro-ai-close" onClick={() => setAiTips('')}>×</button>
                 </div>
                 <div className="ro-ai-body">
+                  {aiTipsFallback && (
+                    <p className="ui-alert ui-alert--warning" role="note">
+                      AI service is temporarily unavailable — these are sample tips, not generated for your route.
+                    </p>
+                  )}
                   {aiTips.split('\n').map((line, i) => {
                     if (!line.trim()) return null;
                     if (line.startsWith('## ') || line.startsWith('# ')) {

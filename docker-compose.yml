@@ -8,13 +8,14 @@ services:
     restart: unless-stopped
     ports:
       - "3001:3001"
+    # Secrets (DATABASE_URL, JWT_SECRET, STRIPE_SECRET_KEY, AI keys) come from
+    # backend/.env, which is gitignored — never hardcode them in this file.
+    env_file:
+      - ./backend/.env
     environment:
       - NODE_ENV=development
       - PORT=3001
-      - DATABASE_URL=postgresql://neondb_owner:npg_gt4v8hsEdzXe@ep-billowing-leaf-a1fvwa7a-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
-      - JWT_SECRET=your_jwt_secret_change_in_production
       - CORS_ORIGIN=http://localhost:3000
-      - GEMINI_API_KEY=AIzaSyCDZZ5H4xfiNcdVYFwxOTMvi0O4P2axjuk
     volumes:
       - ./backend:/app
       - /app/node_modules

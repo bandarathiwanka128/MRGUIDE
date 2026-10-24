@@ -64,6 +64,7 @@ const TripPlanner = ({ user }) => {
 
   // AI Suggestions
   const [aiSuggestions, setAiSuggestions] = useState('');
+  const [aiFallback, setAiFallback] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
 
   // Saved trips
@@ -535,7 +536,12 @@ const TripPlanner = ({ user }) => {
 
       if (text) {
         setAiSuggestions(text);
-        showStatus('AI plan ready!', 'success');
+        setAiFallback(Boolean(response.data?.fallback));
+        if (response.data?.fallback) {
+          showStatus('AI service unavailable — showing a sample plan (demo data).', 'error');
+        } else {
+          showStatus('AI plan ready!', 'success');
+        }
       } else {
         showStatus('No suggestions received.', 'error');
       }
@@ -601,7 +607,7 @@ const TripPlanner = ({ user }) => {
         total_distance: routeInfo ? parseFloat(routeInfo.distance) : 0,
         total_duration: routeInfo ? routeInfo.duration : 0,
         weather_data: weatherData,
-        ai_suggestions: aiSuggestions,
+        ai_suggestions: aiFallback ? '' : aiSuggestions, // never persist demo text as the user's plan
         start_date: startDate || null,
         end_date: endDate || null,
         status: 'planned'
@@ -1293,6 +1299,11 @@ const TripPlanner = ({ user }) => {
 
                 {/* AI Content Body */}
                 <div className="tp-ai-panel-body">
+                  {aiFallback && (
+                    <div className="ui-alert ui-alert--warning" role="note">
+                      ⚠️ The AI service is temporarily unavailable, so this is a generic sample plan — not tailored to your destinations. It won't be saved with your trip.
+                    </div>
+                  )}
                   {renderAiContent(aiSuggestions)}
                 </div>
 
