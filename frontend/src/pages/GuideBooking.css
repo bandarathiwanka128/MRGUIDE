@@ -600,7 +600,7 @@
 
 /* InfoWindow close (X) button — force visible on white bubble */
 .gm-style .gm-ui-hover-effect {
-  background: rgba(0, 0, 0, 0.08) !important;
+  background: rgba(0, 0, 0, 0.92) !important;
   border-radius: 50% !important;
   opacity: 1 !important;
 }
