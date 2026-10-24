@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { Guide, GuideTrip, GuidePayout, GuideLocation, User, sequelize } = require('../config/database');
 const authenticateToken = require('../middleware/auth');
+const adminAuth = require('../middleware/adminAuth');
+router.use(adminAuth);
 const { Op } = require('sequelize');
 
 // Simple admin check middleware
