@@ -1,18 +1,18 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
-const { User, AuthenticProfile, Review, Trip, AuthenticDetail } = require('../../config/database');
+const { User, AuthenticProfile, Review, Trip } = require('../../config/database');
 const { Op } = require('sequelize');
 
 const router = express.Router();
 
-// GET /api/admin/users — list all users
+// GET /api/admin/users â€” list all users
 router.get('/', async (req, res) => {
   try {
     const { search, role, status, page = 1, limit = 20 } = req.query;
     const where = {};
     if (search) where[Op.or] = [
       { username: { [Op.iLike]: `%${search}%` } },
-      { email: { [Op.iLike]: `%${search}%` } }
+      { email: { [Op.iLike]: `%${search}%` } },
     ];
     if (role) where.role = role;
     if (status) where.status = status;
@@ -24,7 +24,7 @@ router.get('/', async (req, res) => {
       include: [{ model: AuthenticProfile, required: false }],
       order: [['created_at', 'DESC']],
       limit: parseInt(limit),
-      offset
+      offset,
     });
 
     res.json({ total: count, page: parseInt(page), pages: Math.ceil(count / limit), users: rows });
@@ -42,8 +42,8 @@ router.get('/:id', async (req, res) => {
       include: [
         { model: AuthenticProfile, required: false },
         { model: Review, required: false, limit: 5, order: [['created_at', 'DESC']] },
-        { model: Trip, required: false, limit: 5, attributes: ['id', 'title', 'status', 'created_at'] }
-      ]
+        { model: Trip, required: false, limit: 5, attributes: ['id', 'title', 'status', 'created_at'] },
+      ],
     });
     if (!user) return res.status(404).json({ error: 'User not found' });
     res.json(user);
@@ -53,7 +53,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// POST /api/admin/users — create user
+// POST /api/admin/users â€” create user
 router.post('/', async (req, res) => {
   try {
     const { username, email, password, role = 'user', mobile_number, country, country_code } = req.body;
@@ -63,7 +63,8 @@ router.post('/', async (req, res) => {
     if (typeof password !== 'string' || password.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters' });
     const hashed = await bcrypt.hash(password, 12);
     const user = await User.create({ username, email, password: hashed, role, mobile_number, country, country_code, status: 'active' });
-    const { password: _, ...userOut } = user.toJSON();
+    const userOut = user.toJSON();
+    delete userOut.password;
     res.status(201).json(userOut);
   } catch (err) {
     if (err.name === 'SequelizeUniqueConstraintError') return res.status(400).json({ error: 'Email or username already exists' });
@@ -72,7 +73,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT /api/admin/users/:id — edit user
+// PUT /api/admin/users/:id â€” edit user
 router.put('/:id', async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id);
@@ -95,7 +96,8 @@ router.put('/:id', async (req, res) => {
     if (password) updates.password = await bcrypt.hash(password, 10);
 
     await user.update(updates);
-    const { password: _, ...userOut } = user.toJSON();
+    const userOut = user.toJSON();
+    delete userOut.password;
     res.json(userOut);
   } catch (err) {
     console.error(err);
@@ -103,7 +105,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// PATCH /api/admin/users/:id/block — toggle block
+// PATCH /api/admin/users/:id/block â€” toggle block
 router.patch('/:id/block', async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id);

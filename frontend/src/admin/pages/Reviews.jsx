@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Search, Edit, Trash2, Star } from 'lucide-react';
+import { Search, Edit, Trash2 } from 'lucide-react';
 import Header from '../components/Header';
 import Modal from '../components/Modal';
 import Pagination from '../components/Pagination';
@@ -32,7 +32,7 @@ export default function Reviews() {
       setData(res.data);
     } catch { toast('Failed to load', 'error'); }
     finally { setLoading(false); }
-  }, [page, search, ratingF]);
+  }, [page, search, ratingF, toast]);
 
   useEffect(() => { load(); }, [load]);
 

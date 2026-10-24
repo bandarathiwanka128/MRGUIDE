@@ -1,12 +1,13 @@
 const express = require('express');
-const { AuthenticDetail, User, Place, AuthenticProfile } = require('../../config/database');
+const { AuthenticDetail: ScopedAuthenticDetail, User, Place, AuthenticProfile } = require('../../config/database');
+const AuthenticDetail = ScopedAuthenticDetail.unscoped();
 const { Op } = require('sequelize');
 
 const router = express.Router();
 
 const detailInclude = [
   { model: User, attributes: ['id', 'username', 'email'] },
-  { model: Place, attributes: ['id', 'name', 'latitude', 'longitude', 'category'], required: false }
+  { model: Place, attributes: ['id', 'name', 'latitude', 'longitude', 'category'], required: false },
 ];
 
 // GET /api/admin/authentic-details — all with filters
@@ -24,7 +25,7 @@ router.get('/', async (req, res) => {
     if (search) where[Op.or] = [
       { title: { [Op.iLike]: `%${search}%` } },
       { business_name: { [Op.iLike]: `%${search}%` } },
-      { description: { [Op.iLike]: `%${search}%` } }
+      { description: { [Op.iLike]: `%${search}%` } },
     ];
 
     const offset = (parseInt(page) - 1) * parseInt(limit);
@@ -33,7 +34,7 @@ router.get('/', async (req, res) => {
       include: detailInclude,
       order: [['created_at', 'DESC']],
       limit: parseInt(limit),
-      offset
+      offset,
     });
 
     res.json({ total: count, page: parseInt(page), pages: Math.ceil(count / limit), details: rows });
@@ -118,7 +119,7 @@ router.get('/profiles/list', async (req, res) => {
     const where = { role: 'authentic_user' };
     if (search) where[Op.or] = [
       { username: { [Op.iLike]: `%${search}%` } },
-      { email: { [Op.iLike]: `%${search}%` } }
+      { email: { [Op.iLike]: `%${search}%` } },
     ];
     const offset = (parseInt(page) - 1) * parseInt(limit);
     const { count, rows } = await User.findAndCountAll({
@@ -127,7 +128,7 @@ router.get('/profiles/list', async (req, res) => {
       include: [{ model: AuthenticProfile, required: false }],
       order: [['created_at', 'DESC']],
       limit: parseInt(limit),
-      offset
+      offset,
     });
     res.json({ total: count, page: parseInt(page), pages: Math.ceil(count / limit), profiles: rows });
   } catch (err) {

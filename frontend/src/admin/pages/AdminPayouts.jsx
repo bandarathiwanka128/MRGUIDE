@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import api from '../api/axios';
+import { useToast } from '../components/Toast';
 
 const fmt = (n) => `LKR ${parseFloat(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
@@ -11,6 +12,7 @@ const STATUS_COLORS = {
 };
 
 export default function AdminPayouts() {
+  const toast = useToast();
   const [payouts, setPayouts] = useState([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -20,7 +22,7 @@ export default function AdminPayouts() {
   const [markingId, setMarkingId] = useState(null);
   const [refInputs, setRefInputs] = useState({});
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams({ page, limit: 30 });
@@ -29,23 +31,23 @@ export default function AdminPayouts() {
       setPayouts(r.data.payouts || []);
       setTotal(r.data.total || 0);
     } catch (e) {
-      console.error(e);
+      toast(e.response?.data?.error || 'Unable to load data. Please try again.', 'error');
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, statusFilter, toast]);
 
-  useEffect(() => { load(); }, [page, statusFilter]);
+  useEffect(() => { load(); }, [load]);
 
   const runPayoutJob = async () => {
     if (!window.confirm('Run the weekly payout job now? This will create payout records for all guides with unpaid QR trips.')) return;
     setRunning(true);
     try {
       const r = await api.post('/guides/payouts/run');
-      alert(`Payout job complete: ${r.data.processed || 0} guides processed.`);
+      toast(`Payout job complete: ${r.data.processed || 0} guides processed.`, 'success');
       load();
     } catch (e) {
-      alert('Payout job failed: ' + (e.response?.data?.error || e.message));
+      toast('Payout job failed: ' + (e.response?.data?.error || e.message), 'error');
     } finally {
       setRunning(false);
     }
@@ -58,7 +60,7 @@ export default function AdminPayouts() {
       await api.put(`/guides/payouts/${payout.id}/mark-paid`, { ref });
       setPayouts(prev => prev.map(p => p.id === payout.id ? { ...p, status: 'paid', bank_transfer_ref: ref || 'MANUAL' } : p));
     } catch (e) {
-      alert('Failed: ' + (e.response?.data?.error || e.message));
+      toast('Failed: ' + (e.response?.data?.error || e.message), 'error');
     } finally {
       setMarkingId(null);
     }

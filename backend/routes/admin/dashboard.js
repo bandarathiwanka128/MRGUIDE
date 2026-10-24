@@ -1,5 +1,6 @@
 const express = require('express');
-const { User, AuthenticDetail, Place, Review, Trip, Store, AuthenticProfile } = require('../../config/database');
+const { User, AuthenticDetail: ScopedAuthenticDetail, Place, Review, Trip, Store, AuthenticProfile } = require('../../config/database');
+const AuthenticDetail = ScopedAuthenticDetail.unscoped();
 
 const router = express.Router();
 
@@ -17,7 +18,7 @@ router.get('/stats', async (req, res) => {
       pendingApprovals,
       approvedDetails,
       rejectedDetails,
-      authenticProfiles
+      authenticProfiles,
     ] = await Promise.all([
       User.count(),
       User.count({ where: { role: 'authentic_user' } }),
@@ -29,7 +30,7 @@ router.get('/stats', async (req, res) => {
       AuthenticDetail.count({ where: { verified: false, is_active: true } }),
       AuthenticDetail.count({ where: { verified: true, is_active: true } }),
       AuthenticDetail.count({ where: { is_active: false } }),
-      AuthenticProfile.count()
+      AuthenticProfile.count(),
     ]);
 
     res.json({
@@ -43,7 +44,7 @@ router.get('/stats', async (req, res) => {
       pendingApprovals,
       approvedDetails,
       rejectedDetails,
-      authenticProfiles
+      authenticProfiles,
     });
   } catch (err) {
     console.error(err);
@@ -58,22 +59,22 @@ router.get('/recent', async (req, res) => {
       User.findAll({
         order: [['created_at', 'DESC']],
         limit: 5,
-        attributes: ['id', 'username', 'email', 'role', 'status', 'created_at']
+        attributes: ['id', 'username', 'email', 'role', 'status', 'created_at'],
       }),
       Review.findAll({
         order: [['created_at', 'DESC']],
         limit: 5,
         include: [
           { model: User, attributes: ['username'] },
-          { model: Place, attributes: ['name'] }
-        ]
+          { model: Place, attributes: ['name'] },
+        ],
       }),
       AuthenticDetail.findAll({
         where: { verified: false, is_active: true },
         order: [['created_at', 'DESC']],
         limit: 5,
-        include: [{ model: User, attributes: ['username', 'email'] }]
-      })
+        include: [{ model: User, attributes: ['username', 'email'] }],
+      }),
     ]);
 
     res.json({ recentUsers, recentReviews, recentPending });

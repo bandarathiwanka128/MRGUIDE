@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, MapPin, Star, Route, Store, ShieldCheck, Clock, UserCheck, Briefcase, TrendingUp } from 'lucide-react';
+import { Users, MapPin, Star, Route, Store, ShieldCheck, Clock, UserCheck } from 'lucide-react';
 import Header from '../components/Header';
 import api from '../api/axios';
 

@@ -155,7 +155,7 @@ router.post('/', authenticateToken, async (req, res) => {
       images,
       description,
       owner_id: req.user.id,
-      is_verified: req.user.role === 'authentic_user'
+      is_verified: req.user.role === 'admin'
     });
 
     res.status(201).json(newStore);
@@ -179,7 +179,15 @@ router.put('/:id', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Not authorized' });
     }
 
-    await store.update(req.body);
+    const allowed = ['name', 'business_type', 'address', 'latitude', 'longitude',
+      'phone', 'email', 'website', 'opening_hours', 'amenities', 'images', 'description'];
+    if (req.user.role === 'admin') allowed.push('status', 'is_verified', 'rating');
+    const updates = {};
+    for (const key of allowed) {
+      if (req.body[key] !== undefined) updates[key] = req.body[key];
+    }
+    if (req.user.role !== 'admin') updates.is_verified = false;
+    await store.update(updates);
     res.json(store);
   } catch (error) {
     console.error('Error updating store:', error);

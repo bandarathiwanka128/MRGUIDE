@@ -6,7 +6,7 @@ const router = express.Router();
 
 const reviewInclude = [
   { model: User, attributes: ['id', 'username', 'email'] },
-  { model: Place, attributes: ['id', 'name'] }
+  { model: Place, attributes: ['id', 'name'] },
 ];
 
 // GET /api/admin/reviews
@@ -23,7 +23,7 @@ router.get('/', async (req, res) => {
       include: reviewInclude,
       order: [['created_at', 'DESC']],
       limit: parseInt(limit),
-      offset
+      offset,
     });
 
     res.json({ total: count, page: parseInt(page), pages: Math.ceil(count / limit), reviews: rows });

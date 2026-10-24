@@ -147,7 +147,10 @@ const App = () => {
         setUser(response.data);
       } catch (error) {
         console.error('Auth check failed:', error);
-        localStorage.removeItem('token');
+        if ([401, 403].includes(error.response?.status)) {
+          localStorage.removeItem('token');
+          setUser(null);
+        }
       }
     }
     setLoading(false);

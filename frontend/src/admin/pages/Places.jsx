@@ -33,7 +33,7 @@ export default function Places() {
       setData(res.data);
     } catch { toast('Failed to load', 'error'); }
     finally { setLoading(false); }
-  }, [page, search, catF]);
+  }, [page, search, catF, toast]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -62,7 +62,7 @@ export default function Places() {
     catch { toast('Delete failed', 'error'); }
   };
 
-  const FormBody = () => (
+  const renderFormBody = () => (
     <div>
       <div className="form-row">
         <div className="form-group"><label className="form-label">Name *</label><input className="form-input" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Place name" /></div>
@@ -144,7 +144,7 @@ export default function Places() {
       {[createModal && { title: 'Add Place', onClose: () => setCreateModal(false) }, editModal && { title: 'Edit Place', onClose: () => setEditModal(null) }].filter(Boolean).map(({ title, onClose }) => (
         <Modal key={title} open size="modal-lg" onClose={onClose} title={title}
           footer={<><button className="btn btn-ghost" onClick={onClose}>Cancel</button><button className="btn btn-primary" onClick={save} disabled={saving}>{saving ? 'Saving…' : 'Save'}</button></>}>
-          <FormBody />
+          {renderFormBody()}
         </Modal>
       ))}
 

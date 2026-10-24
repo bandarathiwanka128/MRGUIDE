@@ -1,9 +1,10 @@
 const express = require('express');
 const adminAuth = require('../../middleware/adminAuth');
+const { defaultLimiter } = require('../../gateway/rateLimiter');
 const router = express.Router();
 
 // This gate covers every admin API, including future routes.
-router.use(adminAuth);
+router.use(adminAuth, defaultLimiter);
 router.use((req, res, next) => {
   for (const key of ['page', 'limit']) {
     const value = req.query[key];

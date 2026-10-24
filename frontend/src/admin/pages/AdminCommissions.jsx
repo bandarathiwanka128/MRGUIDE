@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import api from '../api/axios';
+import { useToast } from '../components/Toast';
 
 const fmt = (n) => `LKR ${parseFloat(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 export default function AdminCommissions() {
+  const toast = useToast();
   const [guides, setGuides] = useState([]);
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       const r = await api.get('/guides/commissions/owed');
@@ -16,13 +18,13 @@ export default function AdminCommissions() {
       setGuides(list);
       setTotal(list.reduce((a, g) => a + parseFloat(g.pending_cash_commission || 0), 0));
     } catch (e) {
-      console.error(e);
+      toast(e.response?.data?.error || 'Unable to load data. Please try again.', 'error');
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [load]);
 
   const getAlertLevel = (amount) => {
     if (amount >= 10000) return { color: '#ef4444', label: 'HIGH', bg: 'rgba(239,68,68,0.1)' };

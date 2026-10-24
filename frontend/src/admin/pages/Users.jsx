@@ -6,7 +6,7 @@ import Pagination from '../components/Pagination';
 import { useToast } from '../components/Toast';
 import api from '../api/axios';
 
-const ROLES = ['user', 'authentic_user', 'admin'];
+const ROLES = ['user', 'authentic_user', 'guide', 'admin'];
 
 function RoleBadge({ role }) {
   const map = { admin: 'badge-purple', authentic_user: 'badge-blue', user: 'badge-gray' };
@@ -43,7 +43,7 @@ export default function Users() {
       setData(res.data);
     } catch { toast('Failed to load users', 'error'); }
     finally { setLoading(false); }
-  }, [page, search, roleF]);
+  }, [page, search, roleF, toast]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -108,7 +108,7 @@ export default function Users() {
       <div className="form-row">
         <div className="form-group">
           <label className="form-label">Password {editModal ? '(leave blank to keep)' : '*'}</label>
-          <input className="form-input" type="password" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" />
+          <input className="form-input" type="password" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} placeholder="••••••••" />
         </div>
         <div className="form-group">
           <label className="form-label">Role</label>
@@ -142,7 +142,7 @@ export default function Users() {
           <div className="toolbar">
             <div className="search-bar" style={{ minWidth: 240 }}>
               <Search size={15} />
-              <input placeholder="Search by name or emailâ€¦" value={search} onChange={handleSearch} />
+              <input placeholder="Search by name or email…" value={search} onChange={handleSearch} />
             </div>
             <div className="tabs">
               {[['', 'All'], ['user', 'Users'], ['authentic_user', 'Authentic'], ['admin', 'Admins']].map(([v, l]) => (
@@ -173,9 +173,9 @@ export default function Users() {
                     </td>
                     <td><RoleBadge role={u.role} /></td>
                     <td><StatusBadge status={u.status} /></td>
-                    <td className="td-muted">{u.mobile_number || 'â€”'}</td>
-                    <td className="td-muted">{u.country || 'â€”'}</td>
-                    <td className="td-muted">{u.created_at ? new Date(u.created_at).toLocaleDateString() : 'â€”'}</td>
+                    <td className="td-muted">{u.mobile_number || '—'}</td>
+                    <td className="td-muted">{u.country || '—'}</td>
+                    <td className="td-muted">{u.created_at ? new Date(u.created_at).toLocaleDateString() : '—'}</td>
                     <td>
                       <div className="action-group">
                         <button className="btn-icon" title="View" onClick={() => setViewModal(u)}><Eye size={14} /></button>
@@ -197,13 +197,13 @@ export default function Users() {
 
       {/* Create Modal */}
       <Modal open={createModal} onClose={() => setCreateModal(false)} title="Add New User"
-        footer={<><button className="btn btn-ghost" onClick={() => setCreateModal(false)}>Cancel</button><button className="btn btn-primary" onClick={save} disabled={saving}>{saving ? 'Savingâ€¦' : 'Create User'}</button></>}>
+        footer={<><button className="btn btn-ghost" onClick={() => setCreateModal(false)}>Cancel</button><button className="btn btn-primary" onClick={save} disabled={saving}>{saving ? 'Saving…' : 'Create User'}</button></>}>
         {renderFormBody()}
       </Modal>
 
       {/* Edit Modal */}
       <Modal open={!!editModal} onClose={() => setEditModal(null)} title="Edit User"
-        footer={<><button className="btn btn-ghost" onClick={() => setEditModal(null)}>Cancel</button><button className="btn btn-primary" onClick={save} disabled={saving}>{saving ? 'Savingâ€¦' : 'Save Changes'}</button></>}>
+        footer={<><button className="btn btn-ghost" onClick={() => setEditModal(null)}>Cancel</button><button className="btn btn-primary" onClick={save} disabled={saving}>{saving ? 'Saving…' : 'Save Changes'}</button></>}>
         {renderFormBody()}
       </Modal>
 
@@ -211,7 +211,7 @@ export default function Users() {
       <Modal open={!!viewModal} onClose={() => setViewModal(null)} title="User Details">
         {viewModal && (
           <div className="detail-grid">
-            {[['ID', viewModal.id], ['Username', viewModal.username], ['Email', viewModal.email], ['Role', viewModal.role], ['Status', viewModal.status || 'active'], ['Mobile', viewModal.mobile_number || 'â€”'], ['Country', viewModal.country || 'â€”'], ['Joined', viewModal.created_at ? new Date(viewModal.created_at).toLocaleString() : 'â€”']].map(([l, v]) => (
+            {[['ID', viewModal.id], ['Username', viewModal.username], ['Email', viewModal.email], ['Role', viewModal.role], ['Status', viewModal.status || 'active'], ['Mobile', viewModal.mobile_number || '—'], ['Country', viewModal.country || '—'], ['Joined', viewModal.created_at ? new Date(viewModal.created_at).toLocaleString() : '—']].map(([l, v]) => (
               <div className="detail-item" key={l}><label>{l}</label><p>{String(v)}</p></div>
             ))}
           </div>

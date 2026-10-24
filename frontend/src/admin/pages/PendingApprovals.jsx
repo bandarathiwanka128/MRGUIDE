@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { CheckCircle2, XCircle, Eye, Clock, RefreshCw, MapPin, Phone, Mail, Globe } from 'lucide-react';
+import { CheckCircle2, XCircle, Eye, Clock, RefreshCw, MapPin, Phone, Mail } from 'lucide-react';
 import Header from '../components/Header';
 import Modal from '../components/Modal';
 import Pagination from '../components/Pagination';
@@ -27,7 +27,7 @@ export default function PendingApprovals() {
       setData(res.data);
     } catch { toast('Failed to load', 'error'); }
     finally { setLoading(false); }
-  }, [page, typeFilter]);
+  }, [page, typeFilter, toast]);
 
   useEffect(() => { load(); }, [load]);
 

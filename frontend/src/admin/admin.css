@@ -185,9 +185,9 @@
 
 
 .admin-panel .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); backdrop-filter: blur(4px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
-.admin-panel .modal { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-lg); width: 100%; max-width: 540px; max-height: 90vh; display: flex; flex-direction: column; animation: modal-in .2s ease; }
+.admin-panel .modal { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-lg); width: 100%; max-width: 540px; max-height: 90vh; display: flex; flex-direction: column; animation: admin-modal-in .2s ease; }
 .admin-panel .modal-lg { max-width: 720px; }
-@keyframes modal-in { from{opacity:0;transform:scale(.96) translateY(-10px)} to {opacity:1;transform:scale(1) translateY(0)} }
+@keyframes admin-modal-in { from{opacity:0;transform:scale(.96) translateY(-10px)} to {opacity:1;transform:scale(1) translateY(0)} }
 .admin-panel .modal-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
 .admin-panel .modal-title { font-size: 16px; font-weight: 700; color: var(--text-1); }
 .admin-panel .modal-close { background: none; border: none; cursor: pointer; color: var(--text-3); padding: 4px; border-radius: 6px; transition: all var(--transition); }
@@ -252,7 +252,7 @@
 .admin-panel .toast { padding: 12px 16px; border-radius: var(--radius-sm); font-size: 13.5px; font-weight: 500; display: flex; align-items: center; gap: 10px; box-shadow: var(--shadow-lg); animation: admin-toast-in .25s ease; min-width: 260px; max-width: 380px; }
 .admin-panel .toast-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
 .admin-panel .toast-error { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
-.admin-panel .admin-toast-info { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
+.admin-panel .toast-info { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
 @keyframes admin-toast-in { from{opacity:0;transform:translateX(20px)} to {opacity:1;transform:translateX(0)} }
 
 
@@ -349,3 +349,20 @@
   .admin-panel .toast-container { left: 12px; right: 12px; }
   .admin-panel .toast { min-width: 0; max-width: 100%; }
 }
+
+.admin-panel .table-container { overflow-x: auto; background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius-md); }
+.admin-panel .table-container > table { min-width: 680px; }
+.admin-panel .row-selected { background: var(--accent-soft); }
+.admin-panel .badge-info, .admin-panel .badge-blue { background: var(--blue-soft); color: var(--blue-ink); }
+.admin-panel .badge-danger, .admin-panel .badge-red { background: var(--danger-soft); color: var(--danger); }
+.admin-panel .badge-gray { background: var(--surface-3); color: var(--text-2); }
+.admin-panel .badge-yellow { background: var(--warning-soft); color: var(--warning); }
+.admin-panel .badge-purple { background: var(--blue-soft); color: var(--blue-ink); }
+.admin-panel .detail-panel { flex-shrink: 0; background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
+.admin-panel .detail-panel-header, .admin-panel .detail-panel-footer { display: flex; justify-content: space-between; gap: 12px; padding: 18px; border-bottom: 1px solid var(--border); }
+.admin-panel .detail-panel-body { padding: 18px; }
+.admin-panel .detail-field { display: flex; flex-direction: column; gap: 4px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.admin-panel .detail-field label { color: var(--text-3); font-size: 12px; }
+.admin-panel .page-info { color: var(--text-2); font-size: 12px; }
+@media (max-width: 1100px) { .admin-panel .page-container > div[style*="display: flex"] { flex-wrap: wrap; } .admin-panel .detail-panel { width: 100% !important; } }
+@media (prefers-reduced-motion: reduce) { .admin-panel *, .admin-panel *::before, .admin-panel *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }

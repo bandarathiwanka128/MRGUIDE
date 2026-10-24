@@ -11,7 +11,7 @@ router.get('/', async (req, res) => {
     const where = {};
     if (search) where[Op.or] = [
       { name: { [Op.iLike]: `%${search}%` } },
-      { address: { [Op.iLike]: `%${search}%` } }
+      { address: { [Op.iLike]: `%${search}%` } },
     ];
     if (business_type) where.business_type = business_type;
     if (status) where.status = status;
@@ -22,7 +22,7 @@ router.get('/', async (req, res) => {
       include: [{ model: User, attributes: ['id', 'username', 'email'], required: false }],
       order: [['created_at', 'DESC']],
       limit: parseInt(limit),
-      offset
+      offset,
     });
 
     res.json({ total: count, page: parseInt(page), pages: Math.ceil(count / limit), stores: rows.map(store => ({ ...store.toJSON(), Owner: store.User })) });
@@ -35,7 +35,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const store = await Store.findByPk(req.params.id, {
-      include: [{ model: User, attributes: ['id', 'username', 'email'], required: false }]
+      include: [{ model: User, attributes: ['id', 'username', 'email'], required: false }],
     });
     if (!store) return res.status(404).json({ error: 'Not found' });
     res.json({ ...store.toJSON(), Owner: store.User });

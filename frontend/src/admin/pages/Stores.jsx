@@ -31,7 +31,7 @@ export default function Stores() {
       setData(res.data);
     } catch { toast('Failed to load', 'error'); }
     finally { setLoading(false); }
-  }, [page, search, typeF]);
+  }, [page, search, typeF, toast]);
 
   useEffect(() => { load(); }, [load]);
 

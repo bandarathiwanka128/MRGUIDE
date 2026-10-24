@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { sequelize } = require('../../config/database');
-const { QueryTypes, Op } = require('sequelize');
+const { QueryTypes } = require('sequelize');
 
 // GET /api/admin/guides — all guides
 router.get('/', async (req, res) => {
@@ -44,8 +44,8 @@ router.put('/:id/verify', async (req, res) => {
     const [guide] = await sequelize.query('SELECT id FROM guides WHERE id = :id', { type: QueryTypes.SELECT, replacements: { id: req.params.id } });
     if (!guide) return res.status(404).json({ error: 'Guide not found' });
     await sequelize.query(
-      `UPDATE guides SET is_verified = :is_verified, updated_at = NOW() WHERE id = :id`,
-      { type: QueryTypes.UPDATE, replacements: { is_verified, id: req.params.id } }
+      'UPDATE guides SET is_verified = :is_verified, updated_at = NOW() WHERE id = :id',
+      { type: QueryTypes.UPDATE, replacements: { is_verified, id: req.params.id } },
     );
     res.json({ ok: true, is_verified });
   } catch (err) {
@@ -76,7 +76,7 @@ router.get('/trips/all', async (req, res) => {
 
     const [{ count }] = await sequelize.query(
       `SELECT COUNT(*) FROM guide_trips gt ${where}`,
-      { type: QueryTypes.SELECT, replacements }
+      { type: QueryTypes.SELECT, replacements },
     );
 
     res.json({ trips, total: parseInt(count), page: parseInt(page) });
@@ -133,8 +133,8 @@ router.get('/financials', async (req, res) => {
     `, { type: QueryTypes.SELECT });
 
     const [{ cash_owed }] = await sequelize.query(
-      `SELECT COALESCE(SUM(pending_cash_commission),0) AS cash_owed FROM guides`,
-      { type: QueryTypes.SELECT }
+      'SELECT COALESCE(SUM(pending_cash_commission),0) AS cash_owed FROM guides',
+      { type: QueryTypes.SELECT },
     );
 
     const [{ payouts_sent }] = await sequelize.query(`
@@ -190,7 +190,7 @@ router.get('/payouts/all', async (req, res) => {
 
     const [{ count }] = await sequelize.query(
       `SELECT COUNT(*) FROM guide_payouts gp ${where}`,
-      { type: QueryTypes.SELECT, replacements }
+      { type: QueryTypes.SELECT, replacements },
     );
 
     res.json({ payouts, total: parseInt(count), page: parseInt(page) });
@@ -203,8 +203,8 @@ router.get('/payouts/all', async (req, res) => {
 router.put('/payouts/:id/mark-paid', async (req, res) => {
   try {
     await sequelize.query(
-      `UPDATE guide_payouts SET status='paid', paid_at=NOW(), bank_transfer_ref=:ref, updated_at=NOW() WHERE id=:id`,
-      { type: QueryTypes.UPDATE, replacements: { id: req.params.id, ref: req.body.ref || 'MANUAL' } }
+      'UPDATE guide_payouts SET status=\'paid\', paid_at=NOW(), bank_transfer_ref=:ref, updated_at=NOW() WHERE id=:id',
+      { type: QueryTypes.UPDATE, replacements: { id: req.params.id, ref: req.body.ref || 'MANUAL' } },
     );
     res.json({ ok: true });
   } catch (err) {
@@ -243,8 +243,8 @@ router.get('/commissions/owed', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const [guide] = await sequelize.query(
-      `SELECT g.*, u.username, u.email FROM guides g LEFT JOIN users u ON u.id = g.user_id WHERE g.id = :id`,
-      { type: QueryTypes.SELECT, replacements: { id: req.params.id } }
+      'SELECT g.*, u.username, u.email FROM guides g LEFT JOIN users u ON u.id = g.user_id WHERE g.id = :id',
+      { type: QueryTypes.SELECT, replacements: { id: req.params.id } },
     );
     if (!guide) return res.status(404).json({ error: 'Guide not found' });
     res.json(guide);

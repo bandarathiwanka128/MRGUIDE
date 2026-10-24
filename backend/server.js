@@ -236,7 +236,7 @@ app.use('/api/guides',       defaultLimiter, guidesRoutes);
 app.use('/api/guide-trips',  paymentLimiter, guideTripsRoutes);
 app.use('/api/payouts',      defaultLimiter, payoutsRoutes);
 app.use('/api/admin-guides', defaultLimiter, adminGuidesRoutes);
-app.use('/api/admin', defaultLimiter, require('./routes/admin'));
+app.use('/api/admin', require('./routes/admin'));
 
 // Generate API key (authenticated users)
 app.post('/api/auth/api-key', async (req, res) => {
@@ -331,7 +331,9 @@ async function startServer() {
      END $$;`
   ).catch(() => {});
 
-  await sequelize.sync({ alter: true });
+  // Preserve columns used by admin workflows and other application versions.
+  await sequelize.sync({ alter: { drop: false } });
+  await require('./scripts/migrate-admin').migrateAdmin();
 
   // 4. Start HTTP server
   httpServer.listen(PORT, '0.0.0.0', () => {

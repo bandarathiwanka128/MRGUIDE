@@ -23,7 +23,7 @@ export default function AuthenticProfiles() {
       setData(res.data);
     } catch { toast('Failed to load', 'error'); }
     finally { setLoading(false); }
-  }, [page, search]);
+  }, [page, search, toast]);
 
   useEffect(() => { load(); }, [load]);
 

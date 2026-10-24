@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const { User, AuthenticProfile, Place, AuthenticDetail, Review } = require('../config/database');
 
 const router = express.Router();
+router.use(require('../middleware/adminAuth'));
 
 // Seed 5 authentic places with realistic data (Wikipedia-sourced info + fake contact data)
 router.post('/seed-places', async (req, res) => {

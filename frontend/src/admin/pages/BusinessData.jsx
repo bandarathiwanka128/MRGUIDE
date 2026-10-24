@@ -28,7 +28,7 @@ export default function BusinessData() {
       setData(res.data);
     } catch { toast('Failed to load', 'error'); }
     finally { setLoading(false); }
-  }, [page, search, statusF]);
+  }, [page, search, statusF, toast]);
 
   useEffect(() => { load(); }, [load]);
 

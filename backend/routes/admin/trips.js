@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
       include: [{ model: User, attributes: ['id', 'username', 'email'] }],
       order: [['created_at', 'DESC']],
       limit: parseInt(limit),
-      offset
+      offset,
     });
 
     res.json({ total: count, page: parseInt(page), pages: Math.ceil(count / limit), trips: rows });
@@ -31,7 +31,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const trip = await Trip.findByPk(req.params.id, {
-      include: [{ model: User, attributes: ['id', 'username', 'email'] }]
+      include: [{ model: User, attributes: ['id', 'username', 'email'] }],
     });
     if (!trip) return res.status(404).json({ error: 'Not found' });
     res.json(trip);

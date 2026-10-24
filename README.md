@@ -230,3 +230,40 @@ docker-compose up -d
 ## License
 
 ISC
+
+
+## Integrated admin panel
+
+The main application now includes `/admin`; the separate admin frontend and port 4000 server are no longer required. Log in through the normal login page. Accounts with database role `admin` see an **Admin panel** button in desktop navigation, their account menu, and mobile navigation. Normal users cannot see the button or open admin routes or APIs.
+
+All existing admin features are available: dashboard statistics, pending approvals with moderation notes, users and passwords, authentic profiles, authentic and business data, places, reviews, trips, stores, guide verification, live trips, financial summaries and trends, payouts, and cash commissions owed. The workspace follows the main application's light/dark theme and uses the existing API and Google Maps configuration.
+
+### Provision an administrator
+
+Set these values in the ignored `backend/.env` file, alongside the existing `DATABASE_URL` and `JWT_SECRET`:
+
+```dotenv
+ADMIN_EMAIL=admin@mrguide.lk
+ADMIN_PASSWORD=your-admin-password
+```
+
+Then run:
+
+```bash
+npm run migrate:admin --workspace backend
+npm run seed:admin --workspace backend
+```
+
+The migration only adds account status and private moderation notes. Server startup preserves existing columns and runs this additive migration after model synchronization. The seed creates or promotes the configured email to an active administrator and hashes its password with bcrypt. Running the seed again intentionally resets that account's password to `ADMIN_PASSWORD`. It does not create a public setup endpoint or automatically reset credentials on server startup. Keep `.env` files out of Git.
+
+Admin APIs are mounted at `/api/admin`. Authorization checks the current database role and account status on every request, so demotions and blocks invalidate access immediately. Public registration only permits `user` and `authentic_user`. Contributors cannot approve their own content; editing a contribution sends it back for approval. Private moderation notes are excluded from public query results.
+
+### Verify the integration
+
+```bash
+npm test --workspace backend -- --runInBand
+npm test --workspace frontend -- --watchAll=false --runInBand
+npm run build
+```
+
+Backend security tests cover anonymous access, stale role claims, blocked accounts, registration, shared login, approvals, owner edits, store verification, legacy seed protection, public visibility, and pagination. Frontend tests cover hidden admin navigation and direct URL protection for user, authentic user, and guide roles.

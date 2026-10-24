@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import api from '../api/axios';
+import { useToast } from '../components/Toast';
 
 export default function AdminGuides() {
+  const toast = useToast();
   const [guides, setGuides] = useState([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -11,7 +13,7 @@ export default function AdminGuides() {
   const [selectedGuide, setSelectedGuide] = useState(null);
   const [verifying, setVerifying] = useState(null);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams({ page, limit: 30 });
@@ -21,13 +23,13 @@ export default function AdminGuides() {
       setGuides(r.data.guides || []);
       setTotal(r.data.total || 0);
     } catch (e) {
-      console.error(e);
+      toast(e.response?.data?.error || 'Unable to load data. Please try again.', 'error');
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, verified, search, toast]);
 
-  useEffect(() => { load(); }, [page, verified]);
+  useEffect(() => { load(); }, [load]);
 
   const handleSearch = (e) => { e.preventDefault(); setPage(1); load(); };
 
@@ -38,7 +40,7 @@ export default function AdminGuides() {
       setGuides(prev => prev.map(g => g.id === guide.id ? { ...g, is_verified: !g.is_verified } : g));
       if (selectedGuide?.id === guide.id) setSelectedGuide(g => ({ ...g, is_verified: !g.is_verified }));
     } catch (e) {
-      alert('Failed to update verification');
+      toast(e.response?.data?.error || 'Failed to update verification', 'error');
     } finally {
       setVerifying(null);
     }

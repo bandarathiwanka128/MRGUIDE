@@ -1,5 +1,6 @@
 const express = require('express');
-const { Place, Review, AuthenticDetail, User } = require('../../config/database');
+const { Place, Review, AuthenticDetail: ScopedAuthenticDetail, User } = require('../../config/database');
+const AuthenticDetail = ScopedAuthenticDetail.unscoped();
 const { Op } = require('sequelize');
 
 const router = express.Router();
@@ -19,7 +20,7 @@ router.get('/', async (req, res) => {
       include: [{ model: Review, attributes: ['rating'], required: false }],
       order: [['created_at', 'DESC']],
       limit: parseInt(limit),
-      offset
+      offset,
     });
 
     const places = rows.map(p => {
@@ -43,8 +44,8 @@ router.get('/:id', async (req, res) => {
     const place = await Place.findByPk(req.params.id, {
       include: [
         { model: Review, include: [{ model: User, attributes: ['username'] }] },
-        { model: AuthenticDetail, include: [{ model: User, attributes: ['username'] }] }
-      ]
+        { model: AuthenticDetail, include: [{ model: User, attributes: ['username'] }] },
+      ],
     });
     if (!place) return res.status(404).json({ error: 'Not found' });
     res.json(place);
@@ -58,7 +59,7 @@ router.post('/', async (req, res) => {
   try {
     const { name, category, latitude, longitude, description, address, google_place_id, price_level } = req.body;
     if (!name) return res.status(400).json({ error: 'name required' });
-    const place = await Place.create({ name, category, latitude, longitude, description, address, google_place_id, price_level, created_by: req.user.id });
+    const place = await Place.create({ name, category, latitude: latitude === '' ? null : latitude, longitude: longitude === '' ? null : longitude, description, address, google_place_id, price_level: price_level === '' ? null : price_level, created_by: req.user.id });
     res.status(201).json(place);
   } catch (err) {
     res.status(500).json({ error: 'Server error' });
@@ -75,6 +76,9 @@ router.put('/:id', async (req, res) => {
     const updates = {};
     for (const key of allowed) if (req.body[key] !== undefined) updates[key] = req.body[key];
 
+    for (const key of ['latitude', 'longitude', 'price_level', 'estimated_cost']) {
+      if (updates[key] === '') updates[key] = null;
+    }
     await place.update(updates);
     res.json(place);
   } catch (err) {

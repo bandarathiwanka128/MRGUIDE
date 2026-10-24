@@ -150,6 +150,7 @@ const AuthenticDetail = sequelize.define('AuthenticDetail', {
   }
 }, {
   tableName: 'authentic_details',
+  defaultScope: { attributes: { exclude: ['admin_notes'] } },
   timestamps: true,
   createdAt: 'created_at',
   updatedAt: 'updated_at'
