@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import {
   ChevronDown, Compass, Map, Route, CalendarRange, Sparkles, Users, Info,
-  Sun, Moon, Menu, X, LogOut, LayoutDashboard, BadgeCheck, Navigation,
+  Sun, Moon, Menu, X, LogOut, LayoutDashboard, BadgeCheck, Navigation, ShieldCheck,
 } from 'lucide-react';
 import Logo from '../brand/Logo';
 import './SiteNav.css';
@@ -218,6 +218,7 @@ const SiteNav = ({ user, onLogout, darkMode, onToggleTheme, overHero, assistantB
             </Link>
           )}
 
+          {user?.role === 'admin' && <NavLink to="/admin" className="ui-btn ui-btn--primary ui-btn--sm site-nav__admin-link"><ShieldCheck size={16} aria-hidden="true" /> Admin panel</NavLink>}
           {assistantButton}
 
           <button
@@ -252,6 +253,7 @@ const SiteNav = ({ user, onLogout, darkMode, onToggleTheme, overHero, assistantB
                 aria-label="Account"
                 onKeyDown={onMenuKeyDown}
               >
+                {user?.role === 'admin' && <Link to="/admin" role="menuitem" className="site-nav__menu-item site-nav__menu-item--row" tabIndex={accountOpen ? 0 : -1}><ShieldCheck size={17} aria-hidden="true" /> Admin panel</Link>}
                 <p className="site-nav__menu-heading">Signed in as <strong>{firstName}</strong></p>
                 <Link to="/guide/dashboard" role="menuitem" className="site-nav__menu-item site-nav__menu-item--row" tabIndex={accountOpen ? 0 : -1}>
                   <LayoutDashboard size={17} aria-hidden="true" /> Guide dashboard
@@ -333,6 +335,7 @@ const SiteNav = ({ user, onLogout, darkMode, onToggleTheme, overHero, assistantB
             </>
           )}
 
+          {user?.role === 'admin' && <NavLink to="/admin" className="site-drawer__link"><ShieldCheck size={19} aria-hidden="true" /> Admin panel</NavLink>}
           <p className="site-drawer__group">Mr. Guide</p>
           <NavLink to="/about" className="site-drawer__link"><Info size={19} aria-hidden="true" /> About us</NavLink>
           <button type="button" className="site-drawer__link" onClick={onToggleTheme}>

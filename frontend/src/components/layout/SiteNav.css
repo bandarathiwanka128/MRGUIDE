@@ -388,3 +388,5 @@
   .site-nav__trip span:last-child { display: none; }
   .site-nav__trip { padding: 0 var(--space-3); }
 }
+
+@media (max-width: 760px) { .site-nav__admin-link { display: none; } }

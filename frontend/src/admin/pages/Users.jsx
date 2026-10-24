@@ -39,7 +39,7 @@ export default function Users() {
       const params = { page, limit: 20 };
       if (search) params.search = search;
       if (roleF) params.role = roleF;
-      const res = await api.get('/admin/users', { params });
+      const res = await api.get('/users', { params });
       setData(res.data);
     } catch { toast('Failed to load users', 'error'); }
     finally { setLoading(false); }
@@ -64,7 +64,7 @@ export default function Users() {
         toast('User updated', 'success');
         setEditModal(null);
       } else {
-        await api.post('/admin/users', form);
+        await api.post('/users', form);
         toast('User created', 'success');
         setCreateModal(false);
       }

@@ -28,7 +28,7 @@ export default function Reviews() {
       const params = { page, limit: 20 };
       if (search) params.search = search;
       if (ratingF) params.rating = ratingF;
-      const res = await api.get('/admin/reviews', { params });
+      const res = await api.get('/reviews', { params });
       setData(res.data);
     } catch { toast('Failed to load', 'error'); }
     finally { setLoading(false); }
