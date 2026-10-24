@@ -11,7 +11,9 @@
     "lint": "eslint . --ext .js",
     "lint:fix": "eslint . --ext .js --fix",
     "migrate": "sequelize db:migrate",
-    "seed": "sequelize db:seed:all"
+    "seed": "sequelize db:seed:all",
+    "migrate:admin": "node scripts/migrate-admin.js",
+    "seed:admin": "node scripts/seed-admin.js"
   },
   "keywords": [
     "api",

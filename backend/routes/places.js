@@ -389,6 +389,8 @@ router.get('/:id', async (req, res) => {
         },
         {
           model: AuthenticDetail,
+          where: { verified: true, is_active: true },
+          required: false,
           include: [{
             model: User,
             attributes: ['username', 'email']
@@ -570,7 +572,13 @@ router.put('/authentic-details/:id', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Not authorized to update this detail' });
     }
 
-    await detail.update(req.body);
+    const allowed = ['title', 'business_name', 'organization', 'job_title', 'expertise',
+      'description', 'phone', 'email', 'website', 'maps_link', 'packages', 'photos'];
+    const updates = {};
+    for (const key of allowed) {
+      if (req.body[key] !== undefined) updates[key] = req.body[key];
+    }
+    await detail.update({ ...updates, verified: false, is_active: true });
 
     const updatedDetail = await AuthenticDetail.findByPk(detail.id, {
       include: [{

@@ -30,6 +30,14 @@ router.post('/register', async (req, res) => {
       businessDescription
     } = req.body;
 
+    // Administrator accounts can only be provisioned by an administrator or CLI.
+    if (role && !['user', 'authentic_user'].includes(role)) {
+      return res.status(400).json({ error: 'Invalid registration role' });
+    }
+    if (!username || !email || typeof password !== 'string' || password.length < 8) {
+      return res.status(400).json({ error: 'Username, email and a password of at least 8 characters are required' });
+    }
+
     // Validation
     if (password !== confirmPassword) {
       return res.status(400).json({ error: 'Passwords do not match' });
@@ -118,6 +126,10 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Invalid email or password' });
     }
 
+    if (user.status === 'blocked') {
+      return res.status(403).json({ error: 'Your account has been blocked' });
+    }
+
     // Check password
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
@@ -151,7 +163,7 @@ router.post('/login', async (req, res) => {
 router.get('/me', authenticateToken, async (req, res) => {
   try {
     const user = await User.findByPk(req.user.id, {
-      attributes: ['id', 'username', 'email', 'role', 'country', 'mobile_number'],
+      attributes: ['id', 'username', 'email', 'role', 'status', 'country', 'mobile_number'],
       include: [{
         model: AuthenticProfile,
         required: false

@@ -1,5 +1,5 @@
 const { Sequelize, DataTypes } = require('sequelize');
-require('dotenv').config();
+require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 
 // Use DATABASE_URL from environment (for Neon/production) or fallback to local
 const databaseUrl = process.env.DATABASE_URL || 'postgresql://postgres:1aA#22##@localhost:5432/mrguide';
@@ -45,6 +45,11 @@ const User = sequelize.define('User', {
   role: {
     type: DataTypes.STRING,
     defaultValue: 'user'
+  },
+  status: {
+    type: DataTypes.STRING,
+    defaultValue: 'active',
+    allowNull: false
   }
 }, {
   tableName: 'users',
@@ -134,6 +139,7 @@ const AuthenticDetail = sequelize.define('AuthenticDetail', {
   maps_link: DataTypes.STRING,
   packages: DataTypes.JSON,
   photos: DataTypes.ARRAY(DataTypes.STRING),
+  admin_notes: DataTypes.TEXT,
   verified: {
     type: DataTypes.BOOLEAN,
     defaultValue: false
@@ -144,6 +150,7 @@ const AuthenticDetail = sequelize.define('AuthenticDetail', {
   }
 }, {
   tableName: 'authentic_details',
+  defaultScope: { attributes: { exclude: ['admin_notes'] } },
   timestamps: true,
   createdAt: 'created_at',
   updatedAt: 'updated_at'

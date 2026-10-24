@@ -63,6 +63,7 @@ if (OAUTH_ENABLED) {
             user = await User.create({ username, email, password: fakePwd, role: 'user' });
           }
 
+          if (user.status === 'blocked') return done(null, false);
           return done(null, user);
         } catch (err) {
           return done(err, null);

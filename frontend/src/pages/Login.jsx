@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import axios from 'axios';
 import { Eye, EyeOff, AlertCircle, ArrowRight } from 'lucide-react';
 import { API_BASE_URL } from '../config';
@@ -14,6 +14,7 @@ const Login = ({ setUser }) => {
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleChange = (e) => {
     setFormData({
@@ -31,9 +32,10 @@ const Login = ({ setUser }) => {
       const response = await axios.post(`${API_BASE_URL}/auth/login`, formData);
       localStorage.setItem('token', response.data.token);
       setUser(response.data.user);
-      navigate('/');
+      const destination = location.state?.from;
+      navigate(response.data.user.role === 'admin' && typeof destination === 'string' && destination.startsWith('/admin') ? destination : '/', { replace: true });
     } catch (err) {
-      setError(err.response?.data?.message || 'We couldn’t log you in. Check your connection and try again.');
+      setError(err.response?.data?.error || err.response?.data?.message || 'We couldn’t log you in. Check your connection and try again.');
     } finally {
       setSubmitting(false);
     }

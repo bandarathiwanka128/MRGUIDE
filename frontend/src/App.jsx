@@ -5,6 +5,7 @@ import './App.css';
 
 import HomePage from './pages/HomePage';
 import SiteNav from './components/layout/SiteNav';
+import AdminRoute from './components/auth/AdminRoute';
 import SiteFooter from './components/layout/SiteFooter';
 import AIAssistant, { AssistantLauncher } from './components/assistant/AIAssistant';
 import { BrandMark } from './components/brand/Logo';
@@ -26,11 +27,12 @@ const GuideDashboard = lazy(() => import('./pages/GuideDashboard'));
 const TripPayment = lazy(() => import('./pages/TripPayment'));
 const LiveTripView = lazy(() => import('./pages/LiveTripView'));
 const MyTrip = lazy(() => import('./pages/MyTrip'));
+const AdminPanel = lazy(() => import('./admin/AdminPanel'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 /* Full-height workspace routes: no footer, no floating assistant button
    (it would sit on top of map controls). */
-const WORKSPACE_PREFIXES = ['/search', '/shortest-path', '/trip-planner', '/authentic', '/trip/live', '/my-trip'];
+const WORKSPACE_PREFIXES = ['/admin', '/search', '/shortest-path', '/trip-planner', '/authentic', '/trip/live', '/my-trip'];
 const isWorkspace = (path) => path === '/guides' || WORKSPACE_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`));
 
 const PageFallback = () => (
@@ -40,7 +42,7 @@ const PageFallback = () => (
   </div>
 );
 
-const AppShell = ({ user, setUser, onLogout, darkMode, onToggleTheme }) => {
+const AppShell = ({ user, setUser, onLogout, darkMode, onToggleTheme, onRefreshAuth }) => {
   const location = useLocation();
   const mainRef = useRef(null);
   const launcherRef = useRef(null);
@@ -101,6 +103,7 @@ const AppShell = ({ user, setUser, onLogout, darkMode, onToggleTheme }) => {
             <Route path="/my-trip" element={user ? <MyTrip user={user} /> : <Navigate to="/login" />} />
             <Route path="/login" element={user ? <Navigate to="/" /> : <Login setUser={setUser} />} />
             <Route path="/register" element={user ? <Navigate to="/" /> : <Register setUser={setUser} />} />
+            <Route path="/admin/*" element={<AdminRoute user={user}><AdminPanel user={user} onAccessDenied={onRefreshAuth} /></AdminRoute>} />
             <Route path="/about" element={<AboutUs />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
@@ -144,7 +147,10 @@ const App = () => {
         setUser(response.data);
       } catch (error) {
         console.error('Auth check failed:', error);
-        localStorage.removeItem('token');
+        if ([401, 403].includes(error.response?.status)) {
+          localStorage.removeItem('token');
+          setUser(null);
+        }
       }
     }
     setLoading(false);
@@ -170,6 +176,7 @@ const App = () => {
         user={user}
         setUser={setUser}
         onLogout={handleLogout}
+        onRefreshAuth={checkAuth}
         darkMode={darkMode}
         onToggleTheme={() => setDarkMode((d) => !d)}
       />
