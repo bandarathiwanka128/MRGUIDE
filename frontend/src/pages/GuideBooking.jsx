@@ -376,7 +376,7 @@ export default function GuideBooking({ user }) {
               >
                 <div className="map-info-window">
                   <strong>{selectedGuide.display_name}</strong>
-                  <div><Star size={13} aria-hidden="true" className="ui-inline-icon" /> {parseFloat(selectedGuide.avg_rating || 0).toFixed(1)} · {selectedGuide.total_reviews || 0} reviews</div>
+                  <div><Star size={13} aria-hidden="true" className="ui-inline-icon" style={{ color: 'var(--accent-ink, #93c5fd)' }} /> {parseFloat(selectedGuide.avg_rating || 0).toFixed(1)} · {selectedGuide.total_reviews || 0} reviews</div>
                   <div>LKR {parseFloat(selectedGuide.tier_1km).toLocaleString()} / 1km</div>
                   {distanceKm && <div>Est: LKR {calculateFare(distanceKm, selectedGuide).toLocaleString()}</div>}
                   <button onClick={() => setBookingGuide(selectedGuide)} style={{ marginTop: 6, background: '#FFCC00', border: 'none', borderRadius: 4, padding: '4px 10px', cursor: 'pointer', fontWeight: 600 }}>
