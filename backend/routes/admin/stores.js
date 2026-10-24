@@ -19,7 +19,7 @@ router.get('/', async (req, res) => {
     const offset = (parseInt(page) - 1) * parseInt(limit);
     const { count, rows } = await Store.findAndCountAll({
       where,
-      include: [{ model: User, , attributes: ['id', 'username', 'email'], required: false }],
+      include: [{ model: User, attributes: ['id', 'username', 'email'], required: false }],
       order: [['created_at', 'DESC']],
       limit: parseInt(limit),
       offset

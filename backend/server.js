@@ -236,6 +236,7 @@ app.use('/api/guides',       defaultLimiter, guidesRoutes);
 app.use('/api/guide-trips',  paymentLimiter, guideTripsRoutes);
 app.use('/api/payouts',      defaultLimiter, payoutsRoutes);
 app.use('/api/admin-guides', defaultLimiter, adminGuidesRoutes);
+app.use('/api/admin', defaultLimiter, require('./routes/admin'));
 
 // Generate API key (authenticated users)
 app.post('/api/auth/api-key', async (req, res) => {
