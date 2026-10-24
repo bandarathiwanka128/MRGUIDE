@@ -12,7 +12,7 @@
   display: flex;
   flex-direction: column;
   border-right: 2px solid rgba(var(--accent-rgb), 0.35);
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 /* Sidebar Header */
@@ -321,8 +321,6 @@
    Places List — Photo Card Layout
    ========================================= */
 .places-list-container {
-  flex: 1;
-  overflow-y: auto;
   padding: 12px 14px;
 }
 
