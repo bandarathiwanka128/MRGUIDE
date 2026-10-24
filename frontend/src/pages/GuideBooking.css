@@ -590,65 +590,12 @@
 .map-register-btn:hover { background: var(--surface-1); }
 .map-register-btn:active { transform: scale(0.97); }
 
-/* Map info window — force dark theme inside Google Maps InfoWindow bubble */
+/* Map info window — Google Maps InfoWindow is always white; use dark-on-white colours */
 .map-info-window {
-  font-family: system-ui, sans-serif;
-  min-width: 180px;
-  line-height: 1.6;
-  font-size: 13px;
-  color: var(--text-1, #e2e8f0);
-}
-
-.map-info-window strong {
-  display: block;
-  font-size: 14px;
-  font-weight: 700;
-  margin-bottom: 6px;
-  color: var(--accent-ink, #93c5fd);
-}
-
-.map-info-window div {
-  color: var(--text-1, #e2e8f0);
-  margin-bottom: 2px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.map-info-window svg {
-  color: var(--accent-ink, #93c5fd);
-  flex-shrink: 0;
-}
-
-/* Override Google Maps InfoWindow native bubble to match dark theme */
-.gm-style .gm-style-iw-c {
-  background: var(--surface-2, #1e2235) !important;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.6) !important;
-  border-radius: 10px !important;
-  padding: 14px 16px !important;
-}
-
-.gm-style .gm-style-iw-d {
-  overflow: hidden !important;
-  background: transparent !important;
-}
-
-.gm-style .gm-style-iw-t::after {
-  background: var(--surface-2, #1e2235) !important;
-}
-
-.gm-style .gm-style-iw-tc::after {
-  background: var(--surface-2, #1e2235) !important;
-}
-
-/* Close button */
-.gm-style .gm-style-iw-chr button {
-  background: rgba(255,255,255,0.1) !important;
-  border-radius: 50% !important;
-}
-
-.gm-style .gm-style-iw-chr button span {
-  filter: invert(1) !important;
+  font-family: system-ui, -apple-system, sans-serif;
+  min-width: 210px;
+  max-width: 260px;
+  line-height: 1;
 }
 
 @media (max-width: 768px) {

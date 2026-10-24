@@ -375,11 +375,101 @@ export default function GuideBooking({ user }) {
                 onCloseClick={() => setSelectedGuide(null)}
               >
                 <div className="map-info-window">
-                  <strong>{selectedGuide.display_name}</strong>
-                  <div><Star size={13} aria-hidden="true" className="ui-inline-icon" style={{ color: 'var(--accent-ink, #93c5fd)' }} /> {parseFloat(selectedGuide.avg_rating || 0).toFixed(1)} · {selectedGuide.total_reviews || 0} reviews</div>
-                  <div>LKR {parseFloat(selectedGuide.tier_1km).toLocaleString()} / 1km</div>
-                  {distanceKm && <div>Est: LKR {calculateFare(distanceKm, selectedGuide).toLocaleString()}</div>}
-                  <button onClick={() => setBookingGuide(selectedGuide)} style={{ marginTop: 6, background: '#FFCC00', border: 'none', borderRadius: 4, padding: '4px 10px', cursor: 'pointer', fontWeight: 600 }}>
+                  {/* Guide name */}
+                  <p style={{ margin: '0 0 6px', fontSize: '15px', fontWeight: 700, color: '#111827' }}>
+                    {selectedGuide.display_name}
+                  </p>
+
+                  {/* Availability badge */}
+                  <p style={{ margin: '0 0 8px' }}>
+                    <span style={{
+                      display: 'inline-block',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      padding: '2px 8px',
+                      borderRadius: '20px',
+                      background: selectedGuide.is_available ? '#dcfce7' : '#fee2e2',
+                      color: selectedGuide.is_available ? '#15803d' : '#b91c1c',
+                      letterSpacing: '0.3px'
+                    }}>
+                      {selectedGuide.is_available ? '● Live Now' : '○ Offline'}
+                    </span>
+                  </p>
+
+                  {/* Rating row */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px' }}>
+                    <Star size={14} style={{ color: '#f59e0b', flexShrink: 0 }} aria-hidden="true" />
+                    <span style={{ color: '#374151', fontSize: '13px', fontWeight: 600 }}>
+                      {parseFloat(selectedGuide.avg_rating || 0).toFixed(1)}
+                    </span>
+                    <span style={{ color: '#6b7280', fontSize: '12px' }}>
+                      ({selectedGuide.total_reviews || 0} reviews)
+                    </span>
+                  </div>
+
+                  {/* Pricing */}
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '6px' }}>
+                    <span style={{
+                      fontSize: '12px', fontWeight: 600,
+                      background: '#eff6ff', color: '#1d4ed8',
+                      border: '1px solid #bfdbfe',
+                      padding: '2px 8px', borderRadius: '6px'
+                    }}>
+                      LKR {parseFloat(selectedGuide.tier_1km).toLocaleString()} / 1km
+                    </span>
+                    <span style={{
+                      fontSize: '12px', fontWeight: 600,
+                      background: '#f0fdf4', color: '#15803d',
+                      border: '1px solid #bbf7d0',
+                      padding: '2px 8px', borderRadius: '6px'
+                    }}>
+                      LKR {parseFloat(selectedGuide.tier_5km).toLocaleString()} / 5km
+                    </span>
+                  </div>
+
+                  {/* Estimated fare */}
+                  {distanceKm && (
+                    <div style={{
+                      display: 'flex', alignItems: 'center', gap: '5px',
+                      marginBottom: '8px', padding: '5px 8px',
+                      background: '#fefce8', borderRadius: '6px',
+                      border: '1px solid #fde68a'
+                    }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#b45309" strokeWidth="2" style={{ flexShrink: 0 }}>
+                        <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/>
+                      </svg>
+                      <span style={{ fontSize: '12px', color: '#92400e' }}>
+                        Est. <strong style={{ color: '#78350f' }}>LKR {calculateFare(distanceKm, selectedGuide).toLocaleString()}</strong> for your trip
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Languages */}
+                  {(selectedGuide.languages || []).length > 0 && (
+                    <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginBottom: '10px' }}>
+                      {(selectedGuide.languages || []).slice(0, 3).map(l => (
+                        <span key={l} style={{
+                          fontSize: '11px', padding: '1px 7px',
+                          background: '#f3f4f6', color: '#374151',
+                          border: '1px solid #d1d5db', borderRadius: '4px'
+                        }}>{l}</span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Book Now button */}
+                  <button
+                    onClick={() => setBookingGuide(selectedGuide)}
+                    style={{
+                      width: '100%', padding: '8px 0',
+                      background: 'linear-gradient(135deg, #FFCC00, #f59e0b)',
+                      border: 'none', borderRadius: '7px',
+                      cursor: 'pointer', fontWeight: 700,
+                      fontSize: '13px', color: '#111827',
+                      boxShadow: '0 2px 8px rgba(245,158,11,0.35)',
+                      letterSpacing: '0.2px'
+                    }}
+                  >
                     Book Now
                   </button>
                 </div>
