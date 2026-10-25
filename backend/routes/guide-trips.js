@@ -10,7 +10,7 @@ const getStripe = () => {
 };
 const { GuideTrip, Guide, GuidePayout, GuideReview, User } = require('../config/database');
 const authenticateToken = require('../middleware/auth');
-const { calculateFare, fareBreakdown, calculateWaitingCharge } = require('../utils/fareCalculator');
+const { calculateFare, fareBreakdown, calculateWaitingCharge, isValidDistanceKm } = require('../utils/fareCalculator');
 const eventBus = require('../events/eventBus');
 
 // GET /api/guide-trips/fare-estimate
@@ -18,6 +18,7 @@ router.get('/fare-estimate', async (req, res) => {
   try {
     const { guideId, distanceKm } = req.query;
     if (!guideId || !distanceKm) return res.status(400).json({ error: 'guideId and distanceKm required' });
+    if (!isValidDistanceKm(distanceKm)) return res.status(400).json({ error: 'distanceKm must be a non-negative number' });
     const guide = await Guide.findByPk(guideId);
     if (!guide) return res.status(404).json({ error: 'Guide not found' });
     res.json(fareBreakdown(distanceKm, guide));
@@ -35,19 +36,23 @@ router.post('/', authenticateToken, async (req, res) => {
     } = req.body;
 
     if (!guide_id) return res.status(400).json({ error: 'guide_id required' });
+    const hasDistance = distance_km !== undefined && distance_km !== null && distance_km !== '';
+    if (hasDistance && !isValidDistanceKm(distance_km)) {
+      return res.status(400).json({ error: 'distance_km must be a non-negative number' });
+    }
 
     const guide = await Guide.findByPk(guide_id);
     if (!guide) return res.status(404).json({ error: 'Guide not found' });
     if (!guide.is_verified) return res.status(400).json({ error: 'Guide is not verified' });
 
-    const fare = distance_km ? fareBreakdown(distance_km, guide) : null;
+    const fare = hasDistance ? fareBreakdown(distance_km, guide) : null;
 
     const trip = await GuideTrip.create({
       guide_id,
       tourist_id: req.user.id,
       origin_lat, origin_lng, dest_lat, dest_lng,
       origin_address, dest_address,
-      distance_km: distance_km || 0,
+      distance_km: hasDistance ? Number(distance_km) : 0,
       base_fare: fare ? fare.base_fare : 0,
       platform_commission: fare ? fare.platform_commission : 0,
       guide_earnings: fare ? fare.guide_earnings : 0,
@@ -62,7 +67,7 @@ router.post('/', authenticateToken, async (req, res) => {
         origin_address,
         dest_address,
         estimated_fare: fare ? fare.base_fare : null,
-        distance_km: distance_km || null
+        distance_km: hasDistance ? Number(distance_km) : null
       });
     }
 
