@@ -19,6 +19,7 @@ body {
   line-height: var(--lh-body);
   color: var(--text-1);
   background-color: var(--bg);
+  background-image: radial-gradient(circle at 100% 0%, rgba(var(--accent-rgb), 0.07), transparent 28rem);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;

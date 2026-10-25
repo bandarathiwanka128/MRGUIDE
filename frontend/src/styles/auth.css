@@ -13,11 +13,11 @@
 .auth-shell__aside {
   position: relative;
   overflow: clip;
-  color: #F6F1E9;
+  color: #FFFFFF;
   background:
     linear-gradient(180deg, rgba(8, 15, 24, 0.35) 0%, rgba(8, 15, 24, 0.92) 85%),
     url('https://res.cloudinary.com/jerrick/image/upload/d_642250b563292b35f27461a7.png,f_jpg,q_auto,w_1200/637f71bba2f78a001d04492b.jpg') 60% 40% / cover,
-    #0B1622;
+    #0D1B2A;
 }
 .auth-shell__aside-inner {
   position: sticky;
@@ -28,8 +28,8 @@
   justify-content: space-between;
   padding: clamp(2rem, 4vw, 3.5rem);
 }
-.auth-shell__logo { align-self: flex-start; color: #F6F1E9; text-decoration: none; }
-.auth-shell__logo .brand-logo { color: #F6F1E9; }
+.auth-shell__logo { align-self: flex-start; color: #FFFFFF; text-decoration: none; }
+.auth-shell__logo .brand-logo { color: #FFFFFF; }
 .auth-shell__logo .brand-logo__word em { color: var(--brand-gold); }
 .auth-shell__quote {
   max-width: 18ch;

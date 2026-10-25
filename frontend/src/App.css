@@ -18,8 +18,12 @@
 }
 .app-main:focus { outline: none; }
 
-/* Pages are direct children of <main>; let each fill the width */
-.app-main > * { width: 100%; }
+/* Pages are direct children of <main>; let each fill the width and arrive
+   consistently as routes change. */
+.app-main > * {
+  width: 100%;
+  animation: fadeIn var(--dur-slow) var(--ease-out) both;
+}
 
 /* Workspace routes (maps) fill the viewport under the navigation */
 .App--workspace .app-main { min-height: calc(100dvh - var(--nav-height)); }

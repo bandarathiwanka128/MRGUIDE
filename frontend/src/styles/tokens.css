@@ -6,10 +6,10 @@
 
 :root {
   /* ── Brand constants (theme-independent) ── */
-  --brand-gold: #FFCC00;
+  --brand-gold: #FFD700;
   --brand-blue: #34699A;
-  --brand-ink: #0B1622;
-  --brand-cream: #F6F1E9;
+  --brand-ink: #0D1B2A;
+  --brand-cream: #FFFFFF;
 
   /* ── Typography ── */
   --font-display: 'Fraunces', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
@@ -88,9 +88,9 @@
   --success-rgb: 46, 158, 106;
   --danger-rgb: 214, 69, 69;
   --warning-rgb: 224, 154, 26;
-  --accent-rgb: 255, 204, 0;
+  --accent-rgb: 255, 215, 0;
   --blue-rgb: 52, 105, 154;
-  --ink-rgb: 11, 22, 34;
+  --ink-rgb: 13, 27, 42;
 }
 
 /* ── Dark theme (default) ── */
@@ -98,29 +98,29 @@
 [data-theme="dark"] {
   color-scheme: dark;
 
-  --bg: #0B1622;
+  --bg: #0D1B2A;
   --surface-1: #101E2D;
   --surface-2: #152739;
   --surface-3: #1C3249;
-  --surface-inverse: #F6F1E9;
+  --surface-inverse: #FFFFFF;
   --overlay: rgba(5, 11, 18, 0.62);
-  --glass: rgba(11, 22, 34, 0.72);
+  --glass: rgba(13, 27, 42, 0.78);
 
-  --fg-rgb: 246, 241, 233;          /* foreground channels for tints */
+  --fg-rgb: 255, 255, 255;          /* foreground channels for tints */
   --surface-rgb: 16, 30, 45;        /* surface-1 channels for translucent panels */
-  --text-1: #F3EEE6;
+  --text-1: #F8FAFC;
   --text-2: #B3BFCC;
   --text-3: #8496A8;
-  --text-inverse: #0B1622;
+  --text-inverse: #0D1B2A;
 
   --border: rgba(246, 241, 233, 0.09);
   --border-strong: rgba(246, 241, 233, 0.18);
 
-  --accent: #FFCC00;
-  --accent-hover: #FFD94D;
-  --accent-ink: #FFD43B;            /* gold used as text on surfaces */
-  --accent-soft: rgba(255, 204, 0, 0.12);
-  --on-accent: #0B1622;
+  --accent: #FFD700;
+  --accent-hover: #F2C900;
+  --accent-ink: #FFD700;            /* gold used as text on dark surfaces */
+  --accent-soft: rgba(255, 215, 0, 0.12);
+  --on-accent: #0D1B2A;
 
   --blue: #34699A;
   --blue-hover: #3F7AB0;
@@ -147,33 +147,33 @@
 [data-theme="light"] {
   color-scheme: light;
 
-  --bg: #F7F4EE;
+  --bg: #F4F7FA;
   --surface-1: #FFFFFF;
-  --surface-2: #F1ECE3;
-  --surface-3: #E7E0D4;
-  --surface-inverse: #0B1622;
-  --overlay: rgba(11, 22, 34, 0.45);
+  --surface-2: #EEF2F6;
+  --surface-3: #E2E8EF;
+  --surface-inverse: #0D1B2A;
+  --overlay: rgba(13, 27, 42, 0.45);
   --glass: rgba(255, 255, 255, 0.8);
 
-  --fg-rgb: 11, 22, 34;
+  --fg-rgb: 13, 27, 42;
   --surface-rgb: 255, 255, 255;
-  --text-1: #12202E;
+  --text-1: #0D1B2A;
   --text-2: #475666;
   --text-3: #66727F;
-  --text-inverse: #F6F1E9;
+  --text-inverse: #FFFFFF;
 
   --border: rgba(11, 22, 34, 0.1);
   --border-strong: rgba(11, 22, 34, 0.2);
 
-  --accent: #FFCC00;
-  --accent-hover: #F2BD00;
-  --accent-ink: #855F00;
-  --accent-soft: rgba(255, 204, 0, 0.2);
-  --on-accent: #0B1622;
+  --accent: #FFD700;
+  --accent-hover: #E6C200;
+  --accent-ink: #6B5200;
+  --accent-soft: rgba(255, 215, 0, 0.2);
+  --on-accent: #0D1B2A;
 
-  --blue: #34699A;
-  --blue-hover: #2B5A86;
-  --blue-ink: #2B5A86;
+  --blue: #0D1B2A;
+  --blue-hover: #183653;
+  --blue-ink: #0D1B2A;
   --blue-soft: rgba(52, 105, 154, 0.12);
   --on-blue: #FFFFFF;
 
@@ -184,7 +184,7 @@
   --warning: #9A6200;
   --warning-soft: rgba(224, 154, 26, 0.14);
 
-  --focus-ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--blue);
+  --focus-ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
 
   --shadow-1: 0 1px 2px rgba(11, 22, 34, 0.06);
   --shadow-2: 0 6px 18px -8px rgba(11, 22, 34, 0.18);

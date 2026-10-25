@@ -22,7 +22,7 @@
 .assistant-launcher.is-active { background: var(--accent); color: var(--on-accent); border-color: transparent; }
 .assistant-launcher__icon { transition: transform var(--dur-slow) var(--ease-out); }
 .assistant-launcher:hover .assistant-launcher__icon { transform: rotate(18deg) scale(1.08); }
-.site-nav.is-over-hero .assistant-launcher:not(.is-active) { color: var(--brand-gold); border-color: rgba(255, 204, 0, 0.5); background: rgba(11, 22, 34, 0.3); }
+.site-nav.is-over-hero .assistant-launcher:not(.is-active) { color: var(--brand-gold); border-color: rgba(255, 215, 0, 0.5); background: rgba(13, 27, 42, 0.3); }
 
 @media (max-width: 1100px) {
   .assistant-launcher { padding: 0; width: 44px; }

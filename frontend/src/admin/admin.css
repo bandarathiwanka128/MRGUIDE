@@ -1,5 +1,5 @@
 .admin-panel {
-  --navy: var(--surface-2);
+  --navy: var(--brand-ink);
   --gold: var(--accent);
   --gold-dark: var(--accent-hover);
   --white: var(--surface-1);

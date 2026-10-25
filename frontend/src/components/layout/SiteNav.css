@@ -29,13 +29,13 @@
   border-bottom-color: transparent;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  --nav-fg: #F6F1E9;
+  --nav-fg: #FFFFFF;
 }
 .site-nav.is-over-hero .site-nav__bar .brand-logo,
 .site-nav.is-over-hero .site-nav__bar .site-nav__link,
 .site-nav.is-over-hero .site-nav__bar .site-nav__icon-btn,
 .site-nav.is-over-hero .site-nav__bar .site-nav__avatar-btn,
-.site-nav.is-over-hero .site-nav__bar .site-nav__login { color: #F6F1E9; }
+.site-nav.is-over-hero .site-nav__bar .site-nav__login { color: #FFFFFF; }
 .site-nav.is-over-hero .site-nav__bar .brand-logo__word em { color: var(--brand-gold); }
 .site-nav.is-over-hero .site-nav__bar .site-nav__icon-btn { border-color: rgba(255, 255, 255, 0.24); background: rgba(11, 22, 34, 0.25); }
 .site-nav.is-over-hero .site-nav__bar .site-nav__login:hover { background: rgba(255, 255, 255, 0.12); }

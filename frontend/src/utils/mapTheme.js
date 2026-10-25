@@ -46,7 +46,7 @@ const DAY = [
 ];
 
 export const MAP_THEMES = {
-  dark: { styles: NIGHT, route: '#FFCC00', routeAlt: '#8CB8E2', marker: '#FFCC00' },
+  dark: { styles: NIGHT, route: '#FFD700', routeAlt: '#8CB8E2', marker: '#FFD700' },
   light: { styles: DAY, route: '#34699A', routeAlt: '#B08400', marker: '#34699A' },
 };
 

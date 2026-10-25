@@ -130,7 +130,7 @@ const App = () => {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('mrguide-theme', theme);
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', darkMode ? '#0B1622' : '#F7F4EE');
+    if (meta) meta.setAttribute('content', darkMode ? '#0D1B2A' : '#F4F7FA');
   }, [darkMode]);
 
   useEffect(() => {
