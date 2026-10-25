@@ -140,18 +140,49 @@
   box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.15);
 }
 
-/* Webkit date input color fix — theme-aware */
-/* Dark theme: invert icon to light so it matches the light text on dark surfaces */
-[data-theme="dark"] .tp-date-input::-webkit-calendar-picker-indicator,
-:root .tp-date-input::-webkit-calendar-picker-indicator {
-  filter: invert(0.8) brightness(1.1);
-  cursor: pointer;
+/* Ensure the browser renders the date text using the theme's color-scheme */
+[data-theme="dark"] .tp-date-input,
+:root .tp-date-input {
+  color-scheme: dark;
+}
+[data-theme="light"] .tp-date-input {
+  color-scheme: light;
 }
 
-/* Light theme: keep icon dark to match --text-1 (#12202E) on light surfaces */
-[data-theme="light"] .tp-date-input::-webkit-calendar-picker-indicator {
-  filter: invert(0.2) brightness(0.4);
+/* ── Calendar picker icon — theme-aware & always visible ── */
+
+/* Dark theme: turn the black browser icon into a bright light icon */
+[data-theme="dark"] .tp-date-input::-webkit-calendar-picker-indicator,
+:root .tp-date-input::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(0.85);
+  opacity: 0.75;
   cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  transition: opacity 0.2s ease, filter 0.2s ease;
+}
+
+/* Hover: glow with accent colour */
+[data-theme="dark"] .tp-date-input::-webkit-calendar-picker-indicator:hover,
+:root .tp-date-input::-webkit-calendar-picker-indicator:hover {
+  filter: invert(1) sepia(1) saturate(5) hue-rotate(5deg) brightness(1.1);
+  opacity: 1;
+}
+
+/* Light theme: keep icon dark to match --text-1 (#12202E) */
+[data-theme="light"] .tp-date-input::-webkit-calendar-picker-indicator {
+  filter: invert(0) brightness(0.25);
+  opacity: 0.7;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  transition: opacity 0.2s ease, filter 0.2s ease;
+}
+
+/* Hover: accent tint in light mode */
+[data-theme="light"] .tp-date-input::-webkit-calendar-picker-indicator:hover {
+  filter: sepia(1) saturate(8) hue-rotate(5deg) brightness(0.85);
+  opacity: 1;
 }
 
 /* Search form */
