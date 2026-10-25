@@ -106,8 +106,11 @@ Update JIRA ticket status accordingly.
 # Run all tests
 npm run test
 
-# Run with coverage
-npm run test -- --coverage
+# Run frontend tests with coverage
+npm run test:frontend -- --coverage
+
+# Run backend tests with coverage
+npm run test:backend -- --coverage
 ```
 
 ## Questions?
