@@ -7,8 +7,18 @@
  *   distance <= 20km → tier_20km (flat)
  *   distance > 20km  → tier_20km + (extra km × tier_per_km_over20)
  */
+function isValidDistanceKm(distanceKm) {
+  if (typeof distanceKm !== 'number' && typeof distanceKm !== 'string') return false;
+  if (typeof distanceKm === 'string' && distanceKm.trim() === '') return false;
+  const distance = Number(distanceKm);
+  return Number.isFinite(distance) && distance >= 0;
+}
+
 function calculateFare(distanceKm, guide) {
-  const d = parseFloat(distanceKm) || 0;
+  if (!isValidDistanceKm(distanceKm)) {
+    throw new TypeError('Distance must be a non-negative finite number');
+  }
+  const d = Number(distanceKm);
   const t1 = parseFloat(guide.tier_1km) || 0;
   const t5 = parseFloat(guide.tier_5km) || 0;
   const t10 = parseFloat(guide.tier_10km) || 0;
@@ -27,14 +37,15 @@ function calculateFare(distanceKm, guide) {
  */
 function fareBreakdown(distanceKm, guide) {
   const fare = calculateFare(distanceKm, guide);
+  const distance = Number(distanceKm);
   const commission = parseFloat((fare * 0.05).toFixed(2));
   const guideEarnings = parseFloat((fare * 0.95).toFixed(2));
   return {
-    distance_km: parseFloat(parseFloat(distanceKm).toFixed(3)),
+    distance_km: parseFloat(distance.toFixed(3)),
     base_fare: parseFloat(fare.toFixed(2)),
     platform_commission: commission,
     guide_earnings: guideEarnings,
-    currency: guide.currency || 'LKR'
+    currency: guide.currency || 'LKR',
   };
 }
 
@@ -68,4 +79,4 @@ function calculateWaitingCharge(minutes, guide) {
   return { minutes: roundedMinutes, charge_lkr: Math.round(total * 100) / 100 };
 }
 
-module.exports = { calculateFare, fareBreakdown, calculateWaitingCharge };
+module.exports = { calculateFare, fareBreakdown, calculateWaitingCharge, isValidDistanceKm };

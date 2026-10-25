@@ -4,7 +4,7 @@ const multer = require('multer');
 const path = require('path');
 const { Guide, GuidePhoto, GuideLocation, GuideReview, User } = require('../config/database');
 const authenticateToken = require('../middleware/auth');
-const { fareBreakdown } = require('../utils/fareCalculator');
+const { fareBreakdown, isValidDistanceKm } = require('../utils/fareCalculator');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, path.join(__dirname, '../uploads')),
@@ -61,6 +61,7 @@ router.get('/fare-estimate', async (req, res) => {
   try {
     const { guideId, distanceKm } = req.query;
     if (!guideId || !distanceKm) return res.status(400).json({ error: 'guideId and distanceKm required' });
+    if (!isValidDistanceKm(distanceKm)) return res.status(400).json({ error: 'distanceKm must be a non-negative number' });
     const guide = await Guide.findByPk(guideId);
     if (!guide) return res.status(404).json({ error: 'Guide not found' });
     res.json(fareBreakdown(distanceKm, guide));
