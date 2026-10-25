@@ -11,6 +11,8 @@ Full-stack application with React frontend and Node.js/Express backend with Post
 
 ## Quick Start
 
+> Note: This project is intended to run as a monorepo with a React frontend and Express backend. For local setup, install dependencies in the root and in each service as needed before starting the app.
+
 ### Option 1: Using Docker (Recommended)
 
 ```bash
