@@ -128,26 +128,7 @@ const AboutUs = () => {
         </div>
       </section>
 
-      {/* ── TEAM ── */}
-      <section className="about-section" aria-labelledby="team-title">
-        <div className="container">
-          <div className="about-head reveal">
-            <p className="eyebrow">The people</p>
-            <h2 id="team-title">Development team</h2>
-            <p className="about-uni"><GraduationCap size={18} aria-hidden="true" /> Faculty of Engineering, University of Ruhuna — Computer Engineering</p>
-          </div>
-          <ul className="about-team">
-            {team.map((m, i) => (
-              <li key={m.reg} className="about-member reveal" style={{ '--reveal-index': i }}>
-                <span className="about-member__avatar" aria-hidden="true">{m.initials}</span>
-                <h3>{m.name}</h3>
-                <p>{m.role}</p>
-                <span className="about-member__reg">{m.reg}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
+
 
       {/* ── CONTACT ── */}
       <section className="about-section" aria-labelledby="contact-title">
