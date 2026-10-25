@@ -605,8 +605,9 @@
   opacity: 1 !important;
 }
 
-.gm-style .gm-ui-hover-effect img {
-  filter: brightness(0) !important; /* black X on white */
+.gm-style .gm-ui-hover-effect img,
+[data-theme="dark"] .gm-style .gm-ui-hover-effect img {
+  filter: brightness(0) saturate(0) !important; /* force black X — both themes */
 }
 
 .gm-style .gm-ui-hover-effect:hover {
