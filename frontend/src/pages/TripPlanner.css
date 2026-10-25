@@ -140,9 +140,17 @@
   box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.15);
 }
 
-/* Webkit date input color fix */
-.tp-date-input::-webkit-calendar-picker-indicator {
-  filter: invert(0.8);
+/* Webkit date input color fix — theme-aware */
+/* Dark theme: invert icon to light so it matches the light text on dark surfaces */
+[data-theme="dark"] .tp-date-input::-webkit-calendar-picker-indicator,
+:root .tp-date-input::-webkit-calendar-picker-indicator {
+  filter: invert(0.8) brightness(1.1);
+  cursor: pointer;
+}
+
+/* Light theme: keep icon dark to match --text-1 (#12202E) on light surfaces */
+[data-theme="light"] .tp-date-input::-webkit-calendar-picker-indicator {
+  filter: invert(0.2) brightness(0.4);
   cursor: pointer;
 }
 
