@@ -53,9 +53,31 @@
       "Bash(sleep 8 && \"C:/Program Files/Docker/Docker/resources/bin/docker.exe\" logs mrguide-backend --tail 10 2>&1)",
       "Bash(docker ps:*)",
       "Bash(tasklist:*)",
-      "Bash(GEMINI_API_KEY=AIzaSyClCmwyTbqp4DadfzQxw_Hf0qGW97rRoEk node -e \":*)"
+      "Bash(GEMINI_API_KEY=AIzaSyClCmwyTbqp4DadfzQxw_Hf0qGW97rRoEk node -e \":*)",
+      "Bash(ssh -T git@github.com)",
+      "Read(//c/Users/User/.ssh/**)",
+      "Bash(wsl -- ls ~/.ssh/)",
+      "Bash(wsl -e ls /root/.ssh/)",
+      "Bash(wsl -e bash -c \"ls ~/.ssh/\")",
+      "Bash(wsl -e bash -c \"ssh -T git@github.com 2>&1\")",
+      "Bash(wsl -e bash -c \"cd /mnt/d/mr-guide && git add backend/tracing/tracer.js backend/utils/circuitBreaker.js && git status --short\")",
+      "Bash(wsl -e bash -c \"cd /mnt/d/mr-guide && git log --oneline -3\")",
+      "Bash(wsl -e bash -c 'cd /mnt/d/mr-guide && git commit -m '\\\\''fix: resolve deploy crashes on Node.js v22 *)",
+      "Bash(wsl -e bash -c \"cd /mnt/d/mr-guide && git push origin master 2>&1\")",
+      "Bash(wsl -e bash -c \"cd /mnt/d/mr-guide && git log --oneline -5 && echo '---' && git ls-files backend/utils/ backend/gateway/ backend/events/ backend/auth/ backend/graphql/ backend/tracing/\")",
+      "Bash(wsl -e bash -c \"cd /mnt/d/mr-guide && git ls-files backend/routes/ && echo '---' && git status --short backend/routes/\")",
+      "WebFetch(domain:www.behance.net)",
+      "Bash(ls \"D:/Mr-Guide mobile\" 2>/dev/null || echo \"Directory does not exist\")",
+      "Read(//d/Mr-Guide mobile/**)",
+      "Bash(mkdir -p \"D:\\\\Mr-Guide mobile\\\\lib\\\\config\" \"D:\\\\Mr-Guide mobile\\\\lib\\\\models\" \"D:\\\\Mr-Guide mobile\\\\lib\\\\services\" \"D:\\\\Mr-Guide mobile\\\\lib\\\\providers\" \"D:\\\\Mr-Guide mobile\\\\lib\\\\screens\\\\auth\" \"D:\\\\Mr-Guide mobile\\\\lib\\\\screens\\\\home\" \"D:\\\\Mr-Guide mobile\\\\lib\\\\screens\\\\shortest_path\" \"D:\\\\Mr-Guide mobile\\\\lib\\\\screens\\\\trip_planner\" \"D:\\\\Mr-Guide mobile\\\\lib\\\\screens\\\\authentic\" \"D:\\\\Mr-Guide mobile\\\\lib\\\\screens\\\\guides\" \"D:\\\\Mr-Guide mobile\\\\lib\\\\screens\\\\profile\" \"D:\\\\Mr-Guide mobile\\\\lib\\\\widgets\" \"D:\\\\Mr-Guide mobile\\\\android\\\\app\\\\src\\\\main\\\\res\\\\values\" 2>&1; echo \"Done\")",
+      "Bash(Get-ChildItem -Recurse \"D:\\\\Mr-Guide mobile\\\\lib\" -File)",
+      "Bash(Select-Object FullName)",
+      "Bash(Format-Table -HideTableHeaders)"
     ],
     "deny": [],
-    "ask": []
+    "ask": [],
+    "additionalDirectories": [
+      "D:\\Mr-Guide mobile\\lib"
+    ]
   }
 }

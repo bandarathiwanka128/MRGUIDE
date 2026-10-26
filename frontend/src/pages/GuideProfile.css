@@ -21,9 +21,14 @@
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* Hero + tabs form one card, aligned with the content cards (900px container minus 20px gutters) */
 .gp-hero {
-  padding: 40px 20px;
+  padding: 32px 28px;
   color: white;
+  width: calc(100% - 40px);
+  max-width: 860px;
+  margin: 24px auto 0;
+  border-radius: 18px 18px 0 0;
 }
 
 .gp-hero-inner {
@@ -142,9 +147,13 @@
   display: flex;
   border-bottom: 2px solid var(--border);
   background: var(--surface-2);
-  max-width: 900px;
+  width: calc(100% - 40px);
+  max-width: 860px;
   margin: 0 auto;
   padding: 0 20px;
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 18px 18px;
 }
 
 .gp-tab {

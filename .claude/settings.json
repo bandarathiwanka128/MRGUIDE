@@ -7,7 +7,13 @@
       "Read(//d/Mr-guide admin/**)",
       "Read(//d/mrguide_Travelguiders/**)",
       "Bash(flutter --version)",
-      "Bash(echo \"EXIT:$?\")"
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(wsl -e bash -c 'cd /mnt/d/mr-guide && git add backend/server.js && git commit -m '\\\\''fix: wrap module loads in try/catch to surface startup errors *)",
+      "Bash(wsl -e bash -c 'cd /mnt/d/mr-guide && git add backend/routes/guides.js backend/routes/guide-trips.js backend/routes/payouts.js backend/routes/admin-guides.js && git commit -m '\\\\''fix: correct authenticateToken import in new route files *)",
+      "Bash(git remote *)",
+      "Bash(git pull *)",
+      "Bash(git -C \"D:\\\\Mr-guide admin\" status)",
+      "Bash(ssh-add -l)"
     ],
     "additionalDirectories": [
       "D:\\Mr-guide admin\\backend",

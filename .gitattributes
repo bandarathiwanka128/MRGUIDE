@@ -1,0 +1,3 @@
+# Store LF in the repo; each OS checks out its native line endings.
+# Prevents whole-file CRLF churn when committing from WSL and Windows.
+* text=auto
