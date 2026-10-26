@@ -12,6 +12,44 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
+const PRICING_FIELDS = ['tier_1km', 'tier_5km', 'tier_10km', 'tier_20km', 'tier_per_km_over20'];
+const WAIT_RATE_FIELDS = [
+  'wait_rate_10m', 'wait_rate_20m', 'wait_rate_30m', 'wait_rate_40m',
+  'wait_rate_1h', 'wait_rate_2h', 'wait_rate_3h', 'wait_rate_5h',
+  'wait_rate_per_hour', 'wait_rate_per_30m', 'wait_rate_per_15m'
+];
+// Column lengths from the Guide model — longer values make Postgres throw
+const STRING_LIMITS = {
+  display_name: 100, bio: 500, phone: 20, whatsapp: 20, nic_number: 20,
+  bank_name: 100, bank_account_number: 50, bank_branch: 100, card_last4: 4, card_expiry: 7
+};
+
+// Blank optional rates ('' from the form) become undefined so the column default (0) applies;
+// Postgres rejects '' for DECIMAL columns.
+function normalizeRates(body, fields) {
+  const rates = {};
+  for (const key of fields) {
+    const raw = body[key];
+    if (raw === undefined || raw === null || String(raw).trim() === '') continue;
+    const n = Number(raw);
+    if (!Number.isFinite(n) || n < 0) return { error: `${key} must be a non-negative number` };
+    rates[key] = n;
+  }
+  return { rates };
+}
+
+function checkStringLimits(body) {
+  for (const [key, max] of Object.entries(STRING_LIMITS)) {
+    const value = body[key];
+    if (typeof value === 'string' && value.trim().length > max) {
+      return `${key.replace(/_/g, ' ')} must be at most ${max} characters`;
+    }
+  }
+  return null;
+}
+
+const trimOrUndefined = (value) => (typeof value === 'string' ? value.trim() || undefined : value);
+
 // GET /api/guides/live — all available verified guides with location
 router.get('/live', async (req, res) => {
   try {
@@ -102,31 +140,38 @@ router.post('/register', authenticateToken, async (req, res) => {
 
     const {
       display_name, bio, about_tours, languages, speciality_regions,
-      tier_1km, tier_5km, tier_10km, tier_20km, tier_per_km_over20,
-      wait_rate_10m, wait_rate_20m, wait_rate_30m, wait_rate_40m,
-      wait_rate_1h, wait_rate_2h, wait_rate_3h, wait_rate_5h,
-      wait_rate_per_hour, wait_rate_per_30m, wait_rate_per_15m,
       phone, whatsapp, payment_ref,
       bank_name, bank_account_number, bank_branch,
       nic_number, card_last4, card_expiry
     } = req.body;
 
-    if (!display_name || !tier_1km || !tier_5km || !tier_10km || !tier_20km || !tier_per_km_over20) {
+    const { rates, error: rateError } = normalizeRates(req.body, [...PRICING_FIELDS, ...WAIT_RATE_FIELDS]);
+    if (rateError) return res.status(400).json({ error: rateError });
+
+    if (!display_name?.trim() || PRICING_FIELDS.some(k => rates[k] === undefined)) {
       return res.status(400).json({ error: 'display_name and all pricing tiers are required' });
     }
 
+    const lengthError = checkStringLimits(req.body);
+    if (lengthError) return res.status(400).json({ error: lengthError });
+
     const guide = await Guide.create({
       user_id: req.user.id,
-      display_name, bio, about_tours,
-      languages: languages || [],
-      speciality_regions: speciality_regions || [],
-      tier_1km, tier_5km, tier_10km, tier_20km, tier_per_km_over20,
-      wait_rate_10m, wait_rate_20m, wait_rate_30m, wait_rate_40m,
-      wait_rate_1h, wait_rate_2h, wait_rate_3h, wait_rate_5h,
-      wait_rate_per_hour, wait_rate_per_30m, wait_rate_per_15m,
-      phone, whatsapp, payment_ref,
-      bank_name, bank_account_number, bank_branch,
-      nic_number, card_last4, card_expiry,
+      display_name: display_name.trim(),
+      bio: trimOrUndefined(bio),
+      about_tours: trimOrUndefined(about_tours),
+      languages: Array.isArray(languages) ? languages : [],
+      speciality_regions: Array.isArray(speciality_regions) ? speciality_regions : [],
+      ...rates,
+      phone: trimOrUndefined(phone),
+      whatsapp: trimOrUndefined(whatsapp),
+      payment_ref: trimOrUndefined(payment_ref),
+      bank_name: trimOrUndefined(bank_name),
+      bank_account_number: trimOrUndefined(bank_account_number),
+      bank_branch: trimOrUndefined(bank_branch),
+      nic_number: trimOrUndefined(nic_number),
+      card_last4: trimOrUndefined(card_last4),
+      card_expiry: trimOrUndefined(card_expiry),
       is_verified: false,
       is_available: false
     });
@@ -146,13 +191,14 @@ router.put('/:id', authenticateToken, async (req, res) => {
 
     const allowed = [
       'display_name', 'bio', 'about_tours', 'languages', 'speciality_regions',
-      'tier_1km', 'tier_5km', 'tier_10km', 'tier_20km', 'tier_per_km_over20',
-      'wait_rate_10m', 'wait_rate_20m', 'wait_rate_30m', 'wait_rate_40m',
-      'wait_rate_1h', 'wait_rate_2h', 'wait_rate_3h', 'wait_rate_5h',
-      'wait_rate_per_hour', 'wait_rate_per_30m', 'wait_rate_per_15m',
       'phone', 'whatsapp', 'payment_ref', 'bank_name', 'bank_account_number', 'bank_branch'
     ];
-    const updates = {};
+    const { rates, error: rateError } = normalizeRates(req.body, [...PRICING_FIELDS, ...WAIT_RATE_FIELDS]);
+    if (rateError) return res.status(400).json({ error: rateError });
+    const lengthError = checkStringLimits(req.body);
+    if (lengthError) return res.status(400).json({ error: lengthError });
+
+    const updates = { ...rates };
     allowed.forEach(k => { if (req.body[k] !== undefined) updates[k] = req.body[k]; });
     await guide.update(updates);
     res.json(guide);

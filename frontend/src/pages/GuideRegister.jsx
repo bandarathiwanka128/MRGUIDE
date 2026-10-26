@@ -127,7 +127,8 @@ export default function GuideRegister({ user }) {
       });
       setSuccess(true);
     } catch (err) {
-      setError(err.response?.data?.error || 'Registration failed. Please try again.');
+      const data = err.response?.data;
+      setError(data?.details ? `${data.error}: ${data.details}` : data?.error || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -173,19 +174,19 @@ export default function GuideRegister({ user }) {
               <h2>Personal Details</h2>
               <div className="gr-field">
                 <label>Display Name *</label>
-                <input value={form.display_name} onChange={e => set('display_name', e.target.value)} placeholder="Your public name" />
+                <input value={form.display_name} onChange={e => set('display_name', e.target.value)} placeholder="Your public name" maxLength={100} />
               </div>
               <div className="gr-field">
                 <label>Phone Number *</label>
-                <input value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="+94 7X XXX XXXX" />
+                <input value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="+94 7X XXX XXXX" maxLength={20} />
               </div>
               <div className="gr-field">
                 <label>WhatsApp Number</label>
-                <input value={form.whatsapp} onChange={e => set('whatsapp', e.target.value)} placeholder="+94 7X XXX XXXX" />
+                <input value={form.whatsapp} onChange={e => set('whatsapp', e.target.value)} placeholder="+94 7X XXX XXXX" maxLength={20} />
               </div>
               <div className="gr-field">
                 <label>NIC Number * <small>(Admin verification only, not shown publicly)</small></label>
-                <input value={form.nic_number} onChange={e => set('nic_number', e.target.value)} placeholder="123456789V" />
+                <input value={form.nic_number} onChange={e => set('nic_number', e.target.value)} placeholder="123456789V" maxLength={20} />
               </div>
               <div className="gr-field">
                 <label>Short Bio <small>(max 500 characters)</small></label>
@@ -296,15 +297,15 @@ export default function GuideRegister({ user }) {
               <h3>Bank Details (for weekly payouts)</h3>
               <div className="gr-field">
                 <label>Bank Name *</label>
-                <input value={form.bank_name} onChange={e => set('bank_name', e.target.value)} placeholder="e.g. Commercial Bank of Ceylon" />
+                <input value={form.bank_name} onChange={e => set('bank_name', e.target.value)} placeholder="e.g. Commercial Bank of Ceylon" maxLength={100} />
               </div>
               <div className="gr-field">
                 <label>Account Number *</label>
-                <input value={form.bank_account_number} onChange={e => set('bank_account_number', e.target.value)} placeholder="Enter your account number" />
+                <input value={form.bank_account_number} onChange={e => set('bank_account_number', e.target.value)} placeholder="Enter your account number" maxLength={50} />
               </div>
               <div className="gr-field">
                 <label>Branch</label>
-                <input value={form.bank_branch} onChange={e => set('bank_branch', e.target.value)} placeholder="e.g. Colombo Fort" />
+                <input value={form.bank_branch} onChange={e => set('bank_branch', e.target.value)} placeholder="e.g. Colombo Fort" maxLength={100} />
               </div>
               <div className="gr-field">
                 <label>Your Payment Reference (shown to tourist for cash trips)</label>
