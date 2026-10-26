@@ -1,7 +1,7 @@
 .bcm-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(var(--fg-rgb), 0.55);
+  background: var(--overlay);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;

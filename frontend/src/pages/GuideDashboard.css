@@ -554,7 +554,7 @@
 .gd-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(var(--fg-rgb), 0.55);
+  background: var(--overlay);
   display: flex;
   align-items: center;
   justify-content: center;

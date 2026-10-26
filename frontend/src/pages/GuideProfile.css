@@ -360,7 +360,7 @@
 .lightbox-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(var(--fg-rgb), 0.9);
+  background: rgba(5, 11, 18, 0.92); /* photo lightbox stays dark in both themes */
   display: flex;
   align-items: center;
   justify-content: center;

@@ -238,7 +238,8 @@
 .ltv-fullscreen-warning {
   position: fixed;
   inset: 0;
-  background: rgba(var(--fg-rgb), 0.7);
+  background: var(--overlay);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -247,7 +248,8 @@
 }
 
 .ltv-warning-card {
-  background: white;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
   border-radius: 18px;
   padding: 24px;
   max-width: 420px;
@@ -271,8 +273,8 @@
   padding: 10px 22px;
   border-radius: 10px;
   border: none;
-  background: var(--surface-inverse);
-  color: white;
+  background: var(--accent);
+  color: var(--on-accent);
   font-weight: 700;
   cursor: pointer;
 }
